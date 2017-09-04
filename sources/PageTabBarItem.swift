@@ -9,39 +9,51 @@
 import Foundation
 import UIKit
 
-public final class PageTabBarItem: UIView {
+@objc public final class PageTabBarItem: UIView {
     
-    var didSelect: ((UIButton) -> ()) = { _ in }
+    public static var tintColor = UIColor.gray
+    public static var selectedTintColor = UIColor.lightGray
     
-    fileprivate let titleButton: UIButton = {
+    internal var badgeCount = 0 {
+        didSet {
+            // ...
+        }
+    }
+    
+    internal var overlayColor = UIColor.gray {
+        didSet {
+            tabBarButton.setTitleColor(overlayColor, for: .normal)
+        }
+    }
+    
+    internal var didSelect: ((UIButton) -> ()) = { _ in }
+    private let tabBarButton: UIButton = {
         let button = UIButton(type: .custom)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 12)
-        button.setTitleColor(UIColor.pastelGray(), for: UIControlState())
+        button.setTitleColor(PageTabBarItem.tintColor, for: .normal)
+        button.setTitleColor(PageTabBarItem.selectedTintColor, for: .highlighted)
+        button.contentEdgeInsets = UIEdgeInsets(top: 4, left: 4, bottom: 4, right: 4)
         button.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         return button
     }()
     
-    convenience init(frame: CGRect, title: String) {
+    // todo: badge view
+    
+    convenience init(frame: CGRect, title: String?, icon: UIImage?) {
         self.init(frame: frame)
         backgroundColor = .white
-        titleButton.setTitle(title, for: UIControlState())
-        if #available(iOS 8.2, *) {
-            titleButton.titleLabel?.font = UIFont.systemFont(ofSize: 12, weight: UIFontWeightMedium)
-        } else {
-            titleButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: 12)
-        }
-        titleButton.addTarget(self, action: #selector(selecting(_:)), for: .touchUpInside)
-        addSubview(titleButton)
-        constrain(titleButton) { (targetView) in
-            targetView.edges == inset(targetView.superview!.edges, 0)
-        }
+        tabBarButton.setTitle(title, for: .normal)
+        tabBarButton.titleLabel?.font = UIFont.systemFont(ofSize: 12, weight: UIFontWeightMedium)
+        tabBarButton.addTarget(self, action: #selector(selecting(_:)), for: .touchUpInside)
+        addSubview(tabBarButton)
+        tabBarButton.translatesAutoresizingMaskIntoConstraints = false
+        tabBarButton.topAnchor.constraint(equalTo: topAnchor).isActive = true
+        tabBarButton.leadingAnchor.constraint(equalTo: leadingAnchor).isActive = true
+        tabBarButton.trailingAnchor.constraint(equalTo: trailingAnchor).isActive = true
+        tabBarButton.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true
     }
     
-    @objc func selecting(_ sender: UIButton) {
+    @objc private func selecting(_ sender: UIButton) {
         didSelect(sender)
-    }
-    
-    func set(color c: UIColor) {
-        titleButton.setTitleColor(c, for: UIControlState())
     }
 }

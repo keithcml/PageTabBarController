@@ -9,7 +9,22 @@
 import Foundation
 import UIKit
 
+@objc public enum PageTabBarPosition: Int {
+    case top = 0
+    case bottom
+}
+
+
+internal enum PageTabBarItemArrngement {
+    case fixedWidth(width: CGFloat)
+    case compact
+}
+
 internal class PageTabBar: UIView {
+    
+    internal static var indicatorLineColor = UIColor.blue
+    internal static var topLineColor = UIColor.lightGray
+    internal static var bottomLineColor = UIColor.lightGray
     
     var isInteracting = false {
         didSet {
@@ -34,18 +49,18 @@ internal class PageTabBar: UIView {
     
     fileprivate var indicatorLine: UIView = {
         let line = UIView()
-        line.backgroundColor = UIColor.darkJungleGreen()
+        line.backgroundColor = PageTabBar.indicatorLineColor
         return line
     }()
     
     fileprivate var topLine: UIView = {
         let line = UIView()
-        line.backgroundColor = UIColor.platinum().withAlphaComponent(0.3)
+        line.backgroundColor = PageTabBar.topLineColor
         return line
     }()
     fileprivate var bottomLine: UIView = {
         let line = UIView()
-        line.backgroundColor = UIColor.platinum()
+        line.backgroundColor = PageTabBar.bottomLineColor
         return line
     }()
     
@@ -58,28 +73,29 @@ internal class PageTabBar: UIView {
     }
     
     fileprivate func commonInit() {
+        
         var previous: PageTabBarItem?
+        
         for (idx, item) in items.enumerated() {
             addSubview(item)
+            item.translatesAutoresizingMaskIntoConstraints = false
+            
+            item.topAnchor.constraint(equalTo: topAnchor).isActive = true
+            item.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true
+            
             if let p = previous {
-                constrain(item, p) { (targetView, pRef) in
-                    targetView.top == targetView.superview!.top
-                    targetView.bottom == targetView.superview!.bottom
-                    targetView.left == pRef.right
-                    pRef.width == targetView.width
-                    if idx == items.count - 1 {
-                        targetView.right == targetView.superview!.right
-                    }
+                
+                item.leadingAnchor.constraint(equalTo: p.trailingAnchor).isActive = true
+                item.widthAnchor.constraint(equalTo: p.widthAnchor, multiplier: 1.0)
+                
+                if idx == items.count - 1 {
+                    item.trailingAnchor.constraint(equalTo: trailingAnchor).isActive = true
                 }
             }
             else {
-                constrain(item) { (targetView) in
-                    targetView.top == targetView.superview!.top
-                    targetView.bottom == targetView.superview!.bottom
-                    targetView.left == targetView.superview!.left
-                }
+                item.leadingAnchor.constraint(equalTo: leadingAnchor).isActive = true
                 // initial color
-                item.set(color: UIColor.darkJungleGreen())
+                // item.set(color: UIColor.darkJungleGreen())
             }
             previous = item
             
@@ -90,23 +106,21 @@ internal class PageTabBar: UIView {
             }
         }
         
-        topLine.frame = CGRect(x: 0, y: 0, width: bounds.width, height: 1)
+        topLine.frame = CGRect(x: 0, y: 0, width: bounds.width, height: 0.5)
         addSubview(topLine)
-        constrain(topLine) { (targetView) in
-            targetView.right == targetView.superview!.right
-            targetView.top == targetView.superview!.top
-            targetView.left == targetView.superview!.left
-            targetView.height == 1
-        }
+        topLine.translatesAutoresizingMaskIntoConstraints = false
+        topLine.topAnchor.constraint(equalTo: topAnchor).isActive = true
+        topLine.leadingAnchor.constraint(equalTo: leadingAnchor).isActive = true
+        topLine.trailingAnchor.constraint(equalTo: trailingAnchor).isActive = true
+        topLine.heightAnchor.constraint(equalToConstant: 0.5).isActive = true
         
-        bottomLine.frame = CGRect(x: 0, y: bounds.height - 1, width: bounds.width, height: 1)
+        bottomLine.frame = CGRect(x: 0, y: bounds.height - 0.5, width: bounds.width, height: 0.5)
         addSubview(bottomLine)
-        constrain(bottomLine) { (targetView) in
-            targetView.right == targetView.superview!.right
-            targetView.bottom == targetView.superview!.bottom
-            targetView.left == targetView.superview!.left
-            targetView.height == 1
-        }
+        bottomLine.translatesAutoresizingMaskIntoConstraints = false
+        bottomLine.heightAnchor.constraint(equalToConstant: 0.5).isActive = true
+        bottomLine.leadingAnchor.constraint(equalTo: leadingAnchor).isActive = true
+        bottomLine.trailingAnchor.constraint(equalTo: trailingAnchor).isActive = true
+        bottomLine.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true
         
         indicatorLine.frame = CGRect(x: 0, y: bounds.height - 1, width: itemWidth, height: 1)
         addSubview(indicatorLine)
@@ -124,7 +138,7 @@ internal class PageTabBar: UIView {
                         let location = newFrame.origin.x + newFrame.width/2
                         let index = Int(ceil(location/newFrame.width)) - 1
                         for (idx, button) in strongSelf.items.enumerated() {
-                            button.set(color: idx == index ? UIColor.darkJungleGreen() : UIColor.pastelGray())
+                            button.overlayColor = idx == index ? UIColor.gray : UIColor.lightGray
                         }
                     }
         }

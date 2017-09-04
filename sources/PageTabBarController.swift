@@ -9,9 +9,6 @@
 import Foundation
 import UIKit
 
-import UIKit
-import Cartography
-
 internal final class PageTabBarCollectionViewFlowLayout: UICollectionViewFlowLayout {
     override func shouldInvalidateLayout(forBoundsChange newBounds: CGRect) -> Bool {
         guard let cv = collectionView else { return false }
@@ -24,32 +21,39 @@ internal final class PageTabBarCollectionViewFlowLayout: UICollectionViewFlowLay
     }
 }
 
-public final class PageTabBarViewController: UIViewController, UIScrollViewDelegate {
+@objc public final class PageTabBarController: UIViewController, UIScrollViewDelegate {
     
     var updateIndex: (Bool, Int) -> () = { _ in }
     fileprivate var pageTabBar: PageTabBar!
+
     fileprivate var collectionView: UICollectionView!
     fileprivate(set) var viewControllers = [UIViewController]()
-    fileprivate var rotationConstraint = ConstraintGroup()
+    
+    //fileprivate var rotationConstraint = ConstraintGroup()
+    
     var pageIndex: Int = 0
-    var items: [PageTabBarItem] = []
+    var pageTabBarItems: [PageTabBarItem] = []
     var isScrollEnabled = true {
         didSet {
             collectionView.isScrollEnabled = isScrollEnabled
         }
     }
     
-    convenience init(viewControllers: [UIViewController], titles: [String], estimatedFrame: CGRect) {
+    @objc public convenience init(viewControllers: [UIViewController],
+                                  items: [PageTabBarItem],
+                                  estimatedFrame: CGRect,
+                                  tabBarPosition: PageTabBarPosition = .top) {
+        
         self.init(nibName: nil, bundle: nil)
         
         self.viewControllers = viewControllers
         
-        for title in titles {
-            let item = PageTabBarItem(frame: CGRect(x: 0, y: 0, width: estimatedFrame.width/CGFloat(titles.count), height: 40), title: title)
-            items.append(item)
+        for item in items {
+            item.frame = CGRect(x: 0, y: 0, width: estimatedFrame.width/CGFloat(items.count), height: 44)
+            pageTabBarItems.append(item)
         }
         
-        pageTabBar = PageTabBar(frame: CGRect(x: 0, y: 0, width: estimatedFrame.width, height: 40), tabBarItems: items)
+        pageTabBar = PageTabBar(frame: CGRect(x: 0, y: 0, width: estimatedFrame.width, height: 44), tabBarItems: pageTabBarItems)
         
         pageTabBar.toIndex = { [unowned self] index in
             
@@ -60,12 +64,10 @@ public final class PageTabBarViewController: UIViewController, UIScrollViewDeleg
         }
         
         view.addSubview(pageTabBar)
-        constrain(pageTabBar) { (targetView) in
-            targetView.top == targetView.superview!.top
-            targetView.right == targetView.superview!.right
-            targetView.left == targetView.superview!.left
-            targetView.height == 40
-        }
+        pageTabBar.translatesAutoresizingMaskIntoConstraints = false
+        pageTabBar.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
+        pageTabBar.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
+        pageTabBar.heightAnchor.constraint(equalToConstant: 44).isActive = true
         
         let layout: UICollectionViewFlowLayout = PageTabBarCollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
@@ -83,11 +85,18 @@ public final class PageTabBarViewController: UIViewController, UIScrollViewDeleg
         collectionView.scrollsToTop = false
         collectionView.backgroundColor = .clear
         view.addSubview(collectionView)
-        constrain(collectionView, pageTabBar) { targetView, pageTabBarRef in
-            targetView.top == pageTabBarRef.bottom
-            targetView.right == targetView.superview!.right
-            targetView.left == targetView.superview!.left
-            targetView.bottom == targetView.superview!.bottom
+        collectionView.translatesAutoresizingMaskIntoConstraints = false
+        collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
+        collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
+        
+        
+        if case .top = tabBarPosition {
+            pageTabBar.topAnchor.constraint(equalTo: view.topAnchor).isActive = true
+            collectionView.topAnchor.constraint(equalTo: pageTabBar.bottomAnchor).isActive = true
+        }
+        else {
+            pageTabBar.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
+            collectionView.bottomAnchor.constraint(equalTo: pageTabBar.topAnchor).isActive = true
         }
     }
     
@@ -126,7 +135,7 @@ public final class PageTabBarViewController: UIViewController, UIScrollViewDeleg
     }
 }
 
-extension PageTabBarViewController: UICollectionViewDataSource {
+extension PageTabBarController: UICollectionViewDataSource {
     public func numberOfSections(in collectionView: UICollectionView) -> Int {
         return 1
     }
@@ -144,22 +153,26 @@ extension PageTabBarViewController: UICollectionViewDataSource {
         if vc.parent == nil {
             addChildViewController(vc)
             cell.contentView.addSubview(vc.view)
-            constrain(vc.view) { (targetView) in
-                targetView.edges == inset(targetView.superview!.edges, 0)
-            }
+            vc.view.translatesAutoresizingMaskIntoConstraints = false
+            vc.view.topAnchor.constraint(equalTo: cell.contentView.topAnchor).isActive = true
+            vc.view.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor).isActive = true
+            vc.view.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor).isActive = true
+            vc.view.bottomAnchor.constraint(equalTo: cell.contentView.bottomAnchor).isActive = true
             vc.didMove(toParentViewController: self)
         }
         else {
             cell.contentView.addSubview(vc.view)
-            constrain(vc.view) { (targetView) in
-                targetView.edges == inset(targetView.superview!.edges, 0)
-            }
+            vc.view.translatesAutoresizingMaskIntoConstraints = false
+            vc.view.topAnchor.constraint(equalTo: cell.contentView.topAnchor).isActive = true
+            vc.view.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor).isActive = true
+            vc.view.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor).isActive = true
+            vc.view.bottomAnchor.constraint(equalTo: cell.contentView.bottomAnchor).isActive = true
         }
         return cell
     }
 }
 
-extension PageTabBarViewController: UICollectionViewDelegate {
+extension PageTabBarController: UICollectionViewDelegate {
     
     public func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         updateIndex(false, indexPath.row)
@@ -191,7 +204,7 @@ extension PageTabBarViewController: UICollectionViewDelegate {
     
 }
 
-extension PageTabBarViewController: UICollectionViewDelegateFlowLayout {
+extension PageTabBarController: UICollectionViewDelegateFlowLayout {
     public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         return collectionView.frame.size
     }
