@@ -16,7 +16,7 @@ import UIKit
     
     internal var badgeCount = 0 {
         didSet {
-            // ...
+            badgeView.badgeValue = badgeCount
         }
     }
     
@@ -37,7 +37,10 @@ import UIKit
         return button
     }()
     
-    // todo: badge view
+    private let badgeView: Badge = {
+        let badgeView = Badge(type: .number)
+        return badgeView
+    }()
     
     convenience init(frame: CGRect, title: String?, icon: UIImage?) {
         self.init(frame: frame)
@@ -51,6 +54,11 @@ import UIKit
         tabBarButton.leadingAnchor.constraint(equalTo: leadingAnchor).isActive = true
         tabBarButton.trailingAnchor.constraint(equalTo: trailingAnchor).isActive = true
         tabBarButton.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true
+        
+        addSubview(badgeView)
+        badgeView.translatesAutoresizingMaskIntoConstraints = false
+        badgeView.topAnchor.constraint(equalTo: topAnchor, constant: 4).isActive = true
+        badgeView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -4).isActive = true
     }
     
     @objc private func selecting(_ sender: UIButton) {
