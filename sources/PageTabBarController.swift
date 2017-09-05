@@ -29,8 +29,6 @@ internal final class PageTabBarCollectionViewFlowLayout: UICollectionViewFlowLay
     fileprivate var collectionView: UICollectionView!
     fileprivate(set) var viewControllers = [UIViewController]()
     
-    //fileprivate var rotationConstraint = ConstraintGroup()
-    
     var pageIndex: Int = 0
     var pageTabBarItems: [PageTabBarItem] = []
     var isScrollEnabled = true {
@@ -148,10 +146,17 @@ extension PageTabBarController: UICollectionViewDataSource {
     
     public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "Cell", for: indexPath)
-        let vc = viewControllers[indexPath.row]
         for view in cell.contentView.subviews {
             view.removeFromSuperview()
         }
+        return cell
+    }
+}
+
+extension PageTabBarController: UICollectionViewDelegate {
+    
+    public func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        let vc = viewControllers[indexPath.row]
         if vc.parent == nil {
             addChildViewController(vc)
             cell.contentView.addSubview(vc.view)
@@ -170,13 +175,6 @@ extension PageTabBarController: UICollectionViewDataSource {
             vc.view.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor).isActive = true
             vc.view.bottomAnchor.constraint(equalTo: cell.contentView.bottomAnchor).isActive = true
         }
-        return cell
-    }
-}
-
-extension PageTabBarController: UICollectionViewDelegate {
-    
-    public func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         updateIndex(false, indexPath.row)
     }
     

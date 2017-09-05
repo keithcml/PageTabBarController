@@ -28,12 +28,10 @@ final class TableViewController: UIViewController, UITableViewDelegate, UITableV
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        //print("viewWillAppear")
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        //print("viewDidAppear")
     }
     
     func numberOfSections(in tableView: UITableView) -> Int {
