@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		9A3FD9281F5DBD6300C24A1B /* Badge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A3FD9271F5DBD6300C24A1B /* Badge.swift */; };
+		9A3FD92A1F5E319B00C24A1B /* CollapsedTabBarViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A3FD9291F5E319B00C24A1B /* CollapsedTabBarViewController.swift */; };
 		9B6D040D1F5D696D00B018E9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B6D040C1F5D696D00B018E9 /* AppDelegate.swift */; };
 		9B6D040F1F5D696D00B018E9 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B6D040E1F5D696D00B018E9 /* ViewController.swift */; };
 		9B6D04121F5D696D00B018E9 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9B6D04101F5D696D00B018E9 /* Main.storyboard */; };
@@ -48,6 +49,7 @@
 
 /* Begin PBXFileReference section */
 		9A3FD9271F5DBD6300C24A1B /* Badge.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Badge.swift; sourceTree = "<group>"; };
+		9A3FD9291F5E319B00C24A1B /* CollapsedTabBarViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CollapsedTabBarViewController.swift; sourceTree = "<group>"; };
 		9B6D04091F5D696D00B018E9 /* PageTabBarControllerExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PageTabBarControllerExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9B6D040C1F5D696D00B018E9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		9B6D040E1F5D696D00B018E9 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -123,6 +125,7 @@
 				9B6D04211F5D69A900B018E9 /* PageTabBarController.swift */,
 				9B6D04221F5D69A900B018E9 /* PageTabBarItem.swift */,
 				9A3FD9271F5DBD6300C24A1B /* Badge.swift */,
+				9A3FD9291F5E319B00C24A1B /* CollapsedTabBarViewController.swift */,
 			);
 			name = sources;
 			path = ../../sources;
@@ -265,6 +268,7 @@
 			files = (
 				9B6D043A1F5D69DB00B018E9 /* PageTabBar.swift in Sources */,
 				9A3FD9281F5DBD6300C24A1B /* Badge.swift in Sources */,
+				9A3FD92A1F5E319B00C24A1B /* CollapsedTabBarViewController.swift in Sources */,
 				9B6D04391F5D69DB00B018E9 /* KeyValueObserver.swift in Sources */,
 				9B6D043B1F5D69DB00B018E9 /* PageTabBarController.swift in Sources */,
 				9B6D043C1F5D69DB00B018E9 /* PageTabBarItem.swift in Sources */,
