@@ -40,15 +40,16 @@ internal final class PageTabBarCollectionViewFlowLayout: UICollectionViewFlowLay
 
 @objc public final class PageTabBarController: UIViewController, UIScrollViewDelegate {
     
-    var updateIndex: (Bool, Int) -> () = { _ in }
-    fileprivate var pageTabBar: PageTabBar!
-
+    public var updateIndex: (Bool, Int) -> () = { _ in }
+    public internal(set) var pageIndex: Int = 0
+    
+    public fileprivate(set) var pageTabBar: PageTabBar!
+    
     fileprivate var collectionView: UICollectionView!
     fileprivate(set) var viewControllers = [UIViewController]()
     
-    var pageIndex: Int = 0
-    var pageTabBarItems: [PageTabBarItem] = []
-    var isScrollEnabled = true {
+    internal var pageTabBarItems: [PageTabBarItem] = []
+    internal var isScrollEnabled = true {
         didSet {
             collectionView.isScrollEnabled = isScrollEnabled
         }
@@ -71,11 +72,7 @@ internal final class PageTabBarCollectionViewFlowLayout: UICollectionViewFlowLay
         pageTabBar = PageTabBar(frame: CGRect(x: 0, y: 0, width: estimatedFrame.width, height: 44), tabBarItems: pageTabBarItems)
         
         pageTabBar.toIndex = { [unowned self] index in
-            
-            let indexPath = IndexPath(item: index, section: 0)
-            self.collectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: true)
-            
-            self.pageIndex = index
+            self.setPageIndex(index, animated: true)
         }
         
         view.addSubview(pageTabBar)
@@ -129,6 +126,14 @@ internal final class PageTabBarCollectionViewFlowLayout: UICollectionViewFlowLay
             let diff = self.collectionView.contentOffset.x * self.pageTabBar.frame.width / self.collectionView.contentSize.width
             self.pageTabBar.setIndicatorPosition(diff)
         })
+    }
+    
+    public func setPageIndex(_ index: Int, animated: Bool) {
+        guard index != pageIndex, pageTabBarItems.count > index else { return }
+        let indexPath = IndexPath(item: index, section: 0)
+        collectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: animated)
+        pageTabBarItems[index].select()
+        pageIndex = index
     }
     
     func theMostBelowScrollViewInView(_ view: UIView) -> UIScrollView? {

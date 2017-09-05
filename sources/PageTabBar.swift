@@ -37,7 +37,24 @@ internal enum PageTabBarItemArrngement {
     case compact
 }
 
-internal class PageTabBar: UIView {
+public class PageTabBar: UIView {
+    
+    public var indicatorLineHidden = false {
+        didSet {
+            indicatorLine.isHidden = indicatorLineHidden
+        }
+    }
+    public var topLineHidden = false {
+        didSet {
+            topLine.isHidden = topLineHidden
+        }
+    }
+    public var bottomLineHidden = false {
+        didSet {
+            bottomLine.isHidden = bottomLineHidden
+        }
+    }
+    
     
     internal static var indicatorLineColor = UIColor.blue
     internal static var topLineColor = UIColor.lightGray
@@ -116,10 +133,12 @@ internal class PageTabBar: UIView {
             }
             previous = item
             
-            item.didSelect = { [unowned self] _ in
+            item.didSelect = { [unowned self] _, fromUserTouch in
+                guard self.selectedIndex != idx else { return }
                 self.selectedIndex = idx
-                // update page view controller
-                self.toIndex(idx)
+                if fromUserTouch {
+                    self.toIndex(idx)
+                }
             }
         }
         

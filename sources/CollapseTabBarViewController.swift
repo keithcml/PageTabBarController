@@ -26,6 +26,11 @@
 import Foundation
 import UIKit
 
+public enum CollapseTabBarPosition {
+    case top
+    case bottom
+}
+
 public enum CollapseTabBarHeaderType {
     case fixedHeight
     case sticky
@@ -34,6 +39,10 @@ public enum CollapseTabBarHeaderType {
 
 public final class CollapseTabBarViewController: UIViewController {
     
+    // MARK: - PageTabBarController Properties
+    public fileprivate(set) var pageTabBarController: PageTabBarController?
+    
+    // MARK: - Scroll Control
     public var autoCollapse = false
     public var alwaysBouncesAtTop = false
     public var alwaysBouncesAtBottom = true
@@ -50,7 +59,6 @@ public final class CollapseTabBarViewController: UIViewController {
     }
     public fileprivate(set) var defaultHeaderHeight: CGFloat = 200
     
-    fileprivate var pageTabBarController: PageTabBarController?
     fileprivate var tabBarItems = [PageTabBarItem]()
     
     // tabbar positioning
@@ -82,6 +90,11 @@ public final class CollapseTabBarViewController: UIViewController {
         self.headerView = headerView
         self.defaultHeaderHeight = maximumHeaderHeight
         
+        pageTabBarController =
+            PageTabBarController(
+                viewControllers: viewControllers,
+                items: tabBarItems,
+                estimatedFrame: UIScreen.main.bounds)
     }
     
     required public init?(coder aDecoder: NSCoder) {
@@ -98,12 +111,6 @@ public final class CollapseTabBarViewController: UIViewController {
         headerView.frame = CGRect(x: 0, y: 0, width: view.frame.width, height: defaultHeaderHeight)
         view.addSubview(headerView)
         
-        pageTabBarController =
-            PageTabBarController(
-                viewControllers: viewControllers,
-                items: tabBarItems,
-                estimatedFrame: view.bounds)
-        
         guard let pageTabBarController = pageTabBarController else { fatalError("pagetabbar controller = nil") }
         pageTabBarController.updateIndex = { _, index in
             if index == 0 {
@@ -113,6 +120,7 @@ public final class CollapseTabBarViewController: UIViewController {
                 
             }
         }
+        
         addChildViewController(pageTabBarController)
         
         pageTabBarController.view.frame = CGRect(x: 0, y: defaultHeaderHeight, width: view.frame.width, height: view.frame.height - defaultHeaderHeight)
@@ -143,6 +151,11 @@ public final class CollapseTabBarViewController: UIViewController {
         parentViewController.view.addSubview(collapseTabBarViewController.view)
         layoutClosure(collapseTabBarViewController, parentViewController)
         collapseTabBarViewController.didMove(toParentViewController: parentViewController)
+    }
+    
+    // MARK: - Select Tab
+    public func selectTabAtIndex(_ index: Int, scrollToPosition: CollapseTabBarPosition) {
+        
     }
     
     // MARK: - Gesture Handling

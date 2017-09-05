@@ -55,6 +55,8 @@ class ViewController: UIViewController {
                                                                         tabBarItems: [tab01, tab02, tab03, tab04, tab05, tab06],
                                                                         headerView: headerView,
                                                                         maximumHeaderHeight: view.frame.width)
+        collapseTabBarViewController.pageTabBarController?.pageTabBar.indicatorLineHidden = true
+        
         CollapseTabBarViewController.attachCollapseTabBarController(collapseTabBarViewController,
                                                                     into: self) { (collapseVC, _) in
                                                                         collapseVC.view.autoresizingMask = [.flexibleWidth, .flexibleHeight]

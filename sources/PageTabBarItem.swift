@@ -45,7 +45,7 @@ import UIKit
         }
     }
     
-    internal var didSelect: ((UIButton) -> ()) = { _ in }
+    internal var didSelect: ((PageTabBarItem, Bool) -> ()) = { _ in }
     private let tabBarButton: UIButton = {
         let button = UIButton(type: .custom)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 12)
@@ -83,12 +83,10 @@ import UIKit
     }
     
     private func commonInit() {
-        
-        
         backgroundColor = .white
         
         tabBarButton.tintColor = PageTabBarItem.tintColor
-        tabBarButton.addTarget(self, action: #selector(selecting(_:)), for: .touchUpInside)
+        tabBarButton.addTarget(self, action: #selector(press(_:)), for: .touchUpInside)
         addSubview(tabBarButton)
         tabBarButton.translatesAutoresizingMaskIntoConstraints = false
         tabBarButton.topAnchor.constraint(equalTo: topAnchor).isActive = true
@@ -102,7 +100,11 @@ import UIKit
         badgeView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -4).isActive = true
     }
     
-    @objc private func selecting(_ sender: UIButton) {
-        didSelect(sender)
+    @objc private func press(_ sender: UIButton) {
+        didSelect(self, true)
+    }
+    
+    func select() {
+        didSelect(self, false)
     }
 }
