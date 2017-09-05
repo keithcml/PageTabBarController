@@ -93,9 +93,11 @@ internal final class PageTabBarCollectionViewFlowLayout: UICollectionViewFlowLay
         if case .top = tabBarPosition {
             pageTabBar.topAnchor.constraint(equalTo: view.topAnchor).isActive = true
             collectionView.topAnchor.constraint(equalTo: pageTabBar.bottomAnchor).isActive = true
+            collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
         }
         else {
             pageTabBar.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
+            collectionView.topAnchor.constraint(equalTo: view.topAnchor).isActive = true
             collectionView.bottomAnchor.constraint(equalTo: pageTabBar.topAnchor).isActive = true
         }
     }

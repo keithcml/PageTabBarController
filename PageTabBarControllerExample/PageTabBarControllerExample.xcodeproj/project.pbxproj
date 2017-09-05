@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		9A3FD9281F5DBD6300C24A1B /* Badge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A3FD9271F5DBD6300C24A1B /* Badge.swift */; };
-		9A3FD92A1F5E319B00C24A1B /* CollapsedTabBarViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A3FD9291F5E319B00C24A1B /* CollapsedTabBarViewController.swift */; };
+		9A3FD92A1F5E319B00C24A1B /* CollapseTabBarViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A3FD9291F5E319B00C24A1B /* CollapseTabBarViewController.swift */; };
 		9B6D040D1F5D696D00B018E9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B6D040C1F5D696D00B018E9 /* AppDelegate.swift */; };
 		9B6D040F1F5D696D00B018E9 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B6D040E1F5D696D00B018E9 /* ViewController.swift */; };
 		9B6D04121F5D696D00B018E9 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9B6D04101F5D696D00B018E9 /* Main.storyboard */; };
@@ -21,6 +21,7 @@
 		9B6D043A1F5D69DB00B018E9 /* PageTabBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B6D04201F5D69A900B018E9 /* PageTabBar.swift */; };
 		9B6D043B1F5D69DB00B018E9 /* PageTabBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B6D04211F5D69A900B018E9 /* PageTabBarController.swift */; };
 		9B6D043C1F5D69DB00B018E9 /* PageTabBarItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B6D04221F5D69A900B018E9 /* PageTabBarItem.swift */; };
+		9B6D043E1F5E4ED100B018E9 /* TableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B6D043D1F5E4ED100B018E9 /* TableViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -49,7 +50,7 @@
 
 /* Begin PBXFileReference section */
 		9A3FD9271F5DBD6300C24A1B /* Badge.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Badge.swift; sourceTree = "<group>"; };
-		9A3FD9291F5E319B00C24A1B /* CollapsedTabBarViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CollapsedTabBarViewController.swift; sourceTree = "<group>"; };
+		9A3FD9291F5E319B00C24A1B /* CollapseTabBarViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CollapseTabBarViewController.swift; sourceTree = "<group>"; };
 		9B6D04091F5D696D00B018E9 /* PageTabBarControllerExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PageTabBarControllerExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9B6D040C1F5D696D00B018E9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		9B6D040E1F5D696D00B018E9 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -64,6 +65,7 @@
 		9B6D042C1F5D69C300B018E9 /* PageTabBarController.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = PageTabBarController.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		9B6D042E1F5D69C300B018E9 /* PageTabBarController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PageTabBarController.h; sourceTree = "<group>"; };
 		9B6D042F1F5D69C300B018E9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		9B6D043D1F5E4ED100B018E9 /* TableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TableViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -109,6 +111,7 @@
 				9B6D041E1F5D69A900B018E9 /* sources */,
 				9B6D040C1F5D696D00B018E9 /* AppDelegate.swift */,
 				9B6D040E1F5D696D00B018E9 /* ViewController.swift */,
+				9B6D043D1F5E4ED100B018E9 /* TableViewController.swift */,
 				9B6D04101F5D696D00B018E9 /* Main.storyboard */,
 				9B6D04131F5D696D00B018E9 /* Assets.xcassets */,
 				9B6D04151F5D696D00B018E9 /* LaunchScreen.storyboard */,
@@ -125,7 +128,7 @@
 				9B6D04211F5D69A900B018E9 /* PageTabBarController.swift */,
 				9B6D04221F5D69A900B018E9 /* PageTabBarItem.swift */,
 				9A3FD9271F5DBD6300C24A1B /* Badge.swift */,
-				9A3FD9291F5E319B00C24A1B /* CollapsedTabBarViewController.swift */,
+				9A3FD9291F5E319B00C24A1B /* CollapseTabBarViewController.swift */,
 			);
 			name = sources;
 			path = ../../sources;
@@ -203,7 +206,7 @@
 				TargetAttributes = {
 					9B6D04081F5D696D00B018E9 = {
 						CreatedOnToolsVersion = 8.3.3;
-						DevelopmentTeam = Z8EH486Q72;
+						DevelopmentTeam = BHCQC66E59;
 						ProvisioningStyle = Automatic;
 					};
 					9B6D042B1F5D69C300B018E9 = {
@@ -258,6 +261,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				9B6D040F1F5D696D00B018E9 /* ViewController.swift in Sources */,
+				9B6D043E1F5E4ED100B018E9 /* TableViewController.swift in Sources */,
 				9B6D040D1F5D696D00B018E9 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -268,7 +272,7 @@
 			files = (
 				9B6D043A1F5D69DB00B018E9 /* PageTabBar.swift in Sources */,
 				9A3FD9281F5DBD6300C24A1B /* Badge.swift in Sources */,
-				9A3FD92A1F5E319B00C24A1B /* CollapsedTabBarViewController.swift in Sources */,
+				9A3FD92A1F5E319B00C24A1B /* CollapseTabBarViewController.swift in Sources */,
 				9B6D04391F5D69DB00B018E9 /* KeyValueObserver.swift in Sources */,
 				9B6D043B1F5D69DB00B018E9 /* PageTabBarController.swift in Sources */,
 				9B6D043C1F5D69DB00B018E9 /* PageTabBarItem.swift in Sources */,
@@ -405,7 +409,7 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = Z8EH486Q72;
+				DEVELOPMENT_TEAM = BHCQC66E59;
 				INFOPLIST_FILE = PageTabBarControllerExample/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.mingloan.PageTabBarControllerExample;
@@ -419,7 +423,7 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = Z8EH486Q72;
+				DEVELOPMENT_TEAM = BHCQC66E59;
 				INFOPLIST_FILE = PageTabBarControllerExample/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.mingloan.PageTabBarControllerExample;

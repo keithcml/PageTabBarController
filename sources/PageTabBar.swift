@@ -86,7 +86,7 @@ internal class PageTabBar: UIView {
             if let p = previous {
                 
                 item.leadingAnchor.constraint(equalTo: p.trailingAnchor).isActive = true
-                item.widthAnchor.constraint(equalTo: p.widthAnchor, multiplier: 1.0)
+                item.widthAnchor.constraint(equalTo: p.widthAnchor, multiplier: 1.0).isActive = true
                 
                 if idx == items.count - 1 {
                     item.trailingAnchor.constraint(equalTo: trailingAnchor).isActive = true
@@ -95,7 +95,7 @@ internal class PageTabBar: UIView {
             else {
                 item.leadingAnchor.constraint(equalTo: leadingAnchor).isActive = true
                 // initial color
-                // item.set(color: UIColor.darkJungleGreen())
+                item.overlayColor = PageTabBarItem.selectedTintColor
             }
             previous = item
             
@@ -138,7 +138,7 @@ internal class PageTabBar: UIView {
                         let location = newFrame.origin.x + newFrame.width/2
                         let index = Int(ceil(location/newFrame.width)) - 1
                         for (idx, button) in strongSelf.items.enumerated() {
-                            button.overlayColor = idx == index ? UIColor.gray : UIColor.lightGray
+                            button.overlayColor = idx == index ? PageTabBarItem.selectedTintColor : PageTabBarItem.tintColor
                         }
                     }
         }

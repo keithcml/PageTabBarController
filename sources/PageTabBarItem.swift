@@ -23,6 +23,8 @@ import UIKit
     internal var overlayColor = UIColor.gray {
         didSet {
             tabBarButton.setTitleColor(overlayColor, for: .normal)
+            tabBarButton.tintColor = overlayColor
+            setNeedsDisplay()
         }
     }
     
@@ -32,7 +34,7 @@ import UIKit
         button.titleLabel?.font = UIFont.systemFont(ofSize: 12)
         button.setTitleColor(PageTabBarItem.tintColor, for: .normal)
         button.setTitleColor(PageTabBarItem.selectedTintColor, for: .highlighted)
-        button.contentEdgeInsets = UIEdgeInsets(top: 4, left: 4, bottom: 4, right: 4)
+        button.contentEdgeInsets = UIEdgeInsets(top: 8, left: 8, bottom: 8, right: 8)
         button.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         return button
     }()
@@ -42,11 +44,33 @@ import UIKit
         return badgeView
     }()
     
-    convenience init(frame: CGRect, title: String?, icon: UIImage?) {
-        self.init(frame: frame)
+    public convenience init(title: String?) {
+    
+        self.init(frame: CGRect(x: 0, y: 0, width: 30, height: 30))
         backgroundColor = .white
+    
         tabBarButton.setTitle(title, for: .normal)
         tabBarButton.titleLabel?.font = UIFont.systemFont(ofSize: 12, weight: UIFontWeightMedium)
+
+        commonInit()
+    }
+    
+    public convenience init(icon: UIImage?) {
+        self.init(frame: CGRect(x: 0, y: 0, width: 30, height: 30))
+        
+        let img = icon?.withRenderingMode(.alwaysTemplate)
+        tabBarButton.setTitle("", for: .normal)
+        tabBarButton.setImage(img, for: .normal)
+        tabBarButton.imageView?.contentMode = .scaleAspectFit
+        commonInit()
+    }
+    
+    private func commonInit() {
+        
+        
+        backgroundColor = .white
+        
+        tabBarButton.tintColor = PageTabBarItem.tintColor
         tabBarButton.addTarget(self, action: #selector(selecting(_:)), for: .touchUpInside)
         addSubview(tabBarButton)
         tabBarButton.translatesAutoresizingMaskIntoConstraints = false
