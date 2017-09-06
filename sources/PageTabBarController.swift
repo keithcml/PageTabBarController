@@ -32,7 +32,8 @@ public enum PageTabBarTransitionAnimation {
 }
 
 @objc public protocol PageTabBarControllerDelegate: class {
-    @objc optional func pageTabBarController(_ controller: PageTabBarController, didSelectItem item: PageTabBarItem, atIndex index: Int)
+    @objc optional func pageTabBarController(_ controller: PageTabBarController, didSelectItem item: PageTabBarItem, atIndex index: Int, previousIndex: Int)
+    @objc optional func pageTabBarController(_ controller: PageTabBarController, didChangeContentViewController: UIViewController, atIndex index: Int, fromIndex: Int)
 }
 
 internal final class PageTabBarCollectionViewFlowLayout: UICollectionViewFlowLayout {
@@ -140,12 +141,15 @@ internal final class PageTabBarCollectionViewFlowLayout: UICollectionViewFlowLay
     }
     
     public func setPageIndex(_ index: Int, animated: Bool) {
-        guard index != pageIndex, pageTabBarItems.count > index else { return }
+        guard pageTabBarItems.count > index else { return }
+        
+        delegate?.pageTabBarController?(self, didSelectItem: pageTabBarItems[index], atIndex: index, previousIndex: pageIndex)
+        
+        guard index != pageIndex else { return }
+        
         pageIndex = index
         pageTabBarItems[index].select()
-        delegate?.pageTabBarController?(self, didSelectItem: pageTabBarItems[index], atIndex: index)
         
-        let indexPath = IndexPath(item: index, section: 0)
         var shouldAnimate = animated
         if case .scroll = transitionAnimation {
             shouldAnimate = animated
@@ -153,7 +157,22 @@ internal final class PageTabBarCollectionViewFlowLayout: UICollectionViewFlowLay
         else {
             shouldAnimate = false
         }
+        
+        let indexPath = IndexPath(item: index, section: 0)
         collectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: shouldAnimate)
+        
+//        if shouldAnimate {
+//            UIView.animate(
+//                withDuration: 0.3,
+//                animations: {
+//                    self.collectionView.setContentOffset(CGPoint(x: CGFloat(index) * self.collectionView.frame.width, y: 0), animated: false)
+//            }) { _ in
+//                print("completed")
+//            }
+//        }
+//        else {
+//            collectionView.setContentOffset(CGPoint(x: CGFloat(index) * collectionView.frame.width, y: 0), animated: false)
+//        }
     }
     
     public func setBadge(_ value: Int, forItemAt index: Int) {

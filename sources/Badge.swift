@@ -56,7 +56,7 @@ final class Badge: UIView {
         }
     }
     
-    var badgeFont: UIFont = UIFont.systemFont(ofSize: 15) {
+    var badgeFont: UIFont = UIFont.systemFont(ofSize: 12) {
         didSet {
             guard oldValue != badgeFont else { return }
             innerLabel.font = badgeFont
@@ -102,7 +102,7 @@ final class Badge: UIView {
             insetTopConstaint?.constant = insets.top
             insetLeftConstaint?.constant = insets.left
             insetBottomConstaint?.constant = -insets.bottom
-            insetRIghtConstaint?.constant = -insets.right
+            insetRightConstaint?.constant = -insets.right
             
             setNeedsUpdateConstraints()
             layoutIfNeeded()
@@ -157,7 +157,7 @@ final class Badge: UIView {
     fileprivate var insetTopConstaint: NSLayoutConstraint?
     fileprivate var insetLeftConstaint: NSLayoutConstraint?
     fileprivate var insetBottomConstaint: NSLayoutConstraint?
-    fileprivate var insetRIghtConstaint: NSLayoutConstraint?
+    fileprivate var insetRightConstaint: NSLayoutConstraint?
     
     fileprivate func commonInit() {
         layer.backgroundColor = badgeTintColor.cgColor
@@ -176,12 +176,12 @@ final class Badge: UIView {
         insetTopConstaint = innerLabel.topAnchor.constraint(equalTo: topAnchor, constant: 3)
         insetLeftConstaint = innerLabel.leftAnchor.constraint(equalTo: leftAnchor, constant: 5)
         insetBottomConstaint = innerLabel.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -3)
-        insetRIghtConstaint = innerLabel.rightAnchor.constraint(equalTo: rightAnchor, constant: -5)
+        insetRightConstaint = innerLabel.rightAnchor.constraint(equalTo: rightAnchor, constant: -5)
         
         insetTopConstaint?.isActive = true
         insetLeftConstaint?.isActive = true
         insetBottomConstaint?.isActive = true
-        insetRIghtConstaint?.isActive = true
+        insetRightConstaint?.isActive = true
         
         switch badgeType {
         case .number:

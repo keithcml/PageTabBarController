@@ -55,8 +55,13 @@ class ViewController: UIViewController, CollapseTabBarViewControllerDelegate, Pa
                                                                     tabBarItems: [tab01, tab02, tab03, tab04, tab05, tab06],
                                                                     headerView: headerView,
                                                                     maximumHeaderHeight: view.frame.width)
-        collapseTabBarViewController.pageTabBarController?.pageTabBar.indicatorLineHidden = true
-        collapseTabBarViewController.pageTabBarController?.transitionAnimation = .none
+        collapseTabBarViewController.pageTabBarController?.pageTabBar.indicatorLineColor = .blue
+        collapseTabBarViewController.pageTabBarController?.pageTabBar.indicatorLineHeight = 2
+        collapseTabBarViewController.pageTabBarController?.pageTabBar.bottomLineHidden = true
+        collapseTabBarViewController.pageTabBarController?.pageTabBar.topLineColor = .black
+        collapseTabBarViewController.pageTabBarController?.pageTabBar.barTintColor = UIColor(white: 0.9, alpha: 1)
+        
+        collapseTabBarViewController.pageTabBarController?.transitionAnimation = .scroll
         collapseTabBarViewController.pageTabBarController?.delegate = self
         collapseTabBarViewController.delegate = self
         CollapseTabBarViewController.attachCollapseTabBarController(collapseTabBarViewController,
@@ -74,7 +79,11 @@ class ViewController: UIViewController, CollapseTabBarViewControllerDelegate, Pa
         // print("\(position.rawValue)")
     }
     
-    func pageTabBarController(_ controller: PageTabBarController, didSelectItem item: PageTabBarItem, atIndex index: Int) {
+    func pageTabBarController(_ controller: PageTabBarController, didSelectItem item: PageTabBarItem, atIndex index: Int, previousIndex: Int) {
+        
+        print("previousIndex: \(previousIndex)")
+        print("currentIndex: \(index)")
+        
         if index == 3 {
             collapseTabBarViewController?.scrollTabBar(to: .top)
         }

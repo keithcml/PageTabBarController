@@ -26,10 +26,38 @@
 import Foundation
 import UIKit
 
+private class PageTabBarButton: UIButton {
+    
+    fileprivate var color = UIColor.lightGray {
+        didSet {
+            setTitleColor(color, for: .normal)
+            setTitleColor(color.withAlphaComponent(0.5), for: .highlighted)
+        }
+    }
+    fileprivate var selectedColor = UIColor.blue {
+        didSet {
+            setTitleColor(selectedColor, for: .selected)
+        }
+    }
+    
+    override var isSelected: Bool {
+        didSet {
+            tintColor = isSelected ? selectedColor : color
+        }
+    }
+}
+
 @objc public final class PageTabBarItem: UIView {
     
-    public static var tintColor = UIColor.gray
-    public static var selectedTintColor = UIColor.lightGray
+    public var color = UIColor.lightGray
+    public var selectedColor = UIColor.red
+    
+    internal var isSelected = false {
+        didSet {
+            tabBarButton.isSelected = isSelected
+            //didSelect(self, false)
+        }
+    }
     
     internal var badgeCount = 0 {
         didSet {
@@ -37,20 +65,10 @@ import UIKit
         }
     }
     
-    internal var overlayColor = UIColor.gray {
-        didSet {
-            tabBarButton.setTitleColor(overlayColor, for: .normal)
-            tabBarButton.tintColor = overlayColor
-            setNeedsDisplay()
-        }
-    }
-    
     internal var didSelect: ((PageTabBarItem, Bool) -> ()) = { _ in }
-    private let tabBarButton: UIButton = {
-        let button = UIButton(type: .custom)
+    private let tabBarButton: PageTabBarButton = {
+        let button = PageTabBarButton(type: .custom)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 12)
-        button.setTitleColor(PageTabBarItem.tintColor, for: .normal)
-        button.setTitleColor(PageTabBarItem.selectedTintColor, for: .highlighted)
         button.contentEdgeInsets = UIEdgeInsets(top: 8, left: 8, bottom: 8, right: 8)
         button.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         return button
@@ -64,7 +82,6 @@ import UIKit
     public convenience init(title: String?) {
     
         self.init(frame: CGRect(x: 0, y: 0, width: 30, height: 30))
-        backgroundColor = .white
     
         tabBarButton.setTitle(title, for: .normal)
         tabBarButton.titleLabel?.font = UIFont.systemFont(ofSize: 12, weight: UIFontWeightMedium)
@@ -83,10 +100,14 @@ import UIKit
     }
     
     private func commonInit() {
-        backgroundColor = .white
+        backgroundColor = .clear
         
-        tabBarButton.tintColor = PageTabBarItem.tintColor
+        tabBarButton.setTitleColor(color, for: .normal)
+        tabBarButton.setTitleColor(selectedColor, for: .highlighted)
+        tabBarButton.tintColor = color
+        
         tabBarButton.addTarget(self, action: #selector(press(_:)), for: .touchUpInside)
+        
         addSubview(tabBarButton)
         tabBarButton.translatesAutoresizingMaskIntoConstraints = false
         tabBarButton.topAnchor.constraint(equalTo: topAnchor).isActive = true
@@ -101,6 +122,7 @@ import UIKit
     }
     
     @objc private func press(_ sender: UIButton) {
+        //sender.isSelected = true
         didSelect(self, true)
     }
     

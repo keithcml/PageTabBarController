@@ -39,6 +39,13 @@ internal enum PageTabBarItemArrngement {
 
 public class PageTabBar: UIView {
     
+    public var barTintColor: UIColor = .white {
+        didSet {
+            backgroundColor = barTintColor
+            setNeedsDisplay()
+        }
+    }
+    
     public var indicatorLineHidden = false {
         didSet {
             indicatorLine.isHidden = indicatorLineHidden
@@ -54,21 +61,38 @@ public class PageTabBar: UIView {
             bottomLine.isHidden = bottomLineHidden
         }
     }
+    public var indicatorLineColor = UIColor.blue  {
+        didSet {
+            indicatorLine.backgroundColor = indicatorLineColor
+            setNeedsDisplay()
+        }
+    }
+    public var indicatorLineHeight: CGFloat = 1.0  {
+        didSet {
+            indicatorLine.frame = CGRect(x: indicatorLine.frame.minX, y: bounds.height - indicatorLineHeight, width: indicatorLine.frame.width, height: indicatorLineHeight)
+        }
+    }
+    public var topLineColor = UIColor.lightGray  {
+        didSet {
+            topLine.backgroundColor = topLineColor
+            setNeedsDisplay()
+        }
+    }
+    public var bottomLineColor = UIColor.lightGray  {
+        didSet {
+            bottomLine.backgroundColor = bottomLineColor
+            setNeedsDisplay()
+        }
+    }
     
-    
-    internal static var indicatorLineColor = UIColor.blue
-    internal static var topLineColor = UIColor.lightGray
-    internal static var bottomLineColor = UIColor.lightGray
-    
-    var isInteracting = false {
+    internal var isInteracting = false {
         didSet {
             isUserInteractionEnabled = !isInteracting
         }
     }
     
-    var toIndex: ((Int) -> ()) = { _ in }
-    
-    var selectedIndex = 0
+    internal var toIndex: ((Int) -> ()) = { _ in }
+    internal var selectedIndex = 0
     
     fileprivate var items = [PageTabBarItem]()
     fileprivate var itemWidth: CGFloat {
@@ -83,18 +107,18 @@ public class PageTabBar: UIView {
     
     fileprivate var indicatorLine: UIView = {
         let line = UIView()
-        line.backgroundColor = PageTabBar.indicatorLineColor
+        line.backgroundColor = .blue
         return line
     }()
     
     fileprivate var topLine: UIView = {
         let line = UIView()
-        line.backgroundColor = PageTabBar.topLineColor
+        line.backgroundColor = .lightGray
         return line
     }()
     fileprivate var bottomLine: UIView = {
         let line = UIView()
-        line.backgroundColor = PageTabBar.bottomLineColor
+        line.backgroundColor = .lightGray
         return line
     }()
     
@@ -129,12 +153,12 @@ public class PageTabBar: UIView {
             else {
                 item.leadingAnchor.constraint(equalTo: leadingAnchor).isActive = true
                 // initial color
-                item.overlayColor = PageTabBarItem.selectedTintColor
+                item.isSelected = true
             }
             previous = item
             
             item.didSelect = { [unowned self] _, fromUserTouch in
-                guard self.selectedIndex != idx else { return }
+                //guard self.selectedIndex != idx else { return }
                 self.selectedIndex = idx
                 if fromUserTouch {
                     self.toIndex(idx)
@@ -158,7 +182,7 @@ public class PageTabBar: UIView {
         bottomLine.trailingAnchor.constraint(equalTo: trailingAnchor).isActive = true
         bottomLine.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true
         
-        indicatorLine.frame = CGRect(x: 0, y: bounds.height - 1, width: itemWidth, height: 1)
+        indicatorLine.frame = CGRect(x: 0, y: bounds.height - indicatorLineHeight, width: itemWidth, height: indicatorLineHeight)
         addSubview(indicatorLine)
         indicatorLocationObserver =
             KeyValueObserver(
@@ -173,9 +197,10 @@ public class PageTabBar: UIView {
                         let newFrame = newFrameValue.cgRectValue
                         let location = newFrame.origin.x + newFrame.width/2
                         let index = Int(ceil(location/newFrame.width)) - 1
-                        for (idx, button) in strongSelf.items.enumerated() {
-                            button.overlayColor = idx == index ? PageTabBarItem.selectedTintColor : PageTabBarItem.tintColor
-                        }
+                        
+//                        for (idx, button) in strongSelf.items.enumerated() {
+//                            button.isSelected = idx == index ? true : false
+//                        }
                     }
         }
     }
@@ -186,6 +211,6 @@ public class PageTabBar: UIView {
     
     func setIndicatorPosition(_ position: CGFloat) {
         let indicatorLineWidth = UIScreen.main.bounds.width / CGFloat(items.count)
-        indicatorLine.frame = CGRect(x: position, y: indicatorLine.frame.origin.y, width: indicatorLineWidth, height: indicatorLine.frame.height)
+        indicatorLine.frame = CGRect(x: position, y: bounds.height - indicatorLineHeight, width: indicatorLineWidth, height: indicatorLineHeight)
     }
 }
