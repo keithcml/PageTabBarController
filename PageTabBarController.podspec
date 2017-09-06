@@ -9,8 +9,8 @@
 Pod::Spec.new do |s|
   s.name             = "PageTabBarController"
   s.version          = "1.0.0"
-  s.summary          = "A material Tab Bar Container View Controller with Android-liked Tabs Collapsible."
-  s.description      = "iOS Custom Tab Bar with Tabs Collapsible"
+  s.summary          = "iOS Custom Tab Bar with Tabs Collapsible."
+  s.description      = "A material TabBarController with Android-liked Tabs Collapsible."
   s.homepage         = "https://github.com/MingLoan/PageTabBarController"
   # s.screenshots     = "www.example.com/screenshots_1", "www.example.com/screenshots_2"
   s.license          = 'MIT'
