@@ -26,7 +26,7 @@
 import UIKit
 import PageTabBarController
 
-class ViewController: UIViewController {
+class ViewController: UIViewController, CollapseTabBarViewControllerDelegate, PageTabBarControllerDelegate {
 
     //var tabBarController: PageTabBarController!
     var collapseTabBarViewController: CollapseTabBarViewController!
@@ -51,12 +51,14 @@ class ViewController: UIViewController {
         let tab05 = PageTabBarItem(icon: UIImage(named: "img01"))
         let tab06 = PageTabBarItem(icon: UIImage(named: "img01"))
         
-        let collapseTabBarViewController = CollapseTabBarViewController(viewControllers: [vc01, vc02, vc03, vc04, vc05, vc06],
-                                                                        tabBarItems: [tab01, tab02, tab03, tab04, tab05, tab06],
-                                                                        headerView: headerView,
-                                                                        maximumHeaderHeight: view.frame.width)
+        collapseTabBarViewController = CollapseTabBarViewController(viewControllers: [vc01, vc02, vc03, vc04, vc05, vc06],
+                                                                    tabBarItems: [tab01, tab02, tab03, tab04, tab05, tab06],
+                                                                    headerView: headerView,
+                                                                    maximumHeaderHeight: view.frame.width)
         collapseTabBarViewController.pageTabBarController?.pageTabBar.indicatorLineHidden = true
-        
+        collapseTabBarViewController.pageTabBarController?.transitionAnimation = .none
+        collapseTabBarViewController.pageTabBarController?.delegate = self
+        collapseTabBarViewController.delegate = self
         CollapseTabBarViewController.attachCollapseTabBarController(collapseTabBarViewController,
                                                                     into: self) { (collapseVC, _) in
                                                                         collapseVC.view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
@@ -68,6 +70,23 @@ class ViewController: UIViewController {
         // Dispose of any resources that can be recreated.
     }
 
+    func collapseTabBarController(_ controller: CollapseTabBarViewController, tabBarDidReach position: CollapseTabBarPosition) {
+        // print("\(position.rawValue)")
+    }
+    
+    func pageTabBarController(_ controller: PageTabBarController, didSelectItem item: PageTabBarItem, atIndex index: Int) {
+        if index == 3 {
+            collapseTabBarViewController?.scrollTabBar(to: .top)
+        }
+        
+        if index == 2 {
+            controller.setBadge(200, forItemAt: index)
+        }
+        
+        if index == 5 {
+            controller.clearAllBadges()
+        }
+    }
 
 }
 

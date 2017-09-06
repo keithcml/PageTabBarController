@@ -26,6 +26,15 @@
 import Foundation
 import UIKit
 
+public enum PageTabBarTransitionAnimation {
+    case none
+    case scroll
+}
+
+@objc public protocol PageTabBarControllerDelegate: class {
+    @objc optional func pageTabBarController(_ controller: PageTabBarController, didSelectItem item: PageTabBarItem, atIndex index: Int)
+}
+
 internal final class PageTabBarCollectionViewFlowLayout: UICollectionViewFlowLayout {
     override func shouldInvalidateLayout(forBoundsChange newBounds: CGRect) -> Bool {
         guard let cv = collectionView else { return false }
@@ -40,6 +49,9 @@ internal final class PageTabBarCollectionViewFlowLayout: UICollectionViewFlowLay
 
 @objc public final class PageTabBarController: UIViewController, UIScrollViewDelegate {
     
+    public weak var delegate: PageTabBarControllerDelegate?
+    
+    public var transitionAnimation = PageTabBarTransitionAnimation.scroll
     public var updateIndex: (Bool, Int) -> () = { _ in }
     public internal(set) var pageIndex: Int = 0
     
@@ -70,7 +82,6 @@ internal final class PageTabBarCollectionViewFlowLayout: UICollectionViewFlowLay
         }
         
         pageTabBar = PageTabBar(frame: CGRect(x: 0, y: 0, width: estimatedFrame.width, height: 44), tabBarItems: pageTabBarItems)
-        
         pageTabBar.toIndex = { [unowned self] index in
             self.setPageIndex(index, animated: true)
         }
@@ -130,10 +141,30 @@ internal final class PageTabBarCollectionViewFlowLayout: UICollectionViewFlowLay
     
     public func setPageIndex(_ index: Int, animated: Bool) {
         guard index != pageIndex, pageTabBarItems.count > index else { return }
-        let indexPath = IndexPath(item: index, section: 0)
-        collectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: animated)
-        pageTabBarItems[index].select()
         pageIndex = index
+        pageTabBarItems[index].select()
+        delegate?.pageTabBarController?(self, didSelectItem: pageTabBarItems[index], atIndex: index)
+        
+        let indexPath = IndexPath(item: index, section: 0)
+        var shouldAnimate = animated
+        if case .scroll = transitionAnimation {
+            shouldAnimate = animated
+        }
+        else {
+            shouldAnimate = false
+        }
+        collectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: shouldAnimate)
+    }
+    
+    public func setBadge(_ value: Int, forItemAt index: Int) {
+        guard pageTabBarItems.count > index else { return }
+        pageTabBarItems[index].badgeCount = value
+    }
+    
+    public func clearAllBadges() {
+        for item in pageTabBarItems {
+            item.badgeCount = 0
+        }
     }
     
     func theMostBelowScrollViewInView(_ view: UIView) -> UIScrollView? {

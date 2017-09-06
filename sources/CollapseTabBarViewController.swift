@@ -26,18 +26,19 @@
 import Foundation
 import UIKit
 
-public enum CollapseTabBarPosition {
-    case top
+@objc public protocol CollapseTabBarViewControllerDelegate: class {
+    @objc optional func collapseTabBarController(_ controller: CollapseTabBarViewController, tabBarDidReach position: CollapseTabBarPosition)
+    //@objc optional func shouldNavigateToItem(at index: Int)
+}
+
+@objc public enum CollapseTabBarPosition: Int {
+    case top = 0
     case bottom
 }
 
-public enum CollapseTabBarHeaderType {
-    case fixedHeight
-    case sticky
-    //case scrollAway
-}
-
-public final class CollapseTabBarViewController: UIViewController {
+@objc public final class CollapseTabBarViewController: UIViewController {
+    
+    public weak var delegate: CollapseTabBarViewControllerDelegate?
     
     // MARK: - PageTabBarController Properties
     public fileprivate(set) var pageTabBarController: PageTabBarController?
@@ -67,6 +68,7 @@ public final class CollapseTabBarViewController: UIViewController {
     fileprivate var headerViewPanGesture: UIPanGestureRecognizer!
     fileprivate var pageTabBarPanGesture: UIPanGestureRecognizer!
     fileprivate var isPageTabBarPanning = false
+    fileprivate var currentScrollDirection = Direction.notMoving
     
     fileprivate var initialY: CGFloat = 200
     fileprivate var initialHeight: CGFloat = 300
@@ -75,7 +77,7 @@ public final class CollapseTabBarViewController: UIViewController {
     fileprivate var viewControllers = [UIViewController]()
     fileprivate var headerView = UIView(frame: CGRect.zero)
     
-    public init(viewControllers: [UIViewController],
+    @objc public init(viewControllers: [UIViewController],
                 tabBarItems: [PageTabBarItem],
                 headerView: UIView = UIView(frame: CGRect.zero),
                 maximumHeaderHeight: CGFloat = 200) {
@@ -154,8 +156,56 @@ public final class CollapseTabBarViewController: UIViewController {
     }
     
     // MARK: - Select Tab
-    public func selectTabAtIndex(_ index: Int, scrollToPosition: CollapseTabBarPosition) {
+    @objc public func selectTabAtIndex(_ index: Int, scrollToPosition: CollapseTabBarPosition) {
+        pageTabBarController?.setPageIndex(index, animated: true)
+        scrollTabBar(to: .top)
+    }
+    
+    // MARK: - Control Scroll
+    @objc public func scrollTabBar(to position: CollapseTabBarPosition, springAnimation: Bool = false) {
+        guard let pageView = pageTabBarController?.view else { return }
+        var headerViewOrigin = CGPoint.zero
+        var pageViewOrigin = pageView.frame.origin
+        var pageViewSize = pageView.frame.size
         
+        switch position {
+        case .top:
+            pageViewOrigin = CGPoint(x: 0, y: minimumHeaderViewHeight)
+            pageViewSize = CGSize(width: pageView.frame.width, height: view.frame.height - minimumHeaderViewHeight)
+            headerViewOrigin = CGPoint(x: 0, y: minimumHeaderViewHeight - defaultHeaderHeight)
+            break
+        case .bottom:
+            pageViewOrigin = CGPoint(x: 0, y: defaultHeaderHeight)
+            pageViewSize = CGSize(width: pageView.frame.width, height: defaultHeaderHeight)
+            break
+        }
+        
+        if springAnimation {
+            UIView.animate(
+                withDuration: 0.3,
+                delay: 0,
+                options: [.curveEaseOut, .allowUserInteraction, .beginFromCurrentState],
+                animations: {
+                    pageView.frame = CGRect(origin: pageViewOrigin, size: pageViewSize)
+                    self.headerView.transform = .identity
+                    self.headerView.frame.origin = headerViewOrigin
+                }) { _ in
+                    self.delegate?.collapseTabBarController?(self, tabBarDidReach: position)
+                }
+        }
+        else {
+            UIView.animate(
+                withDuration: 0.3,
+                delay: 0,
+                options: [.curveEaseOut, .allowUserInteraction, .beginFromCurrentState],
+                animations: {
+                    pageView.frame = CGRect(origin: pageViewOrigin, size: pageViewSize)
+                    self.headerView.transform = .identity
+                    self.headerView.frame.origin = headerViewOrigin
+                }) { _ in
+                    self.delegate?.collapseTabBarController?(self, tabBarDidReach: position)
+                }
+        }
     }
     
     // MARK: - Gesture Handling
@@ -163,10 +213,11 @@ public final class CollapseTabBarViewController: UIViewController {
         guard let gesture = sender else { return }
         guard let gView = pageTabBarController?.view else { return }
         guard let touchView = gesture.view else { return }
-        guard abs(gesture.velocity(in: gView).y) > abs(gesture.velocity(in: gView).x) else { return }
         
         switch gesture.state {
         case .began:
+            guard abs(gesture.velocity(in: gView).y) >= abs(gesture.velocity(in: gView).x) else { return }
+            
             initialY = gView.frame.minY
             initialHeight = gView.frame.height
             
@@ -180,9 +231,18 @@ public final class CollapseTabBarViewController: UIViewController {
                 let scrollView = pageTabBarController.theMostBelowScrollViewInView(pageTabBarController.viewControllers[pageTabBarController.pageIndex].view) {
                 innerScrollViewContentOffset = scrollView.contentOffset
             }
+            
+            if case .notMoving = gesture.direction {} else {
+                currentScrollDirection = gesture.direction
+            }
+            
             break
         case .changed:
             guard isPageTabBarPanning else { return }
+            
+            if case .notMoving = gesture.verticalDirection {} else {
+                currentScrollDirection = gesture.verticalDirection
+            }
             
             let translateY = gesture.translation(in: view).y
             
@@ -208,11 +268,10 @@ public final class CollapseTabBarViewController: UIViewController {
                 headerView.frame = CGRect(x: 0, y: newY - defaultHeaderHeight, width: headerView.frame.width, height: headerView.frame.height)
             }
             
-            guard let direction = gesture.direction,
-                let pageTabBarController = pageTabBarController,
+            guard let pageTabBarController = pageTabBarController,
                 let scrollView = pageTabBarController.theMostBelowScrollViewInView(pageTabBarController.viewControllers[pageTabBarController.pageIndex].view) else { return }
             
-            switch direction {
+            switch gesture.direction {
             case .up:
                 if newY > 0 {
                     scrollView.contentOffset = innerScrollViewContentOffset
@@ -229,83 +288,43 @@ public final class CollapseTabBarViewController: UIViewController {
             break
         default:
             guard isPageTabBarPanning else { return }
-            
+            if case .notMoving = gesture.verticalDirection {} else {
+                currentScrollDirection = gesture.verticalDirection
+            }
+
+            // bouncing control
             if gView.frame.minY > defaultHeaderHeight {
-                let newHeight = initialHeight + (initialY - defaultHeaderHeight)
-                UIView.animate(withDuration: 0.3,
-                               delay: 0,
-                               options: [.curveEaseOut, .allowUserInteraction, .beginFromCurrentState],
-                               animations: {
-                                    gView.bounds = CGRect(x: 0, y: 0, width: gView.frame.width, height: newHeight)
-                                    gView.frame.origin = CGPoint(x: 0, y: self.defaultHeaderHeight)
-                                
-                                    self.headerView.transform = .identity
-                                    self.headerView.frame = CGRect(origin: CGPoint.zero, size: self.headerView.frame.size)
-                                },
-                               completion: nil)
+                scrollTabBar(to: .bottom)
                 return
             }
             else if gView.frame.minY < minimumHeaderViewHeight && alwaysBouncesAtTop {
-                let newHeight = initialHeight + (initialY - minimumHeaderViewHeight)
-                let headerViewOrigin = CGPoint(x: 0, y: minimumHeaderViewHeight - defaultHeaderHeight)
-                UIView.animate(withDuration: 0.3,
-                               delay: 0,
-                               options: [.curveEaseOut, .allowUserInteraction, .beginFromCurrentState],
-                               animations: {
-                                    gView.bounds = CGRect(x: 0, y: 0, width: gView.frame.width, height: newHeight)
-                                    gView.frame.origin = CGPoint(x: 0, y: self.minimumHeaderViewHeight)
-                                
-                                    self.headerView.frame = CGRect(origin: headerViewOrigin, size: self.headerView.frame.size)
-                                },
-                               completion: nil)
+                scrollTabBar(to: .top)
+                return
             }
             
             isPageTabBarPanning = false
             
             if autoCollapse {
-                guard let direction = gesture.direction,
-                    gView.frame.minY > 0,
-                    gView.frame.minY < defaultHeaderHeight else { return }
-                switch direction {
+                guard gView.frame.minY > minimumHeaderViewHeight, gView.frame.minY < defaultHeaderHeight else { return }
+                switch currentScrollDirection {
                 case .up:
-                    let newHeight = initialHeight + initialY
-                    UIView.animate(withDuration: 0.3,
-                                   delay: 0,
-                                   options: [.curveEaseOut, .allowUserInteraction, .beginFromCurrentState],
-                                   animations: {
-                                    gView.bounds = CGRect(x: 0, y: 0, width: gView.frame.width, height: newHeight)
-                                    gView.frame.origin = CGPoint(x: 0, y: 0)
-                                    
-                                    self.headerView.frame = CGRect(x: 0,
-                                                                   y: -self.defaultHeaderHeight,
-                                                                   width: self.headerView.frame.width,
-                                                                   height: self.headerView.frame.height)
-                    },
-                                   completion: nil)
+                    scrollTabBar(to: .top)
                     break
                 case .down:
-                    let newHeight = initialHeight + (initialY - defaultHeaderHeight)
-                    UIView.animate(withDuration: 0.3,
-                                   delay: 0,
-                                   options: [.curveEaseOut, .allowUserInteraction, .beginFromCurrentState],
-                                   animations: {
-                                    gView.bounds = CGRect(x: 0, y: 0, width: gView.frame.width, height: newHeight)
-                                    gView.frame.origin = CGPoint(x: 0, y: self.defaultHeaderHeight)
-                                    
-                                    self.headerView.frame = CGRect(origin: CGPoint.zero, size: self.headerView.frame.size)
-                    },
-                                   completion: nil)
+                    scrollTabBar(to: .bottom)
                     break
                 default:
                     break
                 }
             }
             else {
-                guard let direction = gesture.direction, abs(gesture.velocity(in: gView).y) > 500 else { return }
+                guard abs(gesture.velocity(in: gView).y) > 500 else { return }
                 // spring effect
                 var distance = (gesture.velocity(in: gView).y * gesture.velocity(in: gView).y) / (2 * UIScrollViewDecelerationRateNormal)
-                if case .up = direction {
+                var position = CollapseTabBarPosition.bottom
+                if case .up = currentScrollDirection {
                     distance = distance * -1
+                    position = .top
                 }
                 let time = 0.2
                 let translateY = gesture.translation(in: view).y + distance
@@ -320,8 +339,9 @@ public final class CollapseTabBarViewController: UIViewController {
                                animations: {
                                     gView.frame = CGRect(x: 0, y: newY, width: gView.frame.width, height: newHeight)
                                     self.headerView.frame = CGRect(origin: CGPoint(x: 0, y: newY - self.defaultHeaderHeight), size: self.headerView.frame.size)
-                                },
-                               completion: nil)
+                                }) { _ in
+                                    self.delegate?.collapseTabBarController?(self, tabBarDidReach: position)
+                                }
             }
             break
         }
@@ -359,6 +379,7 @@ public enum Direction: Int {
     case down
     case left
     case right
+    case notMoving
     
     public var isX: Bool { return self == .left || self == .right }
     public var isY: Bool { return !isX }
@@ -366,7 +387,7 @@ public enum Direction: Int {
 
 public extension UIPanGestureRecognizer {
     
-    public var direction: Direction? {
+    public var direction: Direction {
         let panVelocity = velocity(in: view)
         let vertical = fabs(panVelocity.y) > fabs(panVelocity.x)
         switch (vertical, panVelocity.x, panVelocity.y) {
@@ -374,7 +395,19 @@ public extension UIPanGestureRecognizer {
         case (true, _, let y) where y > 0: return .down
         case (false, let x, _) where x > 0: return .right
         case (false, let x, _) where x < 0: return .left
-        default: return nil
+        default: return .notMoving
+        }
+    }
+    
+    public var verticalDirection: Direction {
+        let panVelocity = velocity(in: view)
+        let vertical = fabs(panVelocity.y) > fabs(panVelocity.x)
+        switch (vertical, panVelocity.x, panVelocity.y) {
+        case (true, _, let y) where y < 0: return .up
+        case (true, _, let y) where y > 0: return .down
+        case (false, _, let y) where y < 0: return .up
+        case (false, _, let y) where y > 0: return .down
+        default: return .notMoving
         }
     }
 }
