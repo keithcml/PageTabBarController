@@ -35,6 +35,10 @@ class ViewController: UIViewController, CollapseTabBarViewControllerDelegate, Pa
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.\
         
+        // set styles
+        let tabColor = UIColor(red: 215/255.0, green: 215/255.0, blue: 215/255.0, alpha: 1)
+        let tabSelectedColor = UIColor(red: 35/255.0, green: 171/255.0, blue: 232/255.0, alpha: 1)
+        
         let vc01 = TableViewController(nibName: nil, bundle: nil)
         let vc02 = TableViewController(nibName: nil, bundle: nil)
         let vc03 = TableViewController(nibName: nil, bundle: nil)
@@ -45,17 +49,29 @@ class ViewController: UIViewController, CollapseTabBarViewControllerDelegate, Pa
         let headerView = UIImageView(image: UIImage(named: "cover"))
         
         let tab01 = PageTabBarItem(icon: UIImage(named: "img01"))
+        tab01.color = tabColor
+        tab01.selectedColor = tabSelectedColor
         let tab02 = PageTabBarItem(icon: UIImage(named: "img01"))
+        tab02.color = tabColor
+        tab02.selectedColor = tabSelectedColor
         let tab03 = PageTabBarItem(icon: UIImage(named: "img01"))
+        tab03.color = tabColor
+        tab03.selectedColor = tabSelectedColor
         let tab04 = PageTabBarItem(icon: UIImage(named: "img01"))
+        tab04.color = tabColor
+        tab04.selectedColor = tabSelectedColor
         let tab05 = PageTabBarItem(icon: UIImage(named: "img01"))
+        tab05.color = tabColor
+        tab05.selectedColor = tabSelectedColor
         let tab06 = PageTabBarItem(icon: UIImage(named: "img01"))
+        tab06.color = tabColor
+        tab06.selectedColor = tabSelectedColor
         
         collapseTabBarViewController = CollapseTabBarViewController(viewControllers: [vc01, vc02, vc03, vc04, vc05, vc06],
                                                                     tabBarItems: [tab01, tab02, tab03, tab04, tab05, tab06],
                                                                     headerView: headerView,
                                                                     maximumHeaderHeight: view.frame.width)
-        collapseTabBarViewController.pageTabBarController?.pageTabBar.indicatorLineColor = .blue
+        collapseTabBarViewController.pageTabBarController?.pageTabBar.indicatorLineColor = tabSelectedColor
         collapseTabBarViewController.pageTabBarController?.pageTabBar.indicatorLineHeight = 2
         collapseTabBarViewController.pageTabBarController?.pageTabBar.bottomLineHidden = true
         collapseTabBarViewController.pageTabBarController?.pageTabBar.topLineColor = .black

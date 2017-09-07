@@ -62,7 +62,7 @@ internal final class PageTabBarCollectionViewFlowLayout: UICollectionViewFlowLay
     fileprivate(set) var viewControllers = [UIViewController]()
     
     internal var pageTabBarItems: [PageTabBarItem] = []
-    internal var isScrollEnabled = true {
+    public var isScrollEnabled = true {
         didSet {
             collectionView.isScrollEnabled = isScrollEnabled
         }

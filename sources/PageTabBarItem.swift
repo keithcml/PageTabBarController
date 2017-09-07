@@ -61,8 +61,16 @@ private class PageTabBarButton: UIButton {
 
 @objc public final class PageTabBarItem: UIView {
     
-    public var color = UIColor.lightGray
-    public var selectedColor = UIColor.red
+    public var color = UIColor.lightGray {
+        didSet {
+            tabBarButton.color = color
+        }
+    }
+    public var selectedColor = UIColor.blue {
+        didSet {
+            tabBarButton.selectedColor = selectedColor
+        }
+    }
     
     internal var isSelected = false {
         didSet {

@@ -370,11 +370,11 @@ import UIKit
 extension CollapseTabBarViewController: UIGestureRecognizerDelegate {
     public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         if let panGesture = otherGestureRecognizer as? UIPanGestureRecognizer {
-            if panGesture.direction.isX {
-                return false
+            if panGesture.direction.isY {
+                return true
             }
         }
-        return true
+        return false
     }
 }
 
@@ -416,28 +416,3 @@ public extension UIPanGestureRecognizer {
         }
     }
 }
-
-//extension UIScrollView {
-//    
-//    var isAtTop: Bool {
-//        return contentOffset.y <= verticalOffsetForTop
-//    }
-//    
-//    var isAtBottom: Bool {
-//        return contentOffset.y >= verticalOffsetForBottom
-//    }
-//    
-//    var verticalOffsetForTop: CGFloat {
-//        let topInset = contentInset.top
-//        return -topInset
-//    }
-//    
-//    var verticalOffsetForBottom: CGFloat {
-//        let scrollViewHeight = bounds.height
-//        let scrollContentSizeHeight = contentSize.height
-//        let bottomInset = contentInset.bottom
-//        let scrollViewBottomOffset = scrollContentSizeHeight + bottomInset - scrollViewHeight
-//        return scrollViewBottomOffset
-//    }
-//    
-//}
