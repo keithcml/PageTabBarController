@@ -369,12 +369,17 @@ import UIKit
 
 extension CollapseTabBarViewController: UIGestureRecognizerDelegate {
     public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        if let panGesture = otherGestureRecognizer as? UIPanGestureRecognizer {
+            if panGesture.direction.isX {
+                return false
+            }
+        }
         return true
     }
 }
 
 // Pan Gesture Helpers
-public enum Direction: Int {
+@objc public enum Direction: Int {
     case up
     case down
     case left
@@ -387,7 +392,7 @@ public enum Direction: Int {
 
 public extension UIPanGestureRecognizer {
     
-    public var direction: Direction {
+    @objc public var direction: Direction {
         let panVelocity = velocity(in: view)
         let vertical = fabs(panVelocity.y) > fabs(panVelocity.x)
         switch (vertical, panVelocity.x, panVelocity.y) {
@@ -399,7 +404,7 @@ public extension UIPanGestureRecognizer {
         }
     }
     
-    public var verticalDirection: Direction {
+    @objc public var verticalDirection: Direction {
         let panVelocity = velocity(in: view)
         let vertical = fabs(panVelocity.y) > fabs(panVelocity.x)
         switch (vertical, panVelocity.x, panVelocity.y) {

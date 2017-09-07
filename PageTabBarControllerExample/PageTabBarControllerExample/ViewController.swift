@@ -96,6 +96,11 @@ class ViewController: UIViewController, CollapseTabBarViewControllerDelegate, Pa
             controller.clearAllBadges()
         }
     }
+    
+    func pageTabBarController(_ controller: PageTabBarController, didChangeContentViewController vc: UIViewController, atIndex index: Int) {
+        print("didChangeContentViewController: \(vc)")
+        print("index: \(index)")
+    }
 
 }
 

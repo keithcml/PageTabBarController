@@ -92,7 +92,6 @@ public class PageTabBar: UIView {
     }
     
     internal var toIndex: ((Int) -> ()) = { _ in }
-    internal var selectedIndex = 0
     
     fileprivate var items = [PageTabBarItem]()
     fileprivate var itemWidth: CGFloat {
@@ -101,10 +100,7 @@ public class PageTabBar: UIView {
         }
         return bounds.width/CGFloat(items.count)
     }
-    fileprivate var indicatorOriginX: CGFloat {
-        return itemWidth * CGFloat(selectedIndex)
-    }
-    
+
     fileprivate var indicatorLine: UIView = {
         let line = UIView()
         line.backgroundColor = .blue
@@ -157,12 +153,8 @@ public class PageTabBar: UIView {
             }
             previous = item
             
-            item.didSelect = { [unowned self] _, fromUserTouch in
-                //guard self.selectedIndex != idx else { return }
-                self.selectedIndex = idx
-                if fromUserTouch {
-                    self.toIndex(idx)
-                }
+            item.didTap = { [unowned self] _ in
+                self.toIndex(idx)
             }
         }
         
@@ -198,9 +190,9 @@ public class PageTabBar: UIView {
                         let location = newFrame.origin.x + newFrame.width/2
                         let index = Int(ceil(location/newFrame.width)) - 1
                         
-//                        for (idx, button) in strongSelf.items.enumerated() {
-//                            button.isSelected = idx == index ? true : false
-//                        }
+                        for (idx, button) in strongSelf.items.enumerated() {
+                            button.isSelected = idx == index ? true : false
+                        }
                     }
         }
     }
@@ -209,8 +201,14 @@ public class PageTabBar: UIView {
         indicatorLocationObserver = nil
     }
     
-    func setIndicatorPosition(_ position: CGFloat) {
-        let indicatorLineWidth = UIScreen.main.bounds.width / CGFloat(items.count)
+    internal func setIndicatorPosition(_ position: CGFloat) {
+        let indicatorLineWidth = bounds.width / CGFloat(items.count)
         indicatorLine.frame = CGRect(x: position, y: bounds.height - indicatorLineHeight, width: indicatorLineWidth, height: indicatorLineHeight)
+    }
+    
+    internal func getCurrentIndex() -> Int {
+        let width = bounds.width / CGFloat(items.count)
+        let index = ceil(indicatorLine.frame.minX/width)
+        return Int(index)
     }
 }

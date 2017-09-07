@@ -34,9 +34,21 @@ private class PageTabBarButton: UIButton {
             setTitleColor(color.withAlphaComponent(0.5), for: .highlighted)
         }
     }
+    
     fileprivate var selectedColor = UIColor.blue {
         didSet {
             setTitleColor(selectedColor, for: .selected)
+        }
+    }
+    
+    override var isHighlighted: Bool {
+        didSet {
+            if isHighlighted {
+                tintColor = isSelected ? selectedColor.withAlphaComponent(0.5) : color.withAlphaComponent(0.5)
+            }
+            else {
+                tintColor = isSelected ? selectedColor : color
+            }
         }
     }
     
@@ -55,7 +67,6 @@ private class PageTabBarButton: UIButton {
     internal var isSelected = false {
         didSet {
             tabBarButton.isSelected = isSelected
-            //didSelect(self, false)
         }
     }
     
@@ -65,7 +76,8 @@ private class PageTabBarButton: UIButton {
         }
     }
     
-    internal var didSelect: ((PageTabBarItem, Bool) -> ()) = { _ in }
+    internal var didTap: ((PageTabBarItem) -> ()) = { _ in }
+    
     private let tabBarButton: PageTabBarButton = {
         let button = PageTabBarButton(type: .custom)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 12)
@@ -122,11 +134,6 @@ private class PageTabBarButton: UIButton {
     }
     
     @objc private func press(_ sender: UIButton) {
-        //sender.isSelected = true
-        didSelect(self, true)
-    }
-    
-    func select() {
-        didSelect(self, false)
+        didTap(self)
     }
 }

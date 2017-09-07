@@ -33,7 +33,7 @@ public enum PageTabBarTransitionAnimation {
 
 @objc public protocol PageTabBarControllerDelegate: class {
     @objc optional func pageTabBarController(_ controller: PageTabBarController, didSelectItem item: PageTabBarItem, atIndex index: Int, previousIndex: Int)
-    @objc optional func pageTabBarController(_ controller: PageTabBarController, didChangeContentViewController: UIViewController, atIndex index: Int, fromIndex: Int)
+    @objc optional func pageTabBarController(_ controller: PageTabBarController, didChangeContentViewController vc: UIViewController, atIndex index: Int)
 }
 
 internal final class PageTabBarCollectionViewFlowLayout: UICollectionViewFlowLayout {
@@ -148,7 +148,6 @@ internal final class PageTabBarCollectionViewFlowLayout: UICollectionViewFlowLay
         guard index != pageIndex else { return }
         
         pageIndex = index
-        pageTabBarItems[index].select()
         
         var shouldAnimate = animated
         if case .scroll = transitionAnimation {
@@ -160,19 +159,6 @@ internal final class PageTabBarCollectionViewFlowLayout: UICollectionViewFlowLay
         
         let indexPath = IndexPath(item: index, section: 0)
         collectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: shouldAnimate)
-        
-//        if shouldAnimate {
-//            UIView.animate(
-//                withDuration: 0.3,
-//                animations: {
-//                    self.collectionView.setContentOffset(CGPoint(x: CGFloat(index) * self.collectionView.frame.width, y: 0), animated: false)
-//            }) { _ in
-//                print("completed")
-//            }
-//        }
-//        else {
-//            collectionView.setContentOffset(CGPoint(x: CGFloat(index) * collectionView.frame.width, y: 0), animated: false)
-//        }
     }
     
     public func setBadge(_ value: Int, forItemAt index: Int) {
@@ -259,19 +245,31 @@ extension PageTabBarController: UICollectionViewDelegate {
         pageTabBar.setIndicatorPosition(diff)
     }
     
+    public func scrollViewWillBeginDecelerating(_ scrollView: UIScrollView) {
+        
+    }
+    
     public func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
-        if !decelerate {
-            if !scrollView.isDragging {
-                pageTabBar.isInteracting = false
-            }
+        if !decelerate && !scrollView.isDragging {
+            didDragAndEnd()
         }
     }
     
     public func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-        
         if !scrollView.isDragging {
-            pageTabBar.isInteracting = false
+            didDragAndEnd()
         }
+    }
+    
+    public func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
+        delegate?.pageTabBarController?(self, didChangeContentViewController: viewControllers[pageIndex], atIndex: pageIndex)
+    }
+    
+    fileprivate func didDragAndEnd() {
+        pageTabBar.isInteracting = false
+        let index = pageTabBar.getCurrentIndex()
+        setPageIndex(index, animated: true)
+        delegate?.pageTabBarController?(self, didChangeContentViewController: viewControllers[pageIndex], atIndex: pageIndex)
     }
     
 }
