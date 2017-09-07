@@ -57,16 +57,17 @@ internal final class PageTabBarCollectionViewFlowLayout: UICollectionViewFlowLay
     public internal(set) var pageIndex: Int = 0
     
     public fileprivate(set) var pageTabBar: PageTabBar!
-    
-    fileprivate var collectionView: UICollectionView!
-    fileprivate(set) var viewControllers = [UIViewController]()
-    
-    internal var pageTabBarItems: [PageTabBarItem] = []
     public var isScrollEnabled = true {
         didSet {
             collectionView.isScrollEnabled = isScrollEnabled
         }
     }
+    
+    fileprivate var collectionView: UICollectionView!
+    fileprivate(set) var viewControllers = [UIViewController]()
+    
+    internal var pageTabBarItems: [PageTabBarItem] = []
+    internal var internalScrollViewPanGestureRecognizer: UIPanGestureRecognizer?
     
     @objc public convenience init(viewControllers: [UIViewController],
                                   items: [PageTabBarItem],

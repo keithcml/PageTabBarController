@@ -70,7 +70,9 @@ class ViewController: UIViewController, CollapseTabBarViewControllerDelegate, Pa
         collapseTabBarViewController = CollapseTabBarViewController(viewControllers: [vc01, vc02, vc03, vc04, vc05, vc06],
                                                                     tabBarItems: [tab01, tab02, tab03, tab04, tab05, tab06],
                                                                     headerView: headerView,
-                                                                    maximumHeaderHeight: view.frame.width)
+                                                                    headerHeight: view.frame.width)
+        collapseTabBarViewController.minimumHeaderViewHeight = 0
+        collapseTabBarViewController.maximumHeaderViewHeight = view.frame.height - 150
         collapseTabBarViewController.pageTabBarController?.pageTabBar.indicatorLineColor = tabSelectedColor
         collapseTabBarViewController.pageTabBarController?.pageTabBar.indicatorLineHeight = 2
         collapseTabBarViewController.pageTabBarController?.pageTabBar.bottomLineHidden = true
@@ -80,10 +82,16 @@ class ViewController: UIViewController, CollapseTabBarViewControllerDelegate, Pa
         collapseTabBarViewController.pageTabBarController?.transitionAnimation = .scroll
         collapseTabBarViewController.pageTabBarController?.delegate = self
         collapseTabBarViewController.delegate = self
-        CollapseTabBarViewController.attachCollapseTabBarController(collapseTabBarViewController,
-                                                                    into: self) { (collapseVC, _) in
-                                                                        collapseVC.view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-                                                                    }
+        CollapseTabBarViewController.attachCollapseTabBarController(
+            collapseTabBarViewController,
+            into: self) { (collapseVC, parentVC) in
+                collapseVC.view.translatesAutoresizingMaskIntoConstraints = false
+                collapseVC.view.topAnchor.constraint(equalTo: parentVC.view.topAnchor, constant: 64).isActive = true
+                collapseVC.view.leadingAnchor.constraint(equalTo: parentVC.view.leadingAnchor).isActive = true
+                collapseVC.view.trailingAnchor.constraint(equalTo: parentVC.view.trailingAnchor).isActive = true
+                collapseVC.view.bottomAnchor.constraint(equalTo: parentVC.view.bottomAnchor).isActive = true
+        }
+        
     }
 
     override func didReceiveMemoryWarning() {

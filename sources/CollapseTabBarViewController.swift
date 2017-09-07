@@ -78,9 +78,9 @@ import UIKit
     fileprivate var headerView = UIView(frame: CGRect.zero)
     
     @objc public init(viewControllers: [UIViewController],
-                tabBarItems: [PageTabBarItem],
-                headerView: UIView = UIView(frame: CGRect.zero),
-                maximumHeaderHeight: CGFloat = 200) {
+                      tabBarItems: [PageTabBarItem],
+                      headerView: UIView = UIView(frame: CGRect.zero),
+                      headerHeight: CGFloat = 200) {
         
         super.init(nibName: nil, bundle: nil)
         
@@ -90,7 +90,7 @@ import UIKit
         self.viewControllers = viewControllers
         self.tabBarItems = tabBarItems
         self.headerView = headerView
-        self.defaultHeaderHeight = maximumHeaderHeight
+        self.defaultHeaderHeight = headerHeight
         
         pageTabBarController =
             PageTabBarController(
@@ -128,7 +128,7 @@ import UIKit
         pageTabBarController.view.frame = CGRect(x: 0, y: defaultHeaderHeight, width: view.frame.width, height: view.frame.height - defaultHeaderHeight)
         view.addSubview(pageTabBarController.view)
         pageTabBarController.didMove(toParentViewController: self)
-        
+
         pageTabBarPanGesture = UIPanGestureRecognizer(target: self, action: #selector(pan(_:)))
         pageTabBarPanGesture.delegate = self
         pageTabBarController.view.addGestureRecognizer(pageTabBarPanGesture)
@@ -176,7 +176,7 @@ import UIKit
             break
         case .bottom:
             pageViewOrigin = CGPoint(x: 0, y: defaultHeaderHeight)
-            pageViewSize = CGSize(width: pageView.frame.width, height: defaultHeaderHeight)
+            pageViewSize = CGSize(width: pageView.frame.width, height: view.frame.height - defaultHeaderHeight)
             break
         }
         
