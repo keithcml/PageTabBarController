@@ -67,7 +67,9 @@ internal final class PageTabBarCollectionViewFlowLayout: UICollectionViewFlowLay
     fileprivate(set) var viewControllers = [UIViewController]()
     
     internal var pageTabBarItems: [PageTabBarItem] = []
-    internal var internalScrollViewPanGestureRecognizer: UIPanGestureRecognizer?
+    internal var internalScrollViewPanGestureRecognizer: UIPanGestureRecognizer? {
+        return collectionView.panGestureRecognizer
+    }
     
     @objc public convenience init(viewControllers: [UIViewController],
                                   items: [PageTabBarItem],

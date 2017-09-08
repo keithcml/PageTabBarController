@@ -28,6 +28,7 @@ import UIKit
 
 @objc public protocol CollapseTabBarViewControllerDelegate: class {
     @objc optional func collapseTabBarController(_ controller: CollapseTabBarViewController, tabBarDidReach position: CollapseTabBarPosition)
+    @objc optional func collapseTabBarControllerGestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool
     //@objc optional func shouldNavigateToItem(at index: Int)
 }
 
@@ -369,11 +370,15 @@ import UIKit
 
 extension CollapseTabBarViewController: UIGestureRecognizerDelegate {
     public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
-        if let panGesture = otherGestureRecognizer as? UIPanGestureRecognizer {
-            if panGesture.direction.isY {
-                return true
-            }
+        
+        if let shouldRecognizeSimultaneously = delegate?.collapseTabBarControllerGestureRecognizer?(gestureRecognizer, shouldRecognizeSimultaneouslyWith: otherGestureRecognizer) {
+            return shouldRecognizeSimultaneously
         }
+
+        if let gestureView = otherGestureRecognizer.view, gestureView.isKind(of: UIScrollView.self) {
+            return true
+        }
+        
         return false
     }
 }

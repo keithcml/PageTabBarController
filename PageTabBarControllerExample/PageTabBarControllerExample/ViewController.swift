@@ -31,6 +31,13 @@ class ViewController: UIViewController, CollapseTabBarViewControllerDelegate, Pa
     //var tabBarController: PageTabBarController!
     var collapseTabBarViewController: CollapseTabBarViewController!
     
+    let vc01 = TableViewController(nibName: nil, bundle: nil)
+    let vc02 = TableViewController(nibName: nil, bundle: nil)
+    let vc03 = TableViewController(nibName: nil, bundle: nil)
+    let vc04 = TableViewController(nibName: nil, bundle: nil)
+    let vc05 = TableViewController(nibName: nil, bundle: nil)
+    let vc06 = TableViewController(nibName: nil, bundle: nil)
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.\
@@ -38,13 +45,6 @@ class ViewController: UIViewController, CollapseTabBarViewControllerDelegate, Pa
         // set styles
         let tabColor = UIColor(red: 215/255.0, green: 215/255.0, blue: 215/255.0, alpha: 1)
         let tabSelectedColor = UIColor(red: 35/255.0, green: 171/255.0, blue: 232/255.0, alpha: 1)
-        
-        let vc01 = TableViewController(nibName: nil, bundle: nil)
-        let vc02 = TableViewController(nibName: nil, bundle: nil)
-        let vc03 = TableViewController(nibName: nil, bundle: nil)
-        let vc04 = TableViewController(nibName: nil, bundle: nil)
-        let vc05 = TableViewController(nibName: nil, bundle: nil)
-        let vc06 = TableViewController(nibName: nil, bundle: nil)
         
         let headerView = UIImageView(image: UIImage(named: "cover"))
         
@@ -101,6 +101,10 @@ class ViewController: UIViewController, CollapseTabBarViewControllerDelegate, Pa
 
     func collapseTabBarController(_ controller: CollapseTabBarViewController, tabBarDidReach position: CollapseTabBarPosition) {
         // print("\(position.rawValue)")
+    }
+    
+    func collapseTabBarControllerGestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        return otherGestureRecognizer == vc01.tableView.panGestureRecognizer
     }
     
     func pageTabBarController(_ controller: PageTabBarController, didSelectItem item: PageTabBarItem, atIndex index: Int, previousIndex: Int) {
