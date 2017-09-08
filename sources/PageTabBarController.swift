@@ -162,6 +162,10 @@ internal final class PageTabBarCollectionViewFlowLayout: UICollectionViewFlowLay
         
         let indexPath = IndexPath(item: index, section: 0)
         collectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: shouldAnimate)
+        
+        if !shouldAnimate {
+            delegate?.pageTabBarController?(self, didChangeContentViewController: viewControllers[pageIndex], atIndex: pageIndex)
+        }
     }
     
     public func setBadge(_ value: Int, forItemAt index: Int) {
@@ -207,9 +211,6 @@ extension PageTabBarController: UICollectionViewDataSource {
     
     public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "Cell", for: indexPath)
-        for view in cell.contentView.subviews {
-            view.removeFromSuperview()
-        }
         return cell
     }
 }
@@ -217,6 +218,7 @@ extension PageTabBarController: UICollectionViewDataSource {
 extension PageTabBarController: UICollectionViewDelegate {
     
     public func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        
         let vc = viewControllers[indexPath.row]
         if vc.parent == nil {
             addChildViewController(vc)
