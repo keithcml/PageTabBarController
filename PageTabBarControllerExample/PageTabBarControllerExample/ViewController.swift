@@ -97,7 +97,7 @@ class ViewController: UIViewController, CollapseTabBarViewControllerDelegate, Pa
         collapseTabBarViewController.pageTabBarController?.pageTabBar.topLineColor = tabSelectedColor
         collapseTabBarViewController.pageTabBarController?.pageTabBar.barTintColor = UIColor(white: 0.95, alpha: 1)
         
-        collapseTabBarViewController.pageTabBarController?.transitionAnimation = .scroll
+        collapseTabBarViewController.pageTabBarController?.transitionAnimation = .none
         collapseTabBarViewController.pageTabBarController?.delegate = self
         collapseTabBarViewController.delegate = self
         CollapseTabBarViewController.attachCollapseTabBarController(

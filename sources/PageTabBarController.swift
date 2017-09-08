@@ -335,7 +335,6 @@ extension PageTabBarController: UICollectionViewDelegate {
     open func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         let vc = viewControllers[indexPath.row]
         vc.willMove(toParentViewController: nil)
-        NSLayoutConstraint.deactivate(vc.view.constraints)
         vc.view.removeFromSuperview()
         vc.removeFromParentViewController()
     }
