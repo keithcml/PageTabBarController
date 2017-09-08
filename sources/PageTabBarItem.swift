@@ -59,14 +59,14 @@ private class PageTabBarButton: UIButton {
     }
 }
 
-@objc public final class PageTabBarItem: UIView {
+@objc open class PageTabBarItem: UIView {
     
-    public var color = UIColor.lightGray {
+    open var color = UIColor.lightGray {
         didSet {
             tabBarButton.color = color
         }
     }
-    public var selectedColor = UIColor.blue {
+    open var selectedColor = UIColor.blue {
         didSet {
             tabBarButton.selectedColor = selectedColor
         }

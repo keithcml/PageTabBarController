@@ -28,6 +28,18 @@ import PageTabBarController
 
 class ViewController: UIViewController, CollapseTabBarViewControllerDelegate, PageTabBarControllerDelegate {
 
+    override open var preferredStatusBarUpdateAnimation: UIStatusBarAnimation {
+        return .slide
+    }
+    
+    override open var childViewControllerForStatusBarHidden: UIViewController? {
+        return collapseTabBarViewController
+    }
+    
+    override open var childViewControllerForStatusBarStyle: UIViewController? {
+        return collapseTabBarViewController
+    }
+    
     //var tabBarController: PageTabBarController!
     var collapseTabBarViewController: CollapseTabBarViewController!
     
@@ -40,11 +52,17 @@ class ViewController: UIViewController, CollapseTabBarViewControllerDelegate, Pa
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.\
         
         // set styles
         let tabColor = UIColor(red: 215/255.0, green: 215/255.0, blue: 215/255.0, alpha: 1)
         let tabSelectedColor = UIColor(red: 35/255.0, green: 171/255.0, blue: 232/255.0, alpha: 1)
+        
+        vc01.view.tag = 1
+        vc02.view.tag = 2
+        vc03.view.tag = 3
+        vc04.view.tag = 4
+        vc05.view.tag = 5
+        vc06.view.tag = 6
         
         let headerView = UIImageView(image: UIImage(named: "cover"))
         
@@ -76,8 +94,8 @@ class ViewController: UIViewController, CollapseTabBarViewControllerDelegate, Pa
         collapseTabBarViewController.pageTabBarController?.pageTabBar.indicatorLineColor = tabSelectedColor
         collapseTabBarViewController.pageTabBarController?.pageTabBar.indicatorLineHeight = 2
         collapseTabBarViewController.pageTabBarController?.pageTabBar.bottomLineHidden = true
-        collapseTabBarViewController.pageTabBarController?.pageTabBar.topLineColor = .black
-        collapseTabBarViewController.pageTabBarController?.pageTabBar.barTintColor = UIColor(white: 0.9, alpha: 1)
+        collapseTabBarViewController.pageTabBarController?.pageTabBar.topLineColor = tabSelectedColor
+        collapseTabBarViewController.pageTabBarController?.pageTabBar.barTintColor = UIColor(white: 0.95, alpha: 1)
         
         collapseTabBarViewController.pageTabBarController?.transitionAnimation = .scroll
         collapseTabBarViewController.pageTabBarController?.delegate = self
@@ -92,11 +110,9 @@ class ViewController: UIViewController, CollapseTabBarViewControllerDelegate, Pa
                 collapseVC.view.bottomAnchor.constraint(equalTo: parentVC.view.bottomAnchor).isActive = true
         }
         
-    }
-
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
+        let topBar = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 64))
+        topBar.backgroundColor = tabSelectedColor
+        view.addSubview(topBar)
     }
 
     func collapseTabBarController(_ controller: CollapseTabBarViewController, tabBarDidReach position: CollapseTabBarPosition) {
@@ -104,13 +120,16 @@ class ViewController: UIViewController, CollapseTabBarViewControllerDelegate, Pa
     }
     
     func collapseTabBarControllerGestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
-        return otherGestureRecognizer == vc01.tableView.panGestureRecognizer
+        if let tableViewController = collapseTabBarViewController.pageTabBarController?.selectedViewController as? TableViewController {
+            return otherGestureRecognizer == tableViewController.tableView.panGestureRecognizer
+        }
+        return false
     }
     
     func pageTabBarController(_ controller: PageTabBarController, didSelectItem item: PageTabBarItem, atIndex index: Int, previousIndex: Int) {
         
-        print("previousIndex: \(previousIndex)")
-        print("currentIndex: \(index)")
+        // print("previousIndex: \(previousIndex)")
+        // print("currentIndex: \(index)")
         
         if index == 3 {
             collapseTabBarViewController?.scrollTabBar(to: .top)
@@ -126,8 +145,8 @@ class ViewController: UIViewController, CollapseTabBarViewControllerDelegate, Pa
     }
     
     func pageTabBarController(_ controller: PageTabBarController, didChangeContentViewController vc: UIViewController, atIndex index: Int) {
-        print("didChangeContentViewController: \(vc)")
-        print("index: \(index)")
+        // print("didChangeContentViewController: \(vc)")
+        // print("index: \(index)")
     }
 
 }

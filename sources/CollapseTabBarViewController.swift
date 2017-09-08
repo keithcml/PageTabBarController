@@ -37,19 +37,34 @@ import UIKit
     case bottom
 }
 
-@objc public final class CollapseTabBarViewController: UIViewController {
+@objc open class CollapseTabBarViewController: UIViewController {
     
-    public weak var delegate: CollapseTabBarViewControllerDelegate?
+    override open var childViewControllerForStatusBarHidden: UIViewController? {
+        return pageTabBarController
+    }
+    
+    override open var childViewControllerForStatusBarStyle: UIViewController? {
+        return pageTabBarController
+    }
+    
+    override open var shouldAutomaticallyForwardAppearanceMethods: Bool {
+        return true
+    }
+    
+    open weak var delegate: CollapseTabBarViewControllerDelegate?
     
     // MARK: - PageTabBarController Properties
-    public fileprivate(set) var pageTabBarController: PageTabBarController?
+    open fileprivate(set) var pageTabBarController: PageTabBarController?
+    open var visibleViewController: UIViewController? {
+        return pageTabBarController?.selectedViewController
+    }
     
     // MARK: - Scroll Control
-    public var autoCollapse = false
-    public var alwaysBouncesAtTop = false
-    public var alwaysBouncesAtBottom = true
-    public var minimumHeaderViewHeight: CGFloat = 100
-    public var maximumHeaderViewHeight: CGFloat = 300 {
+    open var autoCollapse = false
+    open var alwaysBouncesAtTop = false
+    open var alwaysBouncesAtBottom = true
+    open var minimumHeaderViewHeight: CGFloat = 100
+    open var maximumHeaderViewHeight: CGFloat = 300 {
         didSet {
             if maximumHeaderViewHeight > self.view.frame.height - 100 {
                 _maximumHeaderViewHeight = self.view.frame.height - 100
@@ -59,7 +74,7 @@ import UIKit
             }
         }
     }
-    public fileprivate(set) var defaultHeaderHeight: CGFloat = 200
+    open fileprivate(set) var defaultHeaderHeight: CGFloat = 200
     
     fileprivate var tabBarItems = [PageTabBarItem]()
     
@@ -104,7 +119,7 @@ import UIKit
         fatalError("init(coder:) has not been implemented")
     }
     
-    override public func viewDidLoad() {
+    override open func viewDidLoad() {
         super.viewDidLoad()
         
         view.backgroundColor = UIColor.white
@@ -117,15 +132,10 @@ import UIKit
         guard let pageTabBarController = pageTabBarController else { fatalError("pagetabbar controller = nil") }
         pageTabBarController.updateIndex = { _, index in
             if index == 0 {
-                
-            }
-            else {
-                
             }
         }
         
         addChildViewController(pageTabBarController)
-        
         pageTabBarController.view.frame = CGRect(x: 0, y: defaultHeaderHeight, width: view.frame.width, height: view.frame.height - defaultHeaderHeight)
         view.addSubview(pageTabBarController.view)
         pageTabBarController.didMove(toParentViewController: self)
@@ -140,11 +150,11 @@ import UIKit
         headerView.addGestureRecognizer(headerViewPanGesture)
     }
     
-    override public func viewWillAppear(_ animated: Bool) {
+    override open func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
     }
     
-    override public func viewWillDisappear(_ animated: Bool) {
+    override open func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
     }
     
@@ -157,13 +167,13 @@ import UIKit
     }
     
     // MARK: - Select Tab
-    @objc public func selectTabAtIndex(_ index: Int, scrollToPosition: CollapseTabBarPosition) {
+    @objc open func selectTabAtIndex(_ index: Int, scrollToPosition: CollapseTabBarPosition) {
         pageTabBarController?.setPageIndex(index, animated: true)
         scrollTabBar(to: .top)
     }
     
     // MARK: - Control Scroll
-    @objc public func scrollTabBar(to position: CollapseTabBarPosition, springAnimation: Bool = false) {
+    @objc open func scrollTabBar(to position: CollapseTabBarPosition, springAnimation: Bool = false) {
         guard let pageView = pageTabBarController?.view else { return }
         var headerViewOrigin = CGPoint.zero
         var pageViewOrigin = pageView.frame.origin
@@ -369,7 +379,7 @@ import UIKit
 }
 
 extension CollapseTabBarViewController: UIGestureRecognizerDelegate {
-    public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+    open func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         
         if let shouldRecognizeSimultaneously = delegate?.collapseTabBarControllerGestureRecognizer?(gestureRecognizer, shouldRecognizeSimultaneouslyWith: otherGestureRecognizer) {
             return shouldRecognizeSimultaneously
@@ -395,9 +405,9 @@ extension CollapseTabBarViewController: UIGestureRecognizerDelegate {
     public var isY: Bool { return !isX }
 }
 
-public extension UIPanGestureRecognizer {
+extension UIPanGestureRecognizer {
     
-    @objc public var direction: Direction {
+    @objc open var direction: Direction {
         let panVelocity = velocity(in: view)
         let vertical = fabs(panVelocity.y) > fabs(panVelocity.x)
         switch (vertical, panVelocity.x, panVelocity.y) {
@@ -409,7 +419,7 @@ public extension UIPanGestureRecognizer {
         }
     }
     
-    @objc public var verticalDirection: Direction {
+    @objc open var verticalDirection: Direction {
         let panVelocity = velocity(in: view)
         let vertical = fabs(panVelocity.y) > fabs(panVelocity.x)
         switch (vertical, panVelocity.x, panVelocity.y) {

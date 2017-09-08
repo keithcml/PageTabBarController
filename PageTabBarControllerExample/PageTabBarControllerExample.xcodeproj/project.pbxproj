@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		9A3FD9281F5DBD6300C24A1B /* Badge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A3FD9271F5DBD6300C24A1B /* Badge.swift */; };
 		9A3FD92A1F5E319B00C24A1B /* CollapseTabBarViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A3FD9291F5E319B00C24A1B /* CollapseTabBarViewController.swift */; };
+		9A4609FC1F62F1C600694602 /* PresentedViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A4609FB1F62F1C600694602 /* PresentedViewController.swift */; };
 		9B6D040D1F5D696D00B018E9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B6D040C1F5D696D00B018E9 /* AppDelegate.swift */; };
 		9B6D040F1F5D696D00B018E9 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B6D040E1F5D696D00B018E9 /* ViewController.swift */; };
 		9B6D04121F5D696D00B018E9 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9B6D04101F5D696D00B018E9 /* Main.storyboard */; };
@@ -51,6 +52,7 @@
 /* Begin PBXFileReference section */
 		9A3FD9271F5DBD6300C24A1B /* Badge.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Badge.swift; sourceTree = "<group>"; };
 		9A3FD9291F5E319B00C24A1B /* CollapseTabBarViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CollapseTabBarViewController.swift; sourceTree = "<group>"; };
+		9A4609FB1F62F1C600694602 /* PresentedViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PresentedViewController.swift; sourceTree = "<group>"; };
 		9B6D04091F5D696D00B018E9 /* PageTabBarControllerExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PageTabBarControllerExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9B6D040C1F5D696D00B018E9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		9B6D040E1F5D696D00B018E9 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -114,6 +116,7 @@
 				9B6D040C1F5D696D00B018E9 /* AppDelegate.swift */,
 				9B6D040E1F5D696D00B018E9 /* ViewController.swift */,
 				9B6D043D1F5E4ED100B018E9 /* TableViewController.swift */,
+				9A4609FB1F62F1C600694602 /* PresentedViewController.swift */,
 				9B6D04101F5D696D00B018E9 /* Main.storyboard */,
 				9B6D04131F5D696D00B018E9 /* Assets.xcassets */,
 				9B6D04151F5D696D00B018E9 /* LaunchScreen.storyboard */,
@@ -126,10 +129,10 @@
 			isa = PBXGroup;
 			children = (
 				9B6D041F1F5D69A900B018E9 /* KeyValueObserver.swift */,
-				9B6D04201F5D69A900B018E9 /* PageTabBar.swift */,
-				9B6D04211F5D69A900B018E9 /* PageTabBarController.swift */,
-				9B6D04221F5D69A900B018E9 /* PageTabBarItem.swift */,
 				9A3FD9271F5DBD6300C24A1B /* Badge.swift */,
+				9B6D04201F5D69A900B018E9 /* PageTabBar.swift */,
+				9B6D04221F5D69A900B018E9 /* PageTabBarItem.swift */,
+				9B6D04211F5D69A900B018E9 /* PageTabBarController.swift */,
 				9A3FD9291F5E319B00C24A1B /* CollapseTabBarViewController.swift */,
 			);
 			name = sources;
@@ -263,6 +266,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				9B6D040F1F5D696D00B018E9 /* ViewController.swift in Sources */,
+				9A4609FC1F62F1C600694602 /* PresentedViewController.swift in Sources */,
 				9B6D043E1F5E4ED100B018E9 /* TableViewController.swift in Sources */,
 				9B6D040D1F5D696D00B018E9 /* AppDelegate.swift in Sources */,
 			);

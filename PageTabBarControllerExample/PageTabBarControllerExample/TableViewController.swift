@@ -28,6 +28,24 @@ import UIKit
 
 final class TableViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
     
+    override var prefersStatusBarHidden: Bool {
+        if view.tag == 5 {
+            return true
+        }
+        return false
+    }
+    
+    override var preferredStatusBarStyle: UIStatusBarStyle {
+        if view.tag % 2 == 0 {
+            return .lightContent
+        }
+        return .default
+    }
+    
+    override open var preferredStatusBarUpdateAnimation: UIStatusBarAnimation {
+        return .slide
+    }
+    
     var tableView: UITableView!
     
     override func viewDidLoad() {
@@ -39,16 +57,26 @@ final class TableViewController: UIViewController, UITableViewDelegate, UITableV
         tableView.delegate = self
         tableView.dataSource = self
         view.addSubview(tableView)
-        
-        
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        //print("viewWillAppear \(view.tag)")
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+        //print("viewDidAppear \(view.tag)")
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        //print("viewWillDisappear \(view.tag)")
+    }
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        //print("viewDidDisappear \(view.tag)")
     }
     
     func numberOfSections(in tableView: UITableView) -> Int {
@@ -67,5 +95,10 @@ final class TableViewController: UIViewController, UITableViewDelegate, UITableV
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 50
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let presentedViewController = PresentedViewController(nibName: nil, bundle: nil)
+        present(presentedViewController, animated: true, completion: nil)
     }
 }

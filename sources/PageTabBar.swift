@@ -37,48 +37,48 @@ internal enum PageTabBarItemArrngement {
     case compact
 }
 
-public class PageTabBar: UIView {
+open class PageTabBar: UIView {
     
-    public var barTintColor: UIColor = .white {
+    open var barTintColor: UIColor = .white {
         didSet {
             backgroundColor = barTintColor
             setNeedsDisplay()
         }
     }
     
-    public var indicatorLineHidden = false {
+    open var indicatorLineHidden = false {
         didSet {
             indicatorLine.isHidden = indicatorLineHidden
         }
     }
-    public var topLineHidden = false {
+    open var topLineHidden = false {
         didSet {
             topLine.isHidden = topLineHidden
         }
     }
-    public var bottomLineHidden = false {
+    open var bottomLineHidden = false {
         didSet {
             bottomLine.isHidden = bottomLineHidden
         }
     }
-    public var indicatorLineColor = UIColor.blue  {
+    open var indicatorLineColor = UIColor.blue  {
         didSet {
             indicatorLine.backgroundColor = indicatorLineColor
             setNeedsDisplay()
         }
     }
-    public var indicatorLineHeight: CGFloat = 1.0  {
+    open var indicatorLineHeight: CGFloat = 1.0  {
         didSet {
-            indicatorLine.frame = CGRect(x: indicatorLine.frame.minX, y: bounds.height - indicatorLineHeight, width: indicatorLine.frame.width, height: indicatorLineHeight)
+            indicatorLine.frame = CGRect(x: indicatorLine.frame.minX, y: bounds.height - indicatorLineHeight, width: itemWidth, height: indicatorLineHeight)
         }
     }
-    public var topLineColor = UIColor.lightGray  {
+    open var topLineColor = UIColor.lightGray  {
         didSet {
             topLine.backgroundColor = topLineColor
             setNeedsDisplay()
         }
     }
-    public var bottomLineColor = UIColor.lightGray  {
+    open var bottomLineColor = UIColor.lightGray  {
         didSet {
             bottomLine.backgroundColor = bottomLineColor
             setNeedsDisplay()
@@ -187,6 +187,8 @@ public class PageTabBar: UIView {
                         let newFrameValue = callbackChanges[NSKeyValueChangeKey.newKey] as? NSValue {
                         
                         let newFrame = newFrameValue.cgRectValue
+                        
+                        guard newFrame.width > 0 else { return }
                         let location = newFrame.origin.x + newFrame.width/2
                         let index = Int(ceil(location/newFrame.width)) - 1
                         
@@ -202,13 +204,11 @@ public class PageTabBar: UIView {
     }
     
     internal func setIndicatorPosition(_ position: CGFloat) {
-        let indicatorLineWidth = bounds.width / CGFloat(items.count)
-        indicatorLine.frame = CGRect(x: position, y: bounds.height - indicatorLineHeight, width: indicatorLineWidth, height: indicatorLineHeight)
+        indicatorLine.frame = CGRect(x: position, y: bounds.height - indicatorLineHeight, width: itemWidth, height: indicatorLineHeight)
     }
     
     internal func getCurrentIndex() -> Int {
-        let width = bounds.width / CGFloat(items.count)
-        let index = ceil(indicatorLine.frame.minX/width)
+        let index = ceil(indicatorLine.frame.minX/itemWidth)
         return Int(index)
     }
 }

@@ -48,16 +48,58 @@ internal final class PageTabBarCollectionViewFlowLayout: UICollectionViewFlowLay
     }
 }
 
-@objc public final class PageTabBarController: UIViewController, UIScrollViewDelegate {
+@objc open class PageTabBarController: UIViewController, UIScrollViewDelegate {
+        
+    override open var childViewControllerForStatusBarHidden: UIViewController? {
+        return selectedViewController
+    }
     
-    public weak var delegate: PageTabBarControllerDelegate?
+    override open var childViewControllerForStatusBarStyle: UIViewController? {
+        return selectedViewController
+    }
     
-    public var transitionAnimation = PageTabBarTransitionAnimation.scroll
-    public var updateIndex: (Bool, Int) -> () = { _ in }
-    public internal(set) var pageIndex: Int = 0
+    override open var shouldAutomaticallyForwardAppearanceMethods: Bool {
+        if case .scroll = transitionAnimation {
+            return false
+        }
+        else {
+           return true
+        }
+    }
     
-    public fileprivate(set) var pageTabBar: PageTabBar!
-    public var isScrollEnabled = true {
+    open weak var delegate: PageTabBarControllerDelegate?
+    
+    open var transitionAnimation = PageTabBarTransitionAnimation.scroll {
+        didSet {
+            if case .scroll = transitionAnimation {
+                isScrollEnabled = true
+            }
+            else {
+                isScrollEnabled = false
+            }
+        }
+    }
+    
+    open var updateIndex: (Bool, Int) -> () = { _ in }
+    
+    open internal(set) var pageIndex: Int = 0 {
+        didSet {
+            // print("change from \(oldValue) to \(pageIndex)")
+            UIView.animate(withDuration: 0.2) {
+                self.setNeedsStatusBarAppearanceUpdate()
+            }
+        }
+    }
+    
+    open var selectedViewController: UIViewController? {
+        if viewControllers.count > pageIndex {
+            return viewControllers[pageIndex]
+        }
+        return nil
+    }
+    
+    open fileprivate(set) var pageTabBar: PageTabBar!
+    open var isScrollEnabled = true {
         didSet {
             collectionView.isScrollEnabled = isScrollEnabled
         }
@@ -65,6 +107,7 @@ internal final class PageTabBarCollectionViewFlowLayout: UICollectionViewFlowLay
     
     fileprivate var collectionView: UICollectionView!
     fileprivate(set) var viewControllers = [UIViewController]()
+    fileprivate var tabBarPosition: PageTabBarPosition = .top
     
     internal var pageTabBarItems: [PageTabBarItem] = []
     internal var internalScrollViewPanGestureRecognizer: UIPanGestureRecognizer? {
@@ -79,13 +122,17 @@ internal final class PageTabBarCollectionViewFlowLayout: UICollectionViewFlowLay
         self.init(nibName: nil, bundle: nil)
         
         self.viewControllers = viewControllers
-        
+        self.tabBarPosition = tabBarPosition
         for item in items {
-            item.frame = CGRect(x: 0, y: 0, width: estimatedFrame.width/CGFloat(items.count), height: 44)
+            item.frame = CGRect(x: 0, y: 0, width: estimatedFrame.width/CGFloat(pageTabBarItems.count), height: 44)
             pageTabBarItems.append(item)
         }
+    }
+    
+    override open func viewDidLoad() {
+        super.viewDidLoad()
         
-        pageTabBar = PageTabBar(frame: CGRect(x: 0, y: 0, width: estimatedFrame.width, height: 44), tabBarItems: pageTabBarItems)
+        pageTabBar = PageTabBar(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 44), tabBarItems: pageTabBarItems)
         pageTabBar.toIndex = { [unowned self] index in
             self.setPageIndex(index, animated: true)
         }
@@ -116,6 +163,12 @@ internal final class PageTabBarCollectionViewFlowLayout: UICollectionViewFlowLay
         collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
         collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
         
+        if case .scroll = transitionAnimation {
+            isScrollEnabled = true
+        }
+        else {
+            isScrollEnabled = false
+        }
         
         if case .top = tabBarPosition {
             pageTabBar.topAnchor.constraint(equalTo: view.topAnchor).isActive = true
@@ -129,8 +182,36 @@ internal final class PageTabBarCollectionViewFlowLayout: UICollectionViewFlowLay
         }
     }
     
+    override open func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        if !shouldAutomaticallyForwardAppearanceMethods {
+            selectedViewController?.beginAppearanceTransition(true, animated: animated)
+        }
+    }
+    
+    override open func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        if !shouldAutomaticallyForwardAppearanceMethods {
+            selectedViewController?.endAppearanceTransition()
+        }
+    }
+    
+    override open func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        if !shouldAutomaticallyForwardAppearanceMethods {
+            selectedViewController?.beginAppearanceTransition(false, animated: animated)
+        }
+    }
+    
+    override open func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        if !shouldAutomaticallyForwardAppearanceMethods {
+            selectedViewController?.endAppearanceTransition()
+        }
+    }
+    
     @available(*, deprecated, message: "deprecated")
-    override public func didRotate(from fromInterfaceOrientation: UIInterfaceOrientation) {
+    override open func didRotate(from fromInterfaceOrientation: UIInterfaceOrientation) {
         UIView.animate(withDuration: 0, animations: {
             self.collectionView.reloadData()
             self.collectionView?.scrollToItem(at: IndexPath(row: self.pageIndex, section: 0),
@@ -143,14 +224,24 @@ internal final class PageTabBarCollectionViewFlowLayout: UICollectionViewFlowLay
         })
     }
     
-    public func setPageIndex(_ index: Int, animated: Bool) {
+    open func setPageIndex(_ index: Int, animated: Bool) {
         guard pageTabBarItems.count > index else { return }
         
         delegate?.pageTabBarController?(self, didSelectItem: pageTabBarItems[index], atIndex: index, previousIndex: pageIndex)
         
         guard index != pageIndex else { return }
         
+        if !shouldAutomaticallyForwardAppearanceMethods {
+            viewControllers[pageIndex].beginAppearanceTransition(false, animated: false)
+            viewControllers[pageIndex].endAppearanceTransition()
+        }
+        
         pageIndex = index
+        
+        if !shouldAutomaticallyForwardAppearanceMethods {
+            viewControllers[pageIndex].beginAppearanceTransition(true, animated: false)
+            viewControllers[pageIndex].endAppearanceTransition()
+        }
         
         var shouldAnimate = animated
         if case .scroll = transitionAnimation {
@@ -168,12 +259,12 @@ internal final class PageTabBarCollectionViewFlowLayout: UICollectionViewFlowLay
         }
     }
     
-    public func setBadge(_ value: Int, forItemAt index: Int) {
+    open func setBadge(_ value: Int, forItemAt index: Int) {
         guard pageTabBarItems.count > index else { return }
         pageTabBarItems[index].badgeCount = value
     }
     
-    public func clearAllBadges() {
+    open func clearAllBadges() {
         for item in pageTabBarItems {
             item.badgeCount = 0
         }
@@ -201,15 +292,15 @@ internal final class PageTabBarCollectionViewFlowLayout: UICollectionViewFlowLay
 }
 
 extension PageTabBarController: UICollectionViewDataSource {
-    public func numberOfSections(in collectionView: UICollectionView) -> Int {
+    open func numberOfSections(in collectionView: UICollectionView) -> Int {
         return 1
     }
     
-    public func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+    open func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return viewControllers.count
     }
     
-    public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+    open func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "Cell", for: indexPath)
         return cell
     }
@@ -217,7 +308,7 @@ extension PageTabBarController: UICollectionViewDataSource {
 
 extension PageTabBarController: UICollectionViewDelegate {
     
-    public func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+    open func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         
         let vc = viewControllers[indexPath.row]
         if vc.parent == nil {
@@ -241,32 +332,40 @@ extension PageTabBarController: UICollectionViewDelegate {
         updateIndex(false, indexPath.row)
     }
     
-    public func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+    open func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        let vc = viewControllers[indexPath.row]
+        vc.willMove(toParentViewController: nil)
+        NSLayoutConstraint.deactivate(vc.view.constraints)
+        vc.view.removeFromSuperview()
+        vc.removeFromParentViewController()
+    }
+    
+    open func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
         pageTabBar.isInteracting = true
     }
     
-    public func scrollViewDidScroll(_ scrollView: UIScrollView) {
+    open func scrollViewDidScroll(_ scrollView: UIScrollView) {
         let diff = scrollView.contentOffset.x * pageTabBar.frame.width/scrollView.contentSize.width
         pageTabBar.setIndicatorPosition(diff)
     }
     
-    public func scrollViewWillBeginDecelerating(_ scrollView: UIScrollView) {
+    open func scrollViewWillBeginDecelerating(_ scrollView: UIScrollView) {
         
     }
     
-    public func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+    open func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
         if !decelerate && !scrollView.isDragging {
             didDragAndEnd()
         }
     }
     
-    public func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+    open func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
         if !scrollView.isDragging {
             didDragAndEnd()
         }
     }
     
-    public func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
+    open func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
         delegate?.pageTabBarController?(self, didChangeContentViewController: viewControllers[pageIndex], atIndex: pageIndex)
     }
     
@@ -280,7 +379,7 @@ extension PageTabBarController: UICollectionViewDelegate {
 }
 
 extension PageTabBarController: UICollectionViewDelegateFlowLayout {
-    public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+    open func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         return collectionView.frame.size
     }
 }
