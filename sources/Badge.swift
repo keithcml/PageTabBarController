@@ -34,13 +34,13 @@
 import Foundation
 import UIKit
 
-final class Badge: UIView {
+open class Badge: UIView {
     
-    enum BadgeType {
+    public enum BadgeType {
         case number
     }
     
-    var badgeBorderWidth: CGFloat = 0 {
+    open var badgeBorderWidth: CGFloat = 0 {
         didSet {
             guard oldValue != badgeBorderWidth else { return }
             layer.borderWidth = badgeBorderWidth
@@ -48,7 +48,7 @@ final class Badge: UIView {
         }
     }
     
-    var badgeBorderColor: UIColor = UIColor.white {
+    open var badgeBorderColor: UIColor = UIColor.white {
         didSet {
             guard oldValue != badgeBorderColor else { return }
             layer.borderColor = badgeBorderColor.cgColor
@@ -56,7 +56,7 @@ final class Badge: UIView {
         }
     }
     
-    var badgeFont: UIFont = UIFont.systemFont(ofSize: 12) {
+    open var badgeFont: UIFont = UIFont.systemFont(ofSize: 12) {
         didSet {
             guard oldValue != badgeFont else { return }
             innerLabel.font = badgeFont
@@ -65,7 +65,7 @@ final class Badge: UIView {
         }
     }
     
-    var badgeTintColor: UIColor = UIColor.red {
+    open var badgeTintColor: UIColor = UIColor.red {
         didSet {
             guard oldValue != badgeTintColor else { return }
             layer.backgroundColor = badgeTintColor.cgColor
@@ -73,7 +73,7 @@ final class Badge: UIView {
         }
     }
     
-    var badgeTextColor: UIColor = UIColor.white {
+    open var badgeTextColor: UIColor = UIColor.white {
         didSet {
             guard oldValue != badgeTextColor else { return }
             innerLabel.textColor = badgeTextColor
@@ -81,7 +81,7 @@ final class Badge: UIView {
         }
     }
     
-    var badgeValue: Int = 0 {
+    open var badgeValue: Int = 0 {
         didSet {
             guard oldValue != badgeValue else { return }
             switch badgeType {
@@ -95,7 +95,7 @@ final class Badge: UIView {
         }
     }
     
-    var insets: UIEdgeInsets = UIEdgeInsets(top: 3, left: 5, bottom: 3, right: 5) {
+    open var insets: UIEdgeInsets = UIEdgeInsets(top: 3, left: 5, bottom: 3, right: 5) {
         didSet {
             guard oldValue != insets else { return }
             
@@ -122,7 +122,7 @@ final class Badge: UIView {
         self.init(frame: CGRect.zero)
     }
     
-    init(type: BadgeType) {
+    public init(type: BadgeType) {
         badgeType = type
         super.init(frame: CGRect.zero)
         commonInit()
@@ -133,24 +133,24 @@ final class Badge: UIView {
         commonInit()
     }
     
-    required init?(coder aDecoder: NSCoder) {
+    required public init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         commonInit()
     }
     
-    override var intrinsicContentSize : CGSize {
+    override open var intrinsicContentSize : CGSize {
         return bounds.size
     }
     
-    override func forBaselineLayout() -> UIView {
+    override open func forBaselineLayout() -> UIView {
         return innerLabel
     }
     
-    override var forFirstBaselineLayout: UIView {
+    override open var forFirstBaselineLayout: UIView {
         return innerLabel
     }
     
-    override var forLastBaselineLayout: UIView {
+    override open var forLastBaselineLayout: UIView {
         return innerLabel
     }
     
