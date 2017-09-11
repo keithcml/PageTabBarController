@@ -94,7 +94,7 @@ private class PageTabBarButton: UIButton {
         return button
     }()
     
-    private let badgeView: Badge = {
+    open let badgeView: Badge = {
         let badgeView = Badge(type: .number)
         return badgeView
     }()
