@@ -28,8 +28,9 @@ import UIKit
 
 @objc public protocol CollapseTabBarViewControllerDelegate: class {
     @objc optional func collapseTabBarController(_ controller: CollapseTabBarViewController, tabBarDidReach position: CollapseTabBarPosition)
-    @objc optional func collapseTabBarControllerGestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool
-    //@objc optional func shouldNavigateToItem(at index: Int)
+    @objc optional func collapseTabBarController(_ controller: CollapseTabBarViewController,
+                                                 panGestureRecognizer: UIPanGestureRecognizer,
+                                                 shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool
 }
 
 @objc public enum CollapseTabBarPosition: Int {
@@ -74,7 +75,11 @@ import UIKit
             }
         }
     }
-    open fileprivate(set) var defaultHeaderHeight: CGFloat = 200
+    open fileprivate(set) var defaultHeaderHeight: CGFloat = 200 {
+        didSet {
+            _maximumHeaderViewHeight = defaultHeaderHeight + 64
+        }
+    }
     
     fileprivate var tabBarItems = [PageTabBarItem]()
     
@@ -124,8 +129,6 @@ import UIKit
         
         view.backgroundColor = UIColor.white
         
-        _maximumHeaderViewHeight = view.frame.height - 100
-        
         headerView.frame = CGRect(x: 0, y: 0, width: view.frame.width, height: defaultHeaderHeight)
         view.addSubview(headerView)
         
@@ -164,6 +167,12 @@ import UIKit
         parentViewController.view.addSubview(collapseTabBarViewController.view)
         layoutClosure(collapseTabBarViewController, parentViewController)
         collapseTabBarViewController.didMove(toParentViewController: parentViewController)
+    }
+    
+    // MARK: - Adjust HeaderViewHeight
+    @objc open func setHeaderHeight(_ height: CGFloat) {
+        defaultHeaderHeight = height
+        scrollTabBar(to: .bottom, springAnimation: false)
     }
     
     // MARK: - Select Tab
@@ -381,8 +390,11 @@ import UIKit
 extension CollapseTabBarViewController: UIGestureRecognizerDelegate {
     open func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         
-        if let shouldRecognizeSimultaneously = delegate?.collapseTabBarControllerGestureRecognizer?(gestureRecognizer, shouldRecognizeSimultaneouslyWith: otherGestureRecognizer) {
-            return shouldRecognizeSimultaneously
+        if let panGestureRecognizer = gestureRecognizer as? UIPanGestureRecognizer,
+            let shouldRecognizeSimultaneously = delegate?.collapseTabBarController?(self,
+                                                                                    panGestureRecognizer: panGestureRecognizer,
+                                                                                    shouldRecognizeSimultaneouslyWith: otherGestureRecognizer) {
+                return shouldRecognizeSimultaneously
         }
 
         if let gestureView = otherGestureRecognizer.view, gestureView.isKind(of: UIScrollView.self) {

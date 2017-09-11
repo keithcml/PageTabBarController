@@ -119,7 +119,7 @@ class ViewController: UIViewController, CollapseTabBarViewControllerDelegate, Pa
         // print("\(position.rawValue)")
     }
     
-    func collapseTabBarControllerGestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+    func collapseTabBarController(_ controller: CollapseTabBarViewController, panGestureRecognizer: UIPanGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         if let tableViewController = collapseTabBarViewController.pageTabBarController?.selectedViewController as? TableViewController {
             return otherGestureRecognizer == tableViewController.tableView.panGestureRecognizer
         }
