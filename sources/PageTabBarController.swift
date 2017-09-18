@@ -117,6 +117,7 @@ internal final class PageTabBarCollectionViewFlowLayout: UICollectionViewFlowLay
     @objc public convenience init(viewControllers: [UIViewController],
                                   items: [PageTabBarItem],
                                   estimatedFrame: CGRect,
+                                  initialPageIndex: Int = 0,
                                   tabBarPosition: PageTabBarPosition = .top) {
         
         self.init(nibName: nil, bundle: nil)
@@ -127,12 +128,13 @@ internal final class PageTabBarCollectionViewFlowLayout: UICollectionViewFlowLay
             item.frame = CGRect(x: 0, y: 0, width: estimatedFrame.width/CGFloat(pageTabBarItems.count), height: 44)
             pageTabBarItems.append(item)
         }
+        self.pageIndex = initialPageIndex
     }
     
     override open func viewDidLoad() {
         super.viewDidLoad()
         
-        pageTabBar = PageTabBar(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 44), tabBarItems: pageTabBarItems)
+        pageTabBar = PageTabBar(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 44), tabBarItems: pageTabBarItems, initialIndex: pageIndex)
         pageTabBar.toIndex = { [unowned self] index in
             self.setPageIndex(index, animated: true)
         }
@@ -162,6 +164,8 @@ internal final class PageTabBarCollectionViewFlowLayout: UICollectionViewFlowLay
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
         collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
+        
+        setPageIndex(pageIndex, animated: false)
         
         if case .scroll = transitionAnimation {
             isScrollEnabled = true

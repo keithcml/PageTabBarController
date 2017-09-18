@@ -120,13 +120,13 @@ open class PageTabBar: UIView {
     
     fileprivate var indicatorLocationObserver: KeyValueObserver?
     
-    convenience init(frame: CGRect, tabBarItems: [PageTabBarItem]) {
+    convenience init(frame: CGRect, tabBarItems: [PageTabBarItem], initialIndex: Int = 0) {
         self.init(frame: frame)
         items = tabBarItems
-        commonInit()
+        commonInit(initialIndex: initialIndex)
     }
     
-    fileprivate func commonInit() {
+    fileprivate func commonInit(initialIndex: Int) {
         
         var previous: PageTabBarItem?
         
@@ -149,7 +149,7 @@ open class PageTabBar: UIView {
             else {
                 item.leadingAnchor.constraint(equalTo: leadingAnchor).isActive = true
                 // initial color
-                item.isSelected = true
+                item.isSelected = initialIndex == idx
             }
             previous = item
             
@@ -174,34 +174,42 @@ open class PageTabBar: UIView {
         bottomLine.trailingAnchor.constraint(equalTo: trailingAnchor).isActive = true
         bottomLine.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true
         
-        indicatorLine.frame = CGRect(x: 0, y: bounds.height - indicatorLineHeight, width: itemWidth, height: indicatorLineHeight)
+        indicatorLine.frame = CGRect(x: CGFloat(initialIndex) * itemWidth, y: bounds.height - indicatorLineHeight, width: itemWidth, height: indicatorLineHeight)
         addSubview(indicatorLine)
-        indicatorLocationObserver =
-            KeyValueObserver(
-                object: indicatorLine,
-                keyPath: "frame",
-                options: [.new]){ [weak self] (change) in
-                    if let
-                        strongSelf = self,
-                        let callbackChanges = change,
-                        let newFrameValue = callbackChanges[NSKeyValueChangeKey.newKey] as? NSValue {
-                        
-                        let newFrame = newFrameValue.cgRectValue
-                        
-                        guard newFrame.width > 0 else { return }
-                        let location = newFrame.origin.x + newFrame.width/2
-                        let index = Int(ceil(location/newFrame.width)) - 1
-                        
-                        for (idx, button) in strongSelf.items.enumerated() {
-                            button.isSelected = idx == index ? true : false
-                        }
-                    }
-        }
     }
     
     deinit {
         indicatorLocationObserver = nil
     }
+    
+    override open func willMove(toSuperview newSuperview: UIView?) {
+        
+        if newSuperview != nil && indicatorLocationObserver == nil {
+            indicatorLocationObserver =
+                KeyValueObserver(
+                    object: indicatorLine,
+                    keyPath: "frame",
+                    options: [.new]){ [weak self] (change) in
+                        if let
+                            strongSelf = self,
+                            let callbackChanges = change,
+                            let newFrameValue = callbackChanges[NSKeyValueChangeKey.newKey] as? NSValue {
+                            
+                            let newFrame = newFrameValue.cgRectValue
+                            
+                            guard newFrame.width > 0 else { return }
+                            let location = newFrame.origin.x + newFrame.width/2
+                            let index = Int(ceil(location/newFrame.width)) - 1
+                            
+                            for (idx, button) in strongSelf.items.enumerated() {
+                                button.isSelected = idx == index ? true : false
+                            }
+                        }
+            }
+        }
+    }
+    
+    
     
     internal func setIndicatorPosition(_ position: CGFloat) {
         indicatorLine.frame = CGRect(x: position, y: bounds.height - indicatorLineHeight, width: itemWidth, height: indicatorLineHeight)

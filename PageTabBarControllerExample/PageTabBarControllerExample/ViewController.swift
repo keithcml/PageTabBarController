@@ -87,6 +87,7 @@ class ViewController: UIViewController, CollapseTabBarViewControllerDelegate, Pa
         
         collapseTabBarViewController = CollapseTabBarViewController(viewControllers: [vc01, vc02, vc03, vc04, vc05, vc06],
                                                                     tabBarItems: [tab01, tab02, tab03, tab04, tab05, tab06],
+                                                                    initialPageIndex: 2,
                                                                     headerView: headerView,
                                                                     headerHeight: view.frame.width)
         collapseTabBarViewController.minimumHeaderViewHeight = 0

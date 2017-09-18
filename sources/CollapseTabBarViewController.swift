@@ -100,6 +100,7 @@ import UIKit
     
     @objc public init(viewControllers: [UIViewController],
                       tabBarItems: [PageTabBarItem],
+                      initialPageIndex: Int = 0,
                       headerView: UIView = UIView(frame: CGRect.zero),
                       headerHeight: CGFloat = 200) {
         
@@ -117,7 +118,8 @@ import UIKit
             PageTabBarController(
                 viewControllers: viewControllers,
                 items: tabBarItems,
-                estimatedFrame: UIScreen.main.bounds)
+                estimatedFrame: UIScreen.main.bounds,
+                initialPageIndex: initialPageIndex)
     }
     
     required public init?(coder aDecoder: NSCoder) {
