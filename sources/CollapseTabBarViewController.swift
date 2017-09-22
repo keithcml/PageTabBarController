@@ -281,8 +281,11 @@ import UIKit
             if alwaysBouncesAtBottom && gView.frame.minY >= defaultHeaderHeight {
                 let gap = gView.frame.minY - defaultHeaderHeight
                 let newHeight = ceil(defaultHeaderHeight + gap)
-                let scale = newHeight/defaultHeaderHeight
-                headerView.transform = CGAffineTransform(scaleX: scale, y: scale)
+                let scaleFactor = newHeight/defaultHeaderHeight
+                let scale = CGAffineTransform(scaleX: scaleFactor, y: scaleFactor)
+                let translation = CGAffineTransform(translationX: 0, y: -scaleFactor)
+                
+                headerView.transform = scale.concatenating(translation)//CGAffineTransform(scaleX: scale, y: scale)
                 headerView.frame = CGRect(x: headerView.frame.minX, y: newY - newHeight, width: headerView.frame.width, height: headerView.frame.height)
             }
             else {
