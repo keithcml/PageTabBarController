@@ -160,9 +160,6 @@ open class Badge: UIView {
     fileprivate var insetRightConstaint: NSLayoutConstraint?
     
     fileprivate func commonInit() {
-        
-        isUserInteractionEnabled = false
-        
         layer.backgroundColor = badgeTintColor.cgColor
         innerLabel.textColor = badgeTextColor
         innerLabel.font = badgeFont

@@ -38,11 +38,6 @@ import UIKit
     case bottom
 }
 
-@objc public enum CollapseTabBarAnimationType: Int {
-    case easeInOut = 0
-    case spring
-}
-
 @objc open class CollapseTabBarViewController: UIViewController {
     
     override open var childViewControllerForStatusBarHidden: UIViewController? {
@@ -66,7 +61,6 @@ import UIKit
     }
     
     // MARK: - Scroll Control
-    open var animationType = CollapseTabBarAnimationType.easeInOut
     open var autoCollapse = false
     open var alwaysBouncesAtTop = false
     open var alwaysBouncesAtBottom = true
@@ -180,17 +174,17 @@ import UIKit
     // MARK: - Adjust HeaderViewHeight
     @objc open func setHeaderHeight(_ height: CGFloat) {
         defaultHeaderHeight = height
-        scrollTabBar(to: .bottom, animated: false)
+        scrollTabBar(to: .bottom, springAnimation: false)
     }
     
     // MARK: - Select Tab
-    @objc open func selectTabAtIndex(_ index: Int, scrollTo position: CollapseTabBarPosition, animated: Bool) {
-        pageTabBarController?.setPageIndex(index, animated: animated)
-        scrollTabBar(to: position, animated: animated)
+    @objc open func selectTabAtIndex(_ index: Int, scrollToPosition: CollapseTabBarPosition) {
+        pageTabBarController?.setPageIndex(index, animated: true)
+        scrollTabBar(to: .top)
     }
     
     // MARK: - Control Scroll
-    @objc open func scrollTabBar(to position: CollapseTabBarPosition, animated: Bool = true) {
+    @objc open func scrollTabBar(to position: CollapseTabBarPosition, springAnimation: Bool = false) {
         guard let pageView = pageTabBarController?.view else { return }
         var headerViewOrigin = CGPoint.zero
         var pageViewOrigin = pageView.frame.origin
@@ -208,35 +202,31 @@ import UIKit
             break
         }
         
-        if animated {
-            
-            if case .easeInOut = animationType {
-                UIView.animate(
-                    withDuration: 0.3,
-                    delay: 0,
-                    options: [.curveEaseOut, .allowUserInteraction, .beginFromCurrentState],
-                    animations: {
-                        pageView.frame = CGRect(origin: pageViewOrigin, size: pageViewSize)
-                        self.headerView.transform = .identity
-                        self.headerView.frame.origin = headerViewOrigin
+        if springAnimation {
+            UIView.animate(
+                withDuration: 0.3,
+                delay: 0,
+                options: [.curveEaseOut, .allowUserInteraction, .beginFromCurrentState],
+                animations: {
+                    pageView.frame = CGRect(origin: pageViewOrigin, size: pageViewSize)
+                    self.headerView.transform = .identity
+                    self.headerView.frame.origin = headerViewOrigin
                 }) { _ in
                     self.delegate?.collapseTabBarController?(self, tabBarDidReach: position)
                 }
-            }
-            else {
-                UIView.animate(withDuration: 0.4, delay: 0, usingSpringWithDamping: 1.0, initialSpringVelocity: 10, options: [], animations: {
-                        pageView.frame = CGRect(origin: pageViewOrigin, size: pageViewSize)
-                        self.headerView.transform = .identity
-                        self.headerView.frame.origin = headerViewOrigin
-                }) { _ in
-                    self.delegate?.collapseTabBarController?(self, tabBarDidReach: position)
-                }
-            }
         }
         else {
-            pageView.frame = CGRect(origin: pageViewOrigin, size: pageViewSize)
-            headerView.transform = .identity
-            headerView.frame.origin = headerViewOrigin
+            UIView.animate(
+                withDuration: 0.3,
+                delay: 0,
+                options: [.curveEaseOut, .allowUserInteraction, .beginFromCurrentState],
+                animations: {
+                    pageView.frame = CGRect(origin: pageViewOrigin, size: pageViewSize)
+                    self.headerView.transform = .identity
+                    self.headerView.frame.origin = headerViewOrigin
+                }) { _ in
+                    self.delegate?.collapseTabBarController?(self, tabBarDidReach: position)
+                }
         }
     }
     
