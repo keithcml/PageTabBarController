@@ -68,7 +68,7 @@ import UIKit
         }
         set {
             guard let pageTabBarController = pageTabBarController, pageTabBarController.pageIndex != newValue else { return }
-            pageTabBarController.pageIndex = newValue
+            pageTabBarController.setPageIndex(newValue, animated: false)
         }
     }
     open var autoCollapse = false
@@ -110,7 +110,6 @@ import UIKit
     
     @objc public init(viewControllers: [UIViewController],
                       tabBarItems: [PageTabBarItem],
-                      initialPageIndex: Int = 0,
                       headerView: UIView = UIView(frame: CGRect.zero),
                       headerHeight: CGFloat = 200) {
         
@@ -127,9 +126,7 @@ import UIKit
         pageTabBarController =
             PageTabBarController(
                 viewControllers: viewControllers,
-                items: tabBarItems,
-                estimatedFrame: UIScreen.main.bounds,
-                initialPageIndex: initialPageIndex)
+                items: tabBarItems)
     }
     
     required public init?(coder aDecoder: NSCoder) {
@@ -150,7 +147,7 @@ import UIKit
             }
         }
         
-        // pageTabBarController
+        pageTabBarController.setPageIndex(pageIndex, animated: false)
         
         addChildViewController(pageTabBarController)
         pageTabBarController.view.frame = CGRect(x: 0, y: defaultHeaderHeight, width: view.frame.width, height: view.frame.height - defaultHeaderHeight)

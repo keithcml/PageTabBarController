@@ -118,13 +118,13 @@ open class PageTabBar: UIView {
         return line
     }()
     
-    convenience init(frame: CGRect, tabBarItems: [PageTabBarItem], initialIndex: Int = 0) {
+    convenience init(frame: CGRect, tabBarItems: [PageTabBarItem]) {
         self.init(frame: frame)
         items = tabBarItems
-        commonInit(initialIndex: initialIndex)
+        commonInit()
     }
     
-    fileprivate func commonInit(initialIndex: Int) {
+    fileprivate func commonInit() {
         
         var previous: PageTabBarItem?
         
@@ -147,7 +147,7 @@ open class PageTabBar: UIView {
             else {
                 item.leadingAnchor.constraint(equalTo: leadingAnchor).isActive = true
                 // initial color
-                item.isSelected = initialIndex == idx
+                item.isSelected = idx == 0
             }
             previous = item
             
@@ -172,7 +172,7 @@ open class PageTabBar: UIView {
         bottomLine.trailingAnchor.constraint(equalTo: trailingAnchor).isActive = true
         bottomLine.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true
         
-        indicatorLine.frame = CGRect(x: CGFloat(initialIndex) * itemWidth, y: bounds.height - indicatorLineHeight, width: itemWidth, height: indicatorLineHeight)
+        indicatorLine.frame = CGRect(x: 0, y: bounds.height - indicatorLineHeight, width: itemWidth, height: indicatorLineHeight)
         addSubview(indicatorLine)
     }
     
@@ -190,5 +190,14 @@ open class PageTabBar: UIView {
     internal func getCurrentIndex() -> Int {
         let index = ceil(indicatorLine.frame.minX/itemWidth)
         return Int(index)
+    }
+    
+    internal func scrollToItem(at index: Int, animated: Bool) {
+        let origin = CGPoint(x: ceil(CGFloat(index) * itemWidth), y: 0)
+        let size = CGSize(width: itemWidth, height: indicatorLineHeight)
+        indicatorLine.frame = CGRect(origin: origin, size: size)
+        for (idx, button) in items.enumerated() {
+            button.isSelected = idx == index ? true : false
+        }
     }
 }
