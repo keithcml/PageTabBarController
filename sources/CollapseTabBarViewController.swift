@@ -61,6 +61,16 @@ import UIKit
     }
     
     // MARK: - Scroll Control
+    open var pageIndex: Int {
+        get {
+            guard let pageTabBarController = pageTabBarController else { return 0 }
+            return pageTabBarController.pageIndex
+        }
+        set {
+            guard let pageTabBarController = pageTabBarController, pageTabBarController.pageIndex != newValue else { return }
+            pageTabBarController.pageIndex = newValue
+        }
+    }
     open var autoCollapse = false
     open var alwaysBouncesAtTop = false
     open var alwaysBouncesAtBottom = true
@@ -139,6 +149,8 @@ import UIKit
             if index == 0 {
             }
         }
+        
+        // pageTabBarController
         
         addChildViewController(pageTabBarController)
         pageTabBarController.view.frame = CGRect(x: 0, y: defaultHeaderHeight, width: view.frame.width, height: view.frame.height - defaultHeaderHeight)

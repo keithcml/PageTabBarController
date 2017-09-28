@@ -32,7 +32,7 @@ import UIKit
 }
 
 
-internal enum PageTabBarItemArrngement {
+internal enum PageTabBarItemArrangement {
     case fixedWidth(width: CGFloat)
     case compact
 }
@@ -118,8 +118,6 @@ open class PageTabBar: UIView {
         return line
     }()
     
-    fileprivate var indicatorLocationObserver: KeyValueObserver?
-    
     convenience init(frame: CGRect, tabBarItems: [PageTabBarItem], initialIndex: Int = 0) {
         self.init(frame: frame)
         items = tabBarItems
@@ -178,41 +176,15 @@ open class PageTabBar: UIView {
         addSubview(indicatorLine)
     }
     
-    deinit {
-        indicatorLocationObserver = nil
-    }
-    
-    override open func willMove(toSuperview newSuperview: UIView?) {
-        
-        if newSuperview != nil && indicatorLocationObserver == nil {
-            indicatorLocationObserver =
-                KeyValueObserver(
-                    object: indicatorLine,
-                    keyPath: "frame",
-                    options: [.new]){ [weak self] (change) in
-                        if let
-                            strongSelf = self,
-                            let callbackChanges = change,
-                            let newFrameValue = callbackChanges[NSKeyValueChangeKey.newKey] as? NSValue {
-                            
-                            let newFrame = newFrameValue.cgRectValue
-                            
-                            guard newFrame.width > 0 else { return }
-                            let location = newFrame.origin.x + newFrame.width/2
-                            let index = Int(ceil(location/newFrame.width)) - 1
-                            
-                            for (idx, button) in strongSelf.items.enumerated() {
-                                button.isSelected = idx == index ? true : false
-                            }
-                        }
-            }
-        }
-    }
-    
-    
-    
     internal func setIndicatorPosition(_ position: CGFloat) {
         indicatorLine.frame = CGRect(x: position, y: bounds.height - indicatorLineHeight, width: itemWidth, height: indicatorLineHeight)
+        
+        let location = position + itemWidth/2
+        let index = Int(ceil(location/itemWidth)) - 1
+        
+        for (idx, button) in items.enumerated() {
+            button.isSelected = idx == index ? true : false
+        }
     }
     
     internal func getCurrentIndex() -> Int {

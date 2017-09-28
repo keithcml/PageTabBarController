@@ -87,7 +87,7 @@ class ViewController: UIViewController, CollapseTabBarViewControllerDelegate, Pa
         
         collapseTabBarViewController = CollapseTabBarViewController(viewControllers: [vc01, vc02, vc03, vc04, vc05, vc06],
                                                                     tabBarItems: [tab01, tab02, tab03, tab04, tab05, tab06],
-                                                                    initialPageIndex: 2,
+                                                                    initialPageIndex: 1,
                                                                     headerView: headerView,
                                                                     headerHeight: view.frame.width)
         collapseTabBarViewController.minimumHeaderViewHeight = 0
@@ -98,7 +98,7 @@ class ViewController: UIViewController, CollapseTabBarViewControllerDelegate, Pa
         collapseTabBarViewController.pageTabBarController?.pageTabBar.topLineColor = tabSelectedColor
         collapseTabBarViewController.pageTabBarController?.pageTabBar.barTintColor = UIColor(white: 0.95, alpha: 1)
         
-        collapseTabBarViewController.pageTabBarController?.transitionAnimation = .none
+        collapseTabBarViewController.pageTabBarController?.transitionAnimation = .scroll
         collapseTabBarViewController.pageTabBarController?.delegate = self
         collapseTabBarViewController.delegate = self
         CollapseTabBarViewController.attachCollapseTabBarController(
