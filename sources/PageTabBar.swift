@@ -26,6 +26,10 @@
 import Foundation
 import UIKit
 
+internal protocol PageTabBarDelegate: class {
+    func pageTabBar(_ tabBar: PageTabBar, indexDidChanged index: Int)
+}
+
 @objc public enum PageTabBarPosition: Int {
     case top = 0
     case bottom
@@ -38,6 +42,26 @@ internal enum PageTabBarItemArrangement {
 }
 
 open class PageTabBar: UIView {
+    
+    internal weak var delegate: PageTabBarDelegate?
+    
+    override open var intrinsicContentSize: CGSize {
+        return CGSize(width: UIScreen.main.bounds.width, height: barHeight)
+    }
+    
+    override open var bounds: CGRect {
+        didSet {
+            scrollToItem(at: currentIndex, animated: false)
+        }
+    }
+    
+    open var barHeight: CGFloat = 44.0 {
+        didSet {
+            guard oldValue != barHeight else { return }
+            indicatorLine.frame.origin = CGPoint(x: indicatorLine.frame.minX, y: barHeight - indicatorLineHeight)
+            //superview?.setNeedsLayout()
+        }
+    }
     
     open var barTintColor: UIColor = .white {
         didSet {
@@ -69,7 +93,7 @@ open class PageTabBar: UIView {
     }
     open var indicatorLineHeight: CGFloat = 1.0  {
         didSet {
-            indicatorLine.frame = CGRect(x: indicatorLine.frame.minX, y: bounds.height - indicatorLineHeight, width: itemWidth, height: indicatorLineHeight)
+            indicatorLine.frame = CGRect(x: indicatorLine.frame.minX, y: barHeight - indicatorLineHeight, width: itemWidth, height: indicatorLineHeight)
         }
     }
     open var topLineColor = UIColor.lightGray  {
@@ -91,7 +115,13 @@ open class PageTabBar: UIView {
         }
     }
     
-    internal var toIndex: ((Int) -> ()) = { _ in }
+    internal var currentIndex: Int = 0 {
+        didSet {
+            guard oldValue != currentIndex else { return }
+            // scrollToItem(at: currentIndex, animated: false)
+            delegate?.pageTabBar(self, indexDidChanged: currentIndex)
+        }
+    }
     
     fileprivate var items = [PageTabBarItem]()
     fileprivate var itemWidth: CGFloat {
@@ -118,41 +148,19 @@ open class PageTabBar: UIView {
         return line
     }()
     
-    convenience init(frame: CGRect, tabBarItems: [PageTabBarItem]) {
-        self.init(frame: frame)
+    convenience init(tabBarItems: [PageTabBarItem]) {
+        self.init(frame: CGRect(x: 0, y: 0, width: 100, height: 44))
         items = tabBarItems
         commonInit()
     }
     
     fileprivate func commonInit() {
         
-        var previous: PageTabBarItem?
-        
         for (idx, item) in items.enumerated() {
             addSubview(item)
-            item.translatesAutoresizingMaskIntoConstraints = false
-            
-            item.topAnchor.constraint(equalTo: topAnchor).isActive = true
-            item.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true
-            
-            if let p = previous {
-                
-                item.leadingAnchor.constraint(equalTo: p.trailingAnchor).isActive = true
-                item.widthAnchor.constraint(equalTo: p.widthAnchor, multiplier: 1.0).isActive = true
-                
-                if idx == items.count - 1 {
-                    item.trailingAnchor.constraint(equalTo: trailingAnchor).isActive = true
-                }
-            }
-            else {
-                item.leadingAnchor.constraint(equalTo: leadingAnchor).isActive = true
-                // initial color
-                item.isSelected = idx == 0
-            }
-            previous = item
-            
             item.didTap = { [unowned self] _ in
-                self.toIndex(idx)
+                self.currentIndex = idx
+                self.delegate?.pageTabBar(self, indexDidChanged: self.currentIndex)
             }
         }
         
@@ -172,12 +180,21 @@ open class PageTabBar: UIView {
         bottomLine.trailingAnchor.constraint(equalTo: trailingAnchor).isActive = true
         bottomLine.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true
         
-        indicatorLine.frame = CGRect(x: 0, y: bounds.height - indicatorLineHeight, width: itemWidth, height: indicatorLineHeight)
         addSubview(indicatorLine)
+        scrollToItem(at: currentIndex, animated: false)
+    }
+    
+    override open func layoutSubviews() {
+        super.layoutSubviews()
+        for (idx, item) in items.enumerated() {
+            let originX: CGFloat = CGFloat(idx) * itemWidth
+            item.frame = CGRect(x: originX, y: 0, width: itemWidth, height: bounds.height)
+        }
     }
     
     internal func setIndicatorPosition(_ position: CGFloat) {
-        indicatorLine.frame = CGRect(x: position, y: bounds.height - indicatorLineHeight, width: itemWidth, height: indicatorLineHeight)
+
+        indicatorLine.frame = CGRect(x: position, y: barHeight - indicatorLineHeight, width: itemWidth, height: indicatorLineHeight)
         
         let location = position + itemWidth/2
         let index = Int(ceil(location/itemWidth)) - 1
@@ -187,13 +204,13 @@ open class PageTabBar: UIView {
         }
     }
     
-    internal func getCurrentIndex() -> Int {
+    internal func updateCurrentIndex() {
         let index = ceil(indicatorLine.frame.minX/itemWidth)
-        return Int(index)
+        currentIndex = Int(index)
     }
     
     internal func scrollToItem(at index: Int, animated: Bool) {
-        let origin = CGPoint(x: ceil(CGFloat(index) * itemWidth), y: 0)
+        let origin = CGPoint(x: ceil(CGFloat(index) * itemWidth), y: barHeight - indicatorLineHeight)
         let size = CGSize(width: itemWidth, height: indicatorLineHeight)
         indicatorLine.frame = CGRect(origin: origin, size: size)
         for (idx, button) in items.enumerated() {

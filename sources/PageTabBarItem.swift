@@ -26,6 +26,11 @@
 import Foundation
 import UIKit
 
+internal enum PageTabBarItemType {
+    case text
+    case icon
+}
+
 private class PageTabBarButton: UIButton {
     
     fileprivate var color = UIColor.lightGray {
@@ -90,7 +95,6 @@ private class PageTabBarButton: UIButton {
         let button = PageTabBarButton(type: .custom)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 12)
         button.contentEdgeInsets = UIEdgeInsets(top: 8, left: 8, bottom: 8, right: 8)
-        button.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         return button
     }()
     
@@ -99,10 +103,14 @@ private class PageTabBarButton: UIButton {
         return badgeView
     }()
     
+    private var type = PageTabBarItemType.text
+    
     public convenience init(title: String?) {
     
         self.init(frame: CGRect(x: 0, y: 0, width: 30, height: 30))
     
+        type = .text
+        
         tabBarButton.setTitle(title, for: .normal)
         tabBarButton.titleLabel?.font = UIFont.systemFont(ofSize: 12, weight: UIFontWeightMedium)
 
@@ -111,6 +119,8 @@ private class PageTabBarButton: UIButton {
     
     public convenience init(icon: UIImage?) {
         self.init(frame: CGRect(x: 0, y: 0, width: 30, height: 30))
+        
+        type = .icon
         
         let img = icon?.withRenderingMode(.alwaysTemplate)
         tabBarButton.setTitle("", for: .normal)
@@ -137,7 +147,11 @@ private class PageTabBarButton: UIButton {
         
         addSubview(badgeView)
         badgeView.translatesAutoresizingMaskIntoConstraints = false
-        badgeView.topAnchor.constraint(equalTo: topAnchor, constant: 4).isActive = true
+        if case .icon = type {
+            badgeView.topAnchor.constraint(equalTo: topAnchor, constant: 4).isActive = true
+        } else {
+            badgeView.centerYAnchor.constraint(equalTo: centerYAnchor).isActive = true
+        }
         badgeView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -4).isActive = true
     }
     

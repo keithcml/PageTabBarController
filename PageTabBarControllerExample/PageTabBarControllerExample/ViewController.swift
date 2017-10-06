@@ -84,14 +84,18 @@ class ViewController: UIViewController, CollapseTabBarViewControllerDelegate, Pa
         let tab06 = PageTabBarItem(icon: UIImage(named: "img01"))
         tab06.color = tabColor
         tab06.selectedColor = tabSelectedColor
+        let tabA = PageTabBarItem(title: "Tab Title A")
+        tabA.color = tabColor
+        tabA.selectedColor = tabSelectedColor
         
-        collapseTabBarViewController = CollapseTabBarViewController(viewControllers: [vc01, vc02, vc03, vc04, vc05, vc06],
-                                                                    tabBarItems: [tab01, tab02, tab03, tab04, tab05, tab06],
+        collapseTabBarViewController = CollapseTabBarViewController(viewControllers: [vc01, vc02, vc03],
+                                                                    tabBarItems: [tab01, tab02, tabA],
                                                                     headerView: headerView,
                                                                     headerHeight: view.frame.width)
-        collapseTabBarViewController.pageIndex = 4
+        collapseTabBarViewController.pageIndex = 1
         collapseTabBarViewController.minimumHeaderViewHeight = 0
         collapseTabBarViewController.maximumHeaderViewHeight = view.frame.height - 150
+        collapseTabBarViewController.pageTabBarController?.pageTabBar.barHeight = 40
         collapseTabBarViewController.pageTabBarController?.pageTabBar.indicatorLineColor = tabSelectedColor
         collapseTabBarViewController.pageTabBarController?.pageTabBar.indicatorLineHeight = 2
         collapseTabBarViewController.pageTabBarController?.pageTabBar.bottomLineHidden = true
