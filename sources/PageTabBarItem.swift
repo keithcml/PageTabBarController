@@ -66,6 +66,11 @@ private class PageTabBarButton: UIButton {
 
 @objc open class PageTabBarItem: UIView {
     
+    open var font = UIFont.systemFont(ofSize: 12, weight: UIFontWeightMedium) {
+        didSet {
+            tabBarButton.titleLabel?.font = font
+        }
+    }
     open var color = UIColor.lightGray {
         didSet {
             tabBarButton.color = color
@@ -149,10 +154,15 @@ private class PageTabBarButton: UIButton {
         badgeView.translatesAutoresizingMaskIntoConstraints = false
         if case .icon = type {
             badgeView.topAnchor.constraint(equalTo: topAnchor, constant: 4).isActive = true
+            badgeView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -4).isActive = true
         } else {
             badgeView.centerYAnchor.constraint(equalTo: centerYAnchor).isActive = true
+            if let label = tabBarButton.titleLabel {
+                badgeView.leadingAnchor.constraint(equalTo: label.trailingAnchor, constant: 6).isActive = true
+            }
+            
         }
-        badgeView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -4).isActive = true
+        
     }
     
     @objc private func press(_ sender: UIButton) {

@@ -84,7 +84,7 @@ class ViewController: UIViewController, CollapseTabBarViewControllerDelegate, Pa
         let tab06 = PageTabBarItem(icon: UIImage(named: "img01"))
         tab06.color = tabColor
         tab06.selectedColor = tabSelectedColor
-        let tabA = PageTabBarItem(title: "Tab Title A")
+        let tabA = PageTabBarItem(title: "Tab A")
         tabA.color = tabColor
         tabA.selectedColor = tabSelectedColor
         
@@ -154,5 +154,8 @@ class ViewController: UIViewController, CollapseTabBarViewControllerDelegate, Pa
         // print("index: \(index)")
     }
 
+    func pageTabBarController(_ controller: PageTabBarController, transit fromIndex: Int, to toIndex: Int, progress: CGFloat) {
+        print("from index: \(fromIndex), to index: \(toIndex), progress: \(progress)")
+    }
 }
 

@@ -34,6 +34,7 @@ public enum PageTabBarTransitionAnimation {
 @objc public protocol PageTabBarControllerDelegate: class {
     @objc optional func pageTabBarController(_ controller: PageTabBarController, didSelectItem item: PageTabBarItem, atIndex index: Int, previousIndex: Int)
     @objc optional func pageTabBarController(_ controller: PageTabBarController, didChangeContentViewController vc: UIViewController, atIndex index: Int)
+    @objc optional func pageTabBarController(_ controller: PageTabBarController, transit fromIndex: Int, to toIndex: Int, progress: CGFloat)
 }
 
 internal final class PageTabBarCollectionViewFlowLayout: UICollectionViewFlowLayout {
@@ -47,25 +48,7 @@ internal final class PageTabBarCollectionViewFlowLayout: UICollectionViewFlowLay
         }
         return false
     }
-    
-    
-//    override func targetContentOffset(forProposedContentOffset proposedContentOffset: CGPoint, withScrollingVelocity velocity: CGPoint) -> CGPoint {
-//        guard let cv = collectionView else { return proposedContentOffset }
-//
-//        let correctedInitialOffsetX = max(cv.contentOffset.x, 0)
-//        let currentPageNumber = (correctedInitialOffsetX/cv.bounds.width).rounded(.down)
-//
-//        var pageNumber: CGFloat = 0
-//        if proposedContentOffset.x > cv.contentOffset.x + cv.bounds.width/2 {
-//            // shift to right page
-//            pageNumber = currentPageNumber + 1
-//        } else {
-//            pageNumber = currentPageNumber
-//        }
-//
-//        let offsetX = pageNumber * cv.bounds.width
-//        return CGPoint(x: offsetX, y: 0)
-//    }
+
 }
 
 @objc open class PageTabBarController: UIViewController, UIScrollViewDelegate {
@@ -146,6 +129,9 @@ internal final class PageTabBarCollectionViewFlowLayout: UICollectionViewFlowLay
         return collectionView?.panGestureRecognizer
     }
     
+    // States
+    fileprivate var transientIndex = 0
+    fileprivate var contentOffsetX: CGFloat = 0
     private var didSetInitialOffset = false
     
     @objc public convenience init(viewControllers: [UIViewController],
@@ -247,6 +233,8 @@ internal final class PageTabBarCollectionViewFlowLayout: UICollectionViewFlowLay
         super.viewDidLayoutSubviews()
         if !didSetInitialOffset {
             didSetInitialOffset = true
+            contentOffsetX = view.frame.width * CGFloat(pageIndex)
+            transientIndex = pageIndex
             collectionView?.scrollToItem(at: IndexPath(item: pageIndex, section: 0), at: .centeredHorizontally, animated: false)
         }
     }
@@ -391,12 +379,59 @@ extension PageTabBarController: UICollectionViewDelegate {
     
     open func scrollViewDidScroll(_ scrollView: UIScrollView) {
         guard scrollView.contentSize.width > 0 else { return }
-        let diff = scrollView.contentOffset.x * pageTabBar.frame.width/scrollView.contentSize.width
-        pageTabBar.setIndicatorPosition(diff)
-    }
-    
-    open func scrollViewWillBeginDecelerating(_ scrollView: UIScrollView) {
         
+        let previousContentOffsetX = contentOffsetX
+        contentOffsetX = scrollView.contentOffset.x
+        
+        let diff = contentOffsetX * pageTabBar.frame.width/scrollView.contentSize.width
+        
+        let oldTransientIndex = transientIndex
+        transientIndex = pageTabBar.setIndicatorPosition(diff)
+        
+        if oldTransientIndex != transientIndex {
+            //print("changed transientIndex: \(transientIndex)")
+            delegate?.pageTabBarController?(self, transit: oldTransientIndex, to: transientIndex, progress: 1.0)
+        } else {
+            
+            let startOffsetX = CGFloat(oldTransientIndex) * pageTabBar.frame.width
+            let displacement = abs(startOffsetX - contentOffsetX)
+            
+            if displacement <= pageTabBar.frame.width/2 {
+                let progress = displacement/(pageTabBar.frame.width/2)
+                
+                if previousContentOffsetX > contentOffsetX {
+                    // moving left
+                    if startOffsetX < contentOffsetX {
+                        //print("moving back to \(oldTransientIndex) with progress \(1.0 - progress)")
+                        if oldTransientIndex < viewControllers.count - 1 {
+                            delegate?.pageTabBarController?(self, transit: oldTransientIndex, to: oldTransientIndex, progress: progress)
+                        }
+                    } else if startOffsetX > contentOffsetX {
+                        //print("moving from \(oldTransientIndex) to \(oldTransientIndex - 1) with progress \(progress)")
+                        if oldTransientIndex > 0 {
+                            delegate?.pageTabBarController?(self, transit: oldTransientIndex, to: oldTransientIndex - 1, progress: progress)
+                        }
+                    }
+                    
+                } else if previousContentOffsetX < contentOffsetX {
+                    // moving right
+                    if startOffsetX < contentOffsetX {
+                        //print("moving from \(oldTransientIndex) to \(oldTransientIndex + 1) with progress \(progress)")
+                        if oldTransientIndex < viewControllers.count - 1 {
+                            delegate?.pageTabBarController?(self, transit: oldTransientIndex, to: oldTransientIndex + 1, progress: progress)
+                        }
+                    } else if startOffsetX > contentOffsetX {
+                        //print("moving back to \(oldTransientIndex) with progress \(1.0 - progress)")
+                        if oldTransientIndex > 0 {
+                            delegate?.pageTabBarController?(self, transit: oldTransientIndex, to: oldTransientIndex, progress: progress)
+                        }
+                    }
+                    
+                }
+            }
+            
+            
+        }
     }
     
     open func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {

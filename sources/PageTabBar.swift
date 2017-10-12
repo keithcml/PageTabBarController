@@ -118,7 +118,6 @@ open class PageTabBar: UIView {
     internal var currentIndex: Int = 0 {
         didSet {
             guard oldValue != currentIndex else { return }
-            // scrollToItem(at: currentIndex, animated: false)
             delegate?.pageTabBar(self, indexDidChanged: currentIndex)
         }
     }
@@ -192,7 +191,7 @@ open class PageTabBar: UIView {
         }
     }
     
-    internal func setIndicatorPosition(_ position: CGFloat) {
+    internal func setIndicatorPosition(_ position: CGFloat) -> Int {
 
         indicatorLine.frame = CGRect(x: position, y: barHeight - indicatorLineHeight, width: itemWidth, height: indicatorLineHeight)
         
@@ -202,6 +201,8 @@ open class PageTabBar: UIView {
         for (idx, button) in items.enumerated() {
             button.isSelected = idx == index ? true : false
         }
+        
+        return index
     }
     
     internal func updateCurrentIndex() {
