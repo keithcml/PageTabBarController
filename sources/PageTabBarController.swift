@@ -32,6 +32,8 @@ public enum PageTabBarTransitionAnimation {
 }
 
 @objc public protocol PageTabBarControllerDelegate: class {
+    @objc optional func pageTabBarController(_ controller: PageTabBarController, tabBarHeaderView: PageTabBarSupplementaryView)
+    @objc optional func pageTabBarController(_ controller: PageTabBarController, bannerView: PageTabBarSupplementaryView)
     @objc optional func pageTabBarController(_ controller: PageTabBarController, didSelectItem item: PageTabBarItem, atIndex index: Int, previousIndex: Int)
     @objc optional func pageTabBarController(_ controller: PageTabBarController, didChangeContentViewController vc: UIViewController, atIndex index: Int)
     @objc optional func pageTabBarController(_ controller: PageTabBarController, transit fromIndex: Int, to toIndex: Int, progress: CGFloat)
@@ -120,6 +122,9 @@ internal final class PageTabBarCollectionViewFlowLayout: UICollectionViewFlowLay
         }
     }
     
+    open fileprivate(set) var pageTabBarHeaderView = PageTabBarSupplementaryView(frame: CGRect.zero)
+    open fileprivate(set) var pageTabBarBannerView = PageTabBarSupplementaryView(frame: CGRect.zero)
+    
     fileprivate var collectionView: UICollectionView?
     fileprivate(set) var viewControllers = [UIViewController]()
     fileprivate var tabBarPosition: PageTabBarPosition = .top
@@ -134,6 +139,15 @@ internal final class PageTabBarCollectionViewFlowLayout: UICollectionViewFlowLay
     fileprivate var contentOffsetX: CGFloat = 0
     private var didSetInitialOffset = false
     
+    // Layout Guide
+    open private(set) var tabBarLayoutGuide = UILayoutGuide()
+    
+    // Constraints
+    fileprivate var topConstraint: NSLayoutConstraint?
+    fileprivate var bottomConstraint: NSLayoutConstraint?
+    fileprivate var headerHeightConstraint: NSLayoutConstraint?
+    fileprivate var bannerHeightConstraint: NSLayoutConstraint?
+    
     @objc public convenience init(viewControllers: [UIViewController],
                                   items: [PageTabBarItem],
                                   tabBarPosition: PageTabBarPosition = .top) {
@@ -147,6 +161,7 @@ internal final class PageTabBarCollectionViewFlowLayout: UICollectionViewFlowLay
         }
         
         pageTabBar = PageTabBar(tabBarItems: pageTabBarItems)
+        pageTabBar.addLayoutGuide(tabBarLayoutGuide)
     }
     
     override open func viewDidLoad() {
@@ -158,6 +173,16 @@ internal final class PageTabBarCollectionViewFlowLayout: UICollectionViewFlowLay
         pageTabBar.translatesAutoresizingMaskIntoConstraints = false
         pageTabBar.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
         pageTabBar.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
+        
+        view.addSubview(pageTabBarHeaderView)
+        pageTabBarHeaderView.translatesAutoresizingMaskIntoConstraints = false
+        pageTabBarHeaderView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
+        pageTabBarHeaderView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
+        
+        view.addSubview(pageTabBarBannerView)
+        pageTabBarBannerView.translatesAutoresizingMaskIntoConstraints = false
+        pageTabBarBannerView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
+        pageTabBarBannerView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
         
         let layout = PageTabBarCollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
@@ -189,16 +214,52 @@ internal final class PageTabBarCollectionViewFlowLayout: UICollectionViewFlowLay
         }
         
         if case .top = tabBarPosition {
-            pageTabBar.topAnchor.constraint(equalTo: view.topAnchor).isActive = true
-            collectionView.topAnchor.constraint(equalTo: pageTabBar.bottomAnchor).isActive = true
-            collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
+            
+            if #available(iOS 11.0, *) {
+                topConstraint = pageTabBarHeaderView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor)
+                topConstraint?.isActive = true
+                
+                bottomConstraint = collectionView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
+                bottomConstraint?.isActive = true
+                
+            } else {
+                topConstraint = pageTabBarHeaderView.topAnchor.constraint(equalTo: view.topAnchor)
+                topConstraint?.isActive = true
+                
+                bottomConstraint = collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+                bottomConstraint?.isActive = true
+            }
+            
+            pageTabBar.topAnchor.constraint(equalTo: pageTabBarHeaderView.bottomAnchor).isActive = true
+            pageTabBarBannerView.topAnchor.constraint(equalTo: pageTabBar.bottomAnchor).isActive = true
+            collectionView.topAnchor.constraint(equalTo: pageTabBarBannerView.bottomAnchor).isActive = true
         }
         else {
-            pageTabBar.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
-            collectionView.topAnchor.constraint(equalTo: view.topAnchor).isActive = true
-            collectionView.bottomAnchor.constraint(equalTo: pageTabBar.topAnchor).isActive = true
+            
+            if #available(iOS 11.0, *) {
+                topConstraint = pageTabBarHeaderView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor)
+                topConstraint?.isActive = true
+                
+                bottomConstraint = pageTabBar.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
+                bottomConstraint?.isActive = true
+                
+            } else {
+                topConstraint = pageTabBarHeaderView.topAnchor.constraint(equalTo: view.topAnchor)
+                topConstraint?.isActive = true
+                
+                bottomConstraint = pageTabBar.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+                bottomConstraint?.isActive = true
+            }
+            
+            collectionView.topAnchor.constraint(equalTo: pageTabBarHeaderView.bottomAnchor).isActive = true
+            pageTabBarBannerView.topAnchor.constraint(equalTo: collectionView.bottomAnchor).isActive = true
+            pageTabBar.topAnchor.constraint(equalTo: pageTabBarBannerView.bottomAnchor).isActive = true
         }
         
+        headerHeightConstraint = pageTabBarHeaderView.heightAnchor.constraint(equalToConstant: 0)
+        bannerHeightConstraint = pageTabBarBannerView.heightAnchor.constraint(equalToConstant: 0)
+        headerHeightConstraint?.isActive = true
+        bannerHeightConstraint?.isActive = true
     }
     
     override open func viewWillAppear(_ animated: Bool) {
@@ -212,6 +273,18 @@ internal final class PageTabBarCollectionViewFlowLayout: UICollectionViewFlowLay
         super.viewDidAppear(animated)
         if !shouldAutomaticallyForwardAppearanceMethods {
             selectedViewController?.endAppearanceTransition()
+        }
+        
+        if isMovingToParentViewController || isBeingPresented {
+            if #available(iOS 11.0, *) {} else {
+                if let top = topConstraint, let bottom = bottomConstraint {
+                    NSLayoutConstraint.deactivate([top, bottom])
+                    topConstraint = pageTabBarHeaderView.topAnchor.constraint(equalTo: topLayoutGuide.bottomAnchor)
+                    topConstraint?.isActive = true
+                    bottomConstraint = pageTabBar.bottomAnchor.constraint(equalTo: bottomLayoutGuide.topAnchor)
+                    bottomConstraint?.isActive = true
+                }
+            }
         }
     }
     
@@ -316,6 +389,61 @@ internal final class PageTabBarCollectionViewFlowLayout: UICollectionViewFlowLay
             }
         }
         return nil
+    }
+    
+    // MARK: - Supplementary Views
+    open func setHeaderViewWithCustomView(_ customView: UIView?, animated: Bool) {
+        pageTabBarHeaderView.subviews.forEach { $0.removeFromSuperview() }
+        
+        guard let customView = customView else {
+            
+            UIView.animate(withDuration: 0.3) {
+                self.headerHeightConstraint?.constant = 0
+                self.view.layoutIfNeeded()
+            }
+            
+            return
+        }
+        
+        pageTabBarHeaderView.addSubview(customView)
+        let height = ceil(customView.systemLayoutSizeFitting(UILayoutFittingCompressedSize).height)
+        
+        if view.window == nil {
+            self.headerHeightConstraint?.constant = height
+            return
+        }
+        
+        UIView.animate(withDuration: 0.3) {
+            self.headerHeightConstraint?.constant = height
+            self.view.layoutIfNeeded()
+        }
+    }
+    
+    open func setBannerViewWithCustomView(_ customView: UIView?, animated: Bool) {
+        pageTabBarBannerView.subviews.forEach { $0.removeFromSuperview() }
+        
+        guard let customView = customView else {
+            
+            UIView.animate(withDuration: 0.3) {
+                self.bannerHeightConstraint?.constant = 0
+                self.view.layoutIfNeeded()
+            }
+            
+            return
+        }
+        
+        pageTabBarBannerView.addSubview(customView)
+        let height = ceil(customView.systemLayoutSizeFitting(UILayoutFittingCompressedSize).height)
+        
+        if view.window == nil {
+            self.bannerHeightConstraint?.constant = height
+            return
+        }
+        
+        UIView.animate(withDuration: 0.3) {
+            self.bannerHeightConstraint?.constant = height
+            self.view.layoutIfNeeded()
+        }
     }
 }
 
