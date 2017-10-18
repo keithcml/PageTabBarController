@@ -45,20 +45,30 @@ extension CollapseCollectionView: UIGestureRecognizerDelegate {
     
     open func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         
-        if let panGestureRecognizer = gestureRecognizer as? UIPanGestureRecognizer,
-            let delegate = delegate as? CollapseCollectionViewDelegate,
-            let shouldRecognizeSimultaneously = delegate.collapseCollectionView?(self,
-                                                                                 panGestureRecognizer: panGestureRecognizer,
-                                                                                 shouldRecognizeSimultaneouslyWith: otherGestureRecognizer) {
-            return shouldRecognizeSimultaneously
+        if let _ = gestureRecognizer as? UIPanGestureRecognizer,
+            let otherPanGestureRecognizer = otherGestureRecognizer as? UIPanGestureRecognizer,
+            let _ = otherPanGestureRecognizer.view as? UIScrollView,
+            otherPanGestureRecognizer != panGestureRecognizer {
+            
+            //print("otherGestureRecognizer: \(otherGestureRecognizer)")
+            //otherPanGestureRecognizer.isEnabled = false
         }
         
-        if let gestureView = otherGestureRecognizer.view, gestureView.isKind(of: UIScrollView.self) {
-            return true
-        }
+//        if let panGestureRecognizer = gestureRecognizer as? UIPanGestureRecognizer,
+//            let delegate = delegate as? CollapseCollectionViewDelegate,
+//            let shouldRecognizeSimultaneously = delegate.collapseCollectionView?(self,
+//                                                                                 panGestureRecognizer: panGestureRecognizer,
+//                                                                                 shouldRecognizeSimultaneouslyWith: otherGestureRecognizer) {
+//            return shouldRecognizeSimultaneously
+//        }
         
-        return true
+//        if let gestureView = otherGestureRecognizer.view, gestureView.isKind(of: UIScrollView.self) {
+//            return true
+//        }
+//
+        return false
     }
 
+    
 }
 
