@@ -11,6 +11,8 @@
 		9A3FD92A1F5E319B00C24A1B /* CollapseTabBarViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A3FD9291F5E319B00C24A1B /* CollapseTabBarViewController.swift */; };
 		9A4609FC1F62F1C600694602 /* PresentedViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A4609FB1F62F1C600694602 /* PresentedViewController.swift */; };
 		9B168F661F975390009281A9 /* PageTabBarSupplementaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B168F641F97525F009281A9 /* PageTabBarSupplementaryView.swift */; };
+		9B168F6A1F976287009281A9 /* CollapseCollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B168F681F976287009281A9 /* CollapseCollectionView.swift */; };
+		9B168F6B1F976287009281A9 /* CollapseCollectionViewLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B168F691F976287009281A9 /* CollapseCollectionViewLayout.swift */; };
 		9B6D040D1F5D696D00B018E9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B6D040C1F5D696D00B018E9 /* AppDelegate.swift */; };
 		9B6D040F1F5D696D00B018E9 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B6D040E1F5D696D00B018E9 /* ViewController.swift */; };
 		9B6D04121F5D696D00B018E9 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9B6D04101F5D696D00B018E9 /* Main.storyboard */; };
@@ -55,6 +57,8 @@
 		9A3FD9291F5E319B00C24A1B /* CollapseTabBarViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CollapseTabBarViewController.swift; sourceTree = "<group>"; };
 		9A4609FB1F62F1C600694602 /* PresentedViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PresentedViewController.swift; sourceTree = "<group>"; };
 		9B168F641F97525F009281A9 /* PageTabBarSupplementaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PageTabBarSupplementaryView.swift; sourceTree = "<group>"; };
+		9B168F681F976287009281A9 /* CollapseCollectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollapseCollectionView.swift; sourceTree = "<group>"; };
+		9B168F691F976287009281A9 /* CollapseCollectionViewLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollapseCollectionViewLayout.swift; sourceTree = "<group>"; };
 		9B6D04091F5D696D00B018E9 /* PageTabBarControllerExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PageTabBarControllerExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9B6D040C1F5D696D00B018E9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		9B6D040E1F5D696D00B018E9 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -92,6 +96,16 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		9B168F671F97625A009281A9 /* CollapseTabBarViewController */ = {
+			isa = PBXGroup;
+			children = (
+				9A3FD9291F5E319B00C24A1B /* CollapseTabBarViewController.swift */,
+				9B168F681F976287009281A9 /* CollapseCollectionView.swift */,
+				9B168F691F976287009281A9 /* CollapseCollectionViewLayout.swift */,
+			);
+			path = CollapseTabBarViewController;
+			sourceTree = "<group>";
+		};
 		9B6D04001F5D696D00B018E9 = {
 			isa = PBXGroup;
 			children = (
@@ -130,13 +144,13 @@
 		9B6D041E1F5D69A900B018E9 /* sources */ = {
 			isa = PBXGroup;
 			children = (
+				9B168F671F97625A009281A9 /* CollapseTabBarViewController */,
 				9B6D041F1F5D69A900B018E9 /* KeyValueObserver.swift */,
 				9A3FD9271F5DBD6300C24A1B /* Badge.swift */,
 				9B168F641F97525F009281A9 /* PageTabBarSupplementaryView.swift */,
 				9B6D04201F5D69A900B018E9 /* PageTabBar.swift */,
 				9B6D04221F5D69A900B018E9 /* PageTabBarItem.swift */,
 				9B6D04211F5D69A900B018E9 /* PageTabBarController.swift */,
-				9A3FD9291F5E319B00C24A1B /* CollapseTabBarViewController.swift */,
 			);
 			name = sources;
 			path = ../../sources;
@@ -280,8 +294,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				9B6D043A1F5D69DB00B018E9 /* PageTabBar.swift in Sources */,
+				9B168F6A1F976287009281A9 /* CollapseCollectionView.swift in Sources */,
 				9A3FD9281F5DBD6300C24A1B /* Badge.swift in Sources */,
 				9A3FD92A1F5E319B00C24A1B /* CollapseTabBarViewController.swift in Sources */,
+				9B168F6B1F976287009281A9 /* CollapseCollectionViewLayout.swift in Sources */,
 				9B6D04391F5D69DB00B018E9 /* KeyValueObserver.swift in Sources */,
 				9B168F661F975390009281A9 /* PageTabBarSupplementaryView.swift in Sources */,
 				9B6D043B1F5D69DB00B018E9 /* PageTabBarController.swift in Sources */,
