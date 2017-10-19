@@ -26,11 +26,9 @@
 import Foundation
 import UIKit
 
-@objc public protocol CollapseTabBarViewControllerDelegate: class {
+@objc public protocol CollapseTabBarViewControllerDelegate: PageTabBarControllerDelegate {
     @objc optional func collapseTabBarController(_ controller: CollapseTabBarViewController, tabBarDidReach position: CollapseTabBarPosition)
-    @objc optional func collapseTabBarController(_ controller: CollapseTabBarViewController,
-                                                 panGestureRecognizer: UIPanGestureRecognizer,
-                                                 shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool
+    @objc optional func collapseTabBarController(_ controller: CollapseTabBarViewController, scrollViewsForScrollingWithTabBarMoveAtIndex pageIndex: Int) -> [UIScrollView]
 }
 
 @objc public enum CollapseTabBarPosition: Int {
@@ -59,23 +57,27 @@ public typealias CollapseTabBarLayoutSettings = CollapseCollectionViewLayoutSett
         return true
     }
     
-    open weak var delegate: CollapseTabBarViewControllerDelegate?
+    open weak var delegate: CollapseTabBarViewControllerDelegate? {
+        didSet {
+            pageTabBarController.delegate = delegate
+        }
+    }
     
     // MARK: - PageTabBarController Properties
-    open fileprivate(set) var pageTabBarController: PageTabBarController?
+    open fileprivate(set) var pageTabBarController: PageTabBarController
     open var visibleViewController: UIViewController? {
-        return pageTabBarController?.selectedViewController
+        return pageTabBarController.selectedViewController
     }
     
     // MARK: - Scroll Control
     open var pageIndex: Int {
         get {
-            guard let pageTabBarController = pageTabBarController else { return 0 }
             return pageTabBarController.pageIndex
         }
         set {
-            guard let pageTabBarController = pageTabBarController, pageTabBarController.pageIndex != newValue else { return }
+            guard pageTabBarController.pageIndex != newValue else { return }
             pageTabBarController.setPageIndex(newValue, animated: false)
+            collpaseCollectionView.otherScrollViews = constructScrollViewsToIgnoreToches()
         }
     }
     open var autoCollapse = false
@@ -94,25 +96,24 @@ public typealias CollapseTabBarLayoutSettings = CollapseCollectionViewLayoutSett
     
     // tabbar positioning
     fileprivate var _maximumHeaderViewHeight: CGFloat = 300
-    
-    fileprivate var headerViewPanGesture: UIPanGestureRecognizer!
-    fileprivate var pageTabBarPanGesture: UIPanGestureRecognizer!
-    fileprivate var isPageTabBarPanning = false
-    // fileprivate var currentScrollDirection = Direction.notMoving
-    
-    fileprivate var initialY: CGFloat = 200
-    fileprivate var initialHeight: CGFloat = 300
-    fileprivate var innerScrollViewContentOffset = CGPoint.zero
-    
+
     fileprivate var viewControllers = [UIViewController]()
     fileprivate var headerView = UIView(frame: CGRect.zero)
     
-    fileprivate var collpaseCollectionView: CollapseCollectionView!
+    fileprivate var collpaseCollectionView: CollapseCollectionView
     
     @objc public init(viewControllers: [UIViewController],
                       tabBarItems: [PageTabBarItem],
                       headerView: UIView = UIView(frame: CGRect.zero),
                       headerHeight: CGFloat = 200) {
+        
+        pageTabBarController =
+            PageTabBarController(
+                viewControllers: viewControllers,
+                items: tabBarItems)
+        
+        let layout = CollapseCollectionViewLayout(settings: CollapseCollectionViewLayoutSettings.defaultSettings())
+        collpaseCollectionView = CollapseCollectionView(frame: UIScreen.main.bounds, collectionViewLayout: layout)
         
         super.init(nibName: nil, bundle: nil)
         
@@ -124,10 +125,13 @@ public typealias CollapseTabBarLayoutSettings = CollapseCollectionViewLayoutSett
         self.headerView = headerView
         self.defaultHeaderHeight = headerHeight
         
-        pageTabBarController =
-            PageTabBarController(
-                viewControllers: viewControllers,
-                items: tabBarItems)
+        collpaseCollectionView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "Content")
+        collpaseCollectionView.register(UICollectionReusableView.self, forSupplementaryViewOfKind: CollapseCollectionViewLayout.Element.header.kind, withReuseIdentifier: "Header")
+        collpaseCollectionView.register(UICollectionReusableView.self, forSupplementaryViewOfKind: CollapseCollectionViewLayout.Element.footer.kind, withReuseIdentifier: "Footer")
+        collpaseCollectionView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        collpaseCollectionView.revealedHeight = minimumHeaderViewHeight
+        collpaseCollectionView.headerHeight = headerHeight
+        collpaseCollectionView.stretchyHeight = headerViewStretchyHeight
     }
     
     required public init?(coder aDecoder: NSCoder) {
@@ -136,30 +140,17 @@ public typealias CollapseTabBarLayoutSettings = CollapseCollectionViewLayoutSett
     
     override open func viewDidLoad() {
         super.viewDidLoad()
-        
         view.backgroundColor = UIColor.white
         
-        let settings = CollapseCollectionViewLayoutSettings(headerSize: CGSize(width: view.frame.width, height: defaultHeaderHeight),
+        let settings = CollapseCollectionViewLayoutSettings(headerSize: CGSize(width: view.frame.width, height: collpaseCollectionView.headerHeight),
                                                             isHeaderStretchy: true,
-                                                            headerStretchHeight: headerViewStretchyHeight,
-                                                            headerMinimumHeight: minimumHeaderViewHeight)
-        let layout = CollapseCollectionViewLayout(settings: settings)
-        
-        collpaseCollectionView = CollapseCollectionView(frame: view.bounds, collectionViewLayout: layout)
-        collpaseCollectionView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "Content")
-        collpaseCollectionView.register(UICollectionReusableView.self, forSupplementaryViewOfKind: CollapseCollectionViewLayout.Element.header.kind, withReuseIdentifier: "Header")
-        collpaseCollectionView.register(UICollectionReusableView.self, forSupplementaryViewOfKind: CollapseCollectionViewLayout.Element.footer.kind, withReuseIdentifier: "Footer")
-        collpaseCollectionView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+                                                            headerStretchHeight: collpaseCollectionView.stretchyHeight,
+                                                            headerMinimumHeight: collpaseCollectionView.revealedHeight)
+        collpaseCollectionView.collectionViewLayout = CollapseCollectionViewLayout(settings: settings)
         collpaseCollectionView.collapseDelegate = self
-        collpaseCollectionView.collapseDelegate = self
-        
-        collpaseCollectionView.revealedHeight = minimumHeaderViewHeight
-        collpaseCollectionView.headerHeight = defaultHeaderHeight
-        collpaseCollectionView.stretchyHeight = headerViewStretchyHeight
         
         view.addSubview(collpaseCollectionView)
         
-        guard let pageTabBarController = pageTabBarController else { fatalError("pagetabbar controller = nil") }
         pageTabBarController.updateIndex = { _, index in
             if index == 0 {
             }
@@ -172,25 +163,7 @@ public typealias CollapseTabBarLayoutSettings = CollapseCollectionViewLayoutSett
         view.addSubview(pageTabBarController.view)
         pageTabBarController.didMove(toParentViewController: self)
         
-        /*
-         
-         //headerView.frame = CGRect(x: 0, y: 0, width: view.frame.width, height: defaultHeaderHeight)
-         //view.addSubview(headerView)
-        pageTabBarController.setPageIndex(pageIndex, animated: false)
-        
-        addChildViewController(pageTabBarController)
-        pageTabBarController.view.frame = CGRect(x: 0, y: defaultHeaderHeight, width: view.frame.width, height: view.frame.height - defaultHeaderHeight)
-        view.addSubview(pageTabBarController.view)
-        pageTabBarController.didMove(toParentViewController: self)
-
-        pageTabBarPanGesture = UIPanGestureRecognizer(target: self, action: #selector(pan(_:)))
-        pageTabBarPanGesture.delegate = self
-        pageTabBarController.view.addGestureRecognizer(pageTabBarPanGesture)
-        
-        headerView.isUserInteractionEnabled = true
-        headerViewPanGesture = UIPanGestureRecognizer(target: self, action: #selector(pan(_:)))
-        headerViewPanGesture.delegate = self
-        headerView.addGestureRecognizer(headerViewPanGesture)*/
+        collpaseCollectionView.otherScrollViews = constructScrollViewsToIgnoreToches()
     }
     
     override open func viewWillAppear(_ animated: Bool) {
@@ -217,7 +190,7 @@ public typealias CollapseTabBarLayoutSettings = CollapseCollectionViewLayoutSett
     
     // MARK: - Select Tab
     @objc open func selectTabAtIndex(_ index: Int, scrollToPosition: CollapseTabBarPosition) {
-        pageTabBarController?.setPageIndex(index, animated: true)
+        pageTabBarController.setPageIndex(index, animated: true)
         scrollTabBar(to: .top)
     }
     
@@ -232,212 +205,20 @@ public typealias CollapseTabBarLayoutSettings = CollapseCollectionViewLayoutSett
             collpaseCollectionView.scrollRectToVisible(CGRect(x: 0, y: 0, width: 1, height: 1), animated: animated)
             break
         }
-//
-//        guard let pageView = pageTabBarController?.view else { return }
-//        var headerViewOrigin = CGPoint.zero
-//        var pageViewOrigin = pageView.frame.origin
-//        var pageViewSize = pageView.frame.size
-//
-//        switch position {
-//        case .top:
-//            pageViewOrigin = CGPoint(x: 0, y: minimumHeaderViewHeight)
-//            pageViewSize = CGSize(width: pageView.frame.width, height: view.frame.height - minimumHeaderViewHeight)
-//            headerViewOrigin = CGPoint(x: 0, y: minimumHeaderViewHeight - defaultHeaderHeight)
-//            break
-//        case .bottom:
-//            pageViewOrigin = CGPoint(x: 0, y: defaultHeaderHeight)
-//            pageViewSize = CGSize(width: pageView.frame.width, height: view.frame.height - defaultHeaderHeight)
-//            break
-//        }
-//
-//        if springAnimation {
-//            UIView.animate(
-//                withDuration: 0.3,
-//                delay: 0,
-//                options: [.curveEaseOut, .allowUserInteraction, .beginFromCurrentState],
-//                animations: {
-//                    pageView.frame = CGRect(origin: pageViewOrigin, size: pageViewSize)
-//                    self.headerView.transform = .identity
-//                    self.headerView.frame.origin = headerViewOrigin
-//                }) { _ in
-//                    self.delegate?.collapseTabBarController?(self, tabBarDidReach: position)
-//                }
-//        }
-//        else {
-//            UIView.animate(
-//                withDuration: 0.3,
-//                delay: 0,
-//                options: [.curveEaseOut, .allowUserInteraction, .beginFromCurrentState],
-//                animations: {
-//                    pageView.frame = CGRect(origin: pageViewOrigin, size: pageViewSize)
-//                    self.headerView.transform = .identity
-//                    self.headerView.frame.origin = headerViewOrigin
-//                }) { _ in
-//                    self.delegate?.collapseTabBarController?(self, tabBarDidReach: position)
-//                }
-//        }
     }
     
-//    // MARK: - Gesture Handling
-//    @objc private func pan(_ sender: UIPanGestureRecognizer?) {
-//        guard let gesture = sender else { return }
-//        guard let gView = pageTabBarController?.view else { return }
-//        guard let touchView = gesture.view else { return }
-//
-//        switch gesture.state {
-//        case .began:
-//            guard abs(gesture.velocity(in: gView).y) >= abs(gesture.velocity(in: gView).x) else { return }
-//
-//            initialY = gView.frame.minY
-//            initialHeight = gView.frame.height
-//
-//            if touchView == headerView {
-//                isPageTabBarPanning = true
-//            }
-//            else {
-//                isPageTabBarPanning = pageTabBarCanScroll(direction: gesture.direction)
-//            }
-//            if let pageTabBarController = pageTabBarController,
-//                let scrollView = pageTabBarController.theMostBelowScrollViewInView(pageTabBarController.viewControllers[pageTabBarController.pageIndex].view) {
-//                innerScrollViewContentOffset = scrollView.contentOffset
-//            }
-//
-//            if case .notMoving = gesture.direction {} else {
-//                currentScrollDirection = gesture.direction
-//            }
-//
-//            break
-//        case .changed:
-//            guard isPageTabBarPanning else { return }
-//
-//            if case .notMoving = gesture.verticalDirection {} else {
-//                currentScrollDirection = gesture.verticalDirection
-//            }
-//
-//            let translateY = gesture.translation(in: view).y
-//
-//            let minimumY = alwaysBouncesAtTop ? 0 : minimumHeaderViewHeight
-//            var newY = alwaysBouncesAtBottom ? max(minimumY, translateY + initialY) : max(minimumY, min(translateY + initialY, defaultHeaderHeight))
-//            if newY > _maximumHeaderViewHeight {
-//                newY = _maximumHeaderViewHeight
-//            }
-//            let newHeight = initialHeight + (initialY - newY)
-//
-//            gView.bounds = CGRect(x: 0, y: 0, width: gView.frame.width, height: newHeight)
-//            gView.frame.origin = CGPoint(x: 0, y: newY)
-//
-//            if alwaysBouncesAtBottom && gView.frame.minY >= defaultHeaderHeight {
-//                let gap = gView.frame.minY - defaultHeaderHeight
-//                let newHeight = ceil(defaultHeaderHeight + gap)
-//                let scaleFactor = newHeight/defaultHeaderHeight
-//                let scale = CGAffineTransform(scaleX: scaleFactor, y: scaleFactor)
-//                let translation = CGAffineTransform(translationX: 0, y: -scaleFactor)
-//
-//                headerView.transform = scale.concatenating(translation)//CGAffineTransform(scaleX: scale, y: scale)
-//                headerView.frame = CGRect(x: headerView.frame.minX, y: newY - newHeight, width: headerView.frame.width, height: headerView.frame.height)
-//            }
-//            else {
-//                headerView.transform = CGAffineTransform.identity
-//                headerView.frame = CGRect(x: 0, y: newY - defaultHeaderHeight, width: headerView.frame.width, height: headerView.frame.height)
-//            }
-//
-//            guard let pageTabBarController = pageTabBarController,
-//                let scrollView = pageTabBarController.theMostBelowScrollViewInView(pageTabBarController.viewControllers[pageTabBarController.pageIndex].view) else { return }
-//
-//            switch gesture.direction {
-//            case .up:
-//                if newY > 0 {
-//                    scrollView.contentOffset = innerScrollViewContentOffset
-//                }
-//                break
-//            case .down:
-//                if newY < defaultHeaderHeight {
-//                    scrollView.contentOffset = innerScrollViewContentOffset
-//                }
-//                break
-//            default:
-//                break
-//            }
-//            break
-//        default:
-//            guard isPageTabBarPanning else { return }
-//            if case .notMoving = gesture.verticalDirection {} else {
-//                currentScrollDirection = gesture.verticalDirection
-//            }
-//
-//            // bouncing control
-//            if gView.frame.minY > defaultHeaderHeight {
-//                scrollTabBar(to: .bottom)
-//                return
-//            }
-//            else if gView.frame.minY < minimumHeaderViewHeight && alwaysBouncesAtTop {
-//                scrollTabBar(to: .top)
-//                return
-//            }
-//
-//            isPageTabBarPanning = false
-//
-//            if autoCollapse {
-//                guard gView.frame.minY > minimumHeaderViewHeight, gView.frame.minY < defaultHeaderHeight else { return }
-//                switch currentScrollDirection {
-//                case .up:
-//                    scrollTabBar(to: .top)
-//                    break
-//                case .down:
-//                    scrollTabBar(to: .bottom)
-//                    break
-//                default:
-//                    break
-//                }
-//            }
-//            else {
-//                guard abs(gesture.velocity(in: gView).y) > 500 else { return }
-//                // spring effect
-//                var distance = (gesture.velocity(in: gView).y * gesture.velocity(in: gView).y) / (2 * UIScrollViewDecelerationRateNormal)
-//                var position = CollapseTabBarPosition.bottom
-//                if case .up = currentScrollDirection {
-//                    distance = distance * -1
-//                    position = .top
-//                }
-//                let time = 0.2
-//                let translateY = gesture.translation(in: view).y + distance
-//                let minimumY = alwaysBouncesAtTop ? 0 : minimumHeaderViewHeight
-//                let newY = max(minimumY, min(translateY + initialY, defaultHeaderHeight))
-//
-//                let newHeight = initialHeight + (initialY - newY)
-//
-//                UIView.animate(withDuration: TimeInterval(time),
-//                               delay: 0,
-//                               options: [.curveEaseOut, .allowUserInteraction, .beginFromCurrentState],
-//                               animations: {
-//                                    gView.frame = CGRect(x: 0, y: newY, width: gView.frame.width, height: newHeight)
-//                                    self.headerView.frame = CGRect(origin: CGPoint(x: 0, y: newY - self.defaultHeaderHeight), size: self.headerView.frame.size)
-//                                }) { _ in
-//                                    self.delegate?.collapseTabBarController?(self, tabBarDidReach: position)
-//                                }
-//            }
-//            break
-//        }
-//    }
-//
-//    fileprivate func pageTabBarCanScroll(direction: Direction?) -> Bool {
-//
-//        if let pageTabBarController = pageTabBarController {
-//            guard let dir = direction else { return true }
-//            switch dir {
-//            case .up:
-//                let threshold = alwaysBouncesAtTop ? 0 : minimumHeaderViewHeight
-//                return pageTabBarController.view.frame.minY > threshold
-//            case .down:
-//                guard let scrollView = pageTabBarController.theMostBelowScrollViewInView(pageTabBarController.viewControllers[pageTabBarController.pageIndex].view) else { return true }
-//                if !alwaysBouncesAtBottom && pageTabBarController.view.frame.minY == defaultHeaderHeight { return false }
-//                return scrollView.contentOffset.y <= scrollView.contentInset.top
-//            default:
-//                break
-//            }
-//        }
-//        return true
-//    }
+    private func constructScrollViewsToIgnoreToches() -> [UIScrollView] {
+        var scrollViews = pageTabBarController.interceptTouchesScrollViews()
+        if let fromDelegate = delegate?.collapseTabBarController?(self, scrollViewsForScrollingWithTabBarMoveAtIndex: pageIndex) {
+            
+            fromDelegate.forEach { additionalScrollView in
+                if !scrollViews.contains( where: { $0 === additionalScrollView } ) {
+                    scrollViews.append(additionalScrollView)
+                }
+            }
+        }
+        return scrollViews
+    }
 }
 
 extension CollapseTabBarViewController: CollapseCollectionViewDelegate {

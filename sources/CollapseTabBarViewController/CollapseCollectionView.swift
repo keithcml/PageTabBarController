@@ -22,13 +22,15 @@ final class CollapseCollectionView: UICollectionView {
     var headerHeight: CGFloat = 320
     var stretchyHeight: CGFloat = 64
     
-    fileprivate var uncommitedOtherScrollViews = [UIScrollView]()
-    fileprivate var otherScrollViews = [UIScrollView]()
+    var otherScrollViews = [UIScrollView]() {
+        didSet {
+            otherScrollViewsContentOffset = otherScrollViews.map { $0.contentOffset }
+        }
+    }
     fileprivate var otherScrollViewsContentOffset = [CGPoint]()
-    fileprivate var initialCollectionViewContentOffset = CGPoint.zero
     
-    fileprivate var gestureDirection = Direction.notMoving
-    fileprivate var isScrolling = false
+    fileprivate var lastContentOffset = CGPoint.zero
+    fileprivate var ignoringScroll = false
     
     weak var collapseDelegate: CollapseCollectionViewDelegate?
     
@@ -42,36 +44,30 @@ final class CollapseCollectionView: UICollectionView {
         alwaysBounceVertical = true
         showsVerticalScrollIndicator = false
         panGestureRecognizer.delegate = self
-        panGestureRecognizer.addTarget(self, action: #selector(pan(_:)))
     }
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
-    @objc private func pan(_ sender: UIPanGestureRecognizer?) {
-        guard let gesture = sender else { return }
-
-        switch gesture.state {
-        case .began:
-            initialCollectionViewContentOffset = contentOffset
-            otherScrollViewsContentOffset = otherScrollViews.map { $0.contentOffset }
-            gestureDirection = gesture.verticalDirection
-            break
-        case .changed:
-            break
-        default:
-            break
-        }
-    }
 }
 
 extension CollapseCollectionView: UICollectionViewDelegate, UICollectionViewDataSource {
     
+    private func shouldIgoreScrolling(at point: CGPoint, on scrollView: UIScrollView) -> Bool {
+        for otherScrollView in otherScrollViews {
+            let rect = otherScrollView.superview!.convert(otherScrollView.frame, to: scrollView)
+            if rect.contains(point) && otherScrollView.contentOffset.y > -otherScrollView.contentInset.top {
+                print(otherScrollView)
+                return true
+            }
+        }
+        return false
+    }
+    
     public func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
-        otherScrollViews.forEach({ $0.setContentOffset(scrollView.contentOffset, animated: false) })
-        otherScrollViews = uncommitedOtherScrollViews
-        uncommitedOtherScrollViews = []
+        
+        let touchLocation = scrollView.panGestureRecognizer.location(in: scrollView)
+        ignoringScroll = shouldIgoreScrolling(at: touchLocation, on: scrollView)
     }
     
     public func scrollViewDidScroll(_ scrollView: UIScrollView) {
@@ -83,37 +79,20 @@ extension CollapseCollectionView: UICollectionViewDelegate, UICollectionViewData
                 contentOffset.y = scrollableOffsetY
             }
         }
-
-        if case .up = gestureDirection {
-            
-            for (scrollView, initialContentOffset) in zip(otherScrollViews, otherScrollViewsContentOffset) {
-                if contentOffset.y < scrollableOffsetY {
-                    scrollView.contentOffset = initialContentOffset
-                } else {
-                    contentOffset.y = scrollableOffsetY
-                    contentOffset.y = max(scrollableOffsetY, revealedHeight)
+        
+        if ignoringScroll {
+            scrollView.contentOffset = lastContentOffset
+        } else {
+            if lastContentOffset.y < scrollView.contentOffset.y {
+                for (otherScrollView, initialContentOffset) in zip(otherScrollViews, otherScrollViewsContentOffset) {
+                    if contentOffset.y < scrollableOffsetY {
+                        otherScrollView.contentOffset = initialContentOffset
+                    }
                 }
             }
-            
-            return
         }
         
-        if case .down = gestureDirection {
-            for (scrollView, initialContentOffset) in zip(otherScrollViews, otherScrollViewsContentOffset) {
-                
-                if initialContentOffset.y > -scrollView.contentInset.top && scrollView.contentOffset.y <= -scrollView.contentInset.top {
-                    scrollView.contentOffset.y = -scrollView.contentInset.top
-                }
-                else if scrollView.contentOffset.y > -scrollView.contentInset.top {
-                    contentOffset.y = initialCollectionViewContentOffset.y
-                }
-                else {
-                    scrollView.contentOffset = initialContentOffset
-                }
-            }
-            return
-        }
-        
+        lastContentOffset = CGPoint(x: scrollView.contentOffset.x, y: max(scrollView.contentOffset.y, revealedHeight))
     }
     
     public func numberOfSections(in collectionView: UICollectionView) -> Int {
@@ -186,35 +165,12 @@ extension CollapseCollectionView: UICollectionViewDelegate, UICollectionViewData
 
 extension CollapseCollectionView: UIGestureRecognizerDelegate {
     
-    open override func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
-        guard let panGesture = gestureRecognizer as? UIPanGestureRecognizer else { return false }
-        if case .notMoving = panGesture.verticalDirection {
+    open func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        if let cv = collapseDelegate?.getPageTabBarController()?.collectionView, let gestureView = otherGestureRecognizer.view, gestureView == cv {
             return false
         }
         return true
     }
-    
-    open func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
-        
-        
-        if let _ = gestureRecognizer as? UIPanGestureRecognizer,
-            let otherPanGestureRecognizer = otherGestureRecognizer as? UIPanGestureRecognizer,
-            let otherScrollView = otherPanGestureRecognizer.view as? UIScrollView,
-            otherPanGestureRecognizer != panGestureRecognizer {
-
-            if let _ = otherScrollView as? PageTabBarCollectionView {} else {
-                
-                if !uncommitedOtherScrollViews.contains( where: { $0 === otherScrollView } ) && !otherScrollView.description.hasPrefix("<UITableViewWrapperView") {
-                    uncommitedOtherScrollViews.append(otherScrollView)
-                }
-                
-            }
-        }
-        
-        return true
-    }
-
-    
 }
 
 // MARK: - Pan Gesture Helpers

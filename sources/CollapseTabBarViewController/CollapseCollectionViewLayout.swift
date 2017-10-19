@@ -10,10 +10,13 @@ import Foundation
 import UIKit
 
 public struct CollapseCollectionViewLayoutSettings {
+    
     var isHeaderStretchy = true
     var headerSize = CGSize.zero
     var headerStretchHeight: CGFloat = 64
     var headerMinimumHeight: CGFloat = 0
+    
+    var decorationViewSize = CGSize.zero
     
     public static func defaultSettings() -> CollapseCollectionViewLayoutSettings {
         return CollapseCollectionViewLayoutSettings(headerSize: CGSize.zero, isHeaderStretchy: true, headerStretchHeight: 64, headerMinimumHeight: 0)
@@ -27,13 +30,10 @@ public struct CollapseCollectionViewLayoutSettings {
     }
 }
 
-//@objc protocol CollapseCollectionViewLayoutDelegate: CollapseCollectionViewDelegate, UICollectionViewDataSource {}
-
 final class CollapseCollectionViewLayout: UICollectionViewLayout {
     
-    //weak var delegate: CollapseCollectionViewLayoutDelegate?
-
     enum Element: String {
+        case decoration
         case header
         case footer
         case cell
@@ -47,13 +47,18 @@ final class CollapseCollectionViewLayout: UICollectionViewLayout {
         }
     }
     
+    var settings = CollapseCollectionViewLayoutSettings.defaultSettings() {
+        didSet {
+            invalidateLayout()
+            prepareCache()
+        }
+    }
     fileprivate var contentSize = CGSize.zero
-    fileprivate var settings = CollapseCollectionViewLayoutSettings.defaultSettings()
     fileprivate var oldBounds = CGRect.zero
     fileprivate var cache = [Element: [IndexPath: UICollectionViewLayoutAttributes]]()
     fileprivate var visibleLayoutAttributes = [UICollectionViewLayoutAttributes]()
     
-    convenience init(settings: CollapseCollectionViewLayoutSettings) {
+    convenience init(settings: CollapseCollectionViewLayoutSettings = CollapseCollectionViewLayoutSettings.defaultSettings()) {
         self.init()
         self.settings = settings
     }
@@ -76,6 +81,10 @@ final class CollapseCollectionViewLayout: UICollectionViewLayout {
         }
     }
     
+    override public func layoutAttributesForDecorationView(ofKind elementKind: String, at indexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
+        return cache[.decoration]?[indexPath]
+    }
+    
     override public func layoutAttributesForItem(at indexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
         return cache[.cell]?[indexPath]
     }
@@ -91,10 +100,10 @@ final class CollapseCollectionViewLayout: UICollectionViewLayout {
         for (type, elementInfos) in cache {
             for (indexPath, attributes) in elementInfos {
                 
-                updateSupplementaryViews(type,
-                                         attributes: attributes,
-                                         collectionView: collectionView,
-                                         indexPath: indexPath)
+                updateViews(type,
+                            attributes: attributes,
+                            collectionView: collectionView,
+                            indexPath: indexPath)
                 visibleLayoutAttributes.append(attributes)
 
             }
@@ -106,6 +115,7 @@ final class CollapseCollectionViewLayout: UICollectionViewLayout {
     
     private func prepareCache() {
         cache.removeAll(keepingCapacity: true)
+        cache[.decoration] = [IndexPath: UICollectionViewLayoutAttributes]()
         cache[.header] = [IndexPath: UICollectionViewLayoutAttributes]()
         cache[.footer] = [IndexPath: UICollectionViewLayoutAttributes]()
         cache[.cell] = [IndexPath: UICollectionViewLayoutAttributes]()
@@ -117,18 +127,37 @@ final class CollapseCollectionViewLayout: UICollectionViewLayout {
             return
         }
         
-        attributes.frame = CGRect(origin: CGPoint.zero, size: size)
+        switch type {
+        case .decoration:
+            attributes.frame = CGRect(origin: CGPoint(x: 0, y: settings.headerSize.height - size.height), size: size)
+            break
+        case .header:
+            attributes.frame = CGRect(origin: CGPoint.zero, size: size)
+            break
+        case .footer:
+            break
+        case .cell:
+            attributes.frame = CGRect(origin: CGPoint(x: 0, y: settings.headerSize.height), size: size)
+            break
+        }
         
         cache[type]?[attributes.indexPath] = attributes
     }
     
-    private func updateSupplementaryViews(_ type: Element, attributes: UICollectionViewLayoutAttributes, collectionView: UICollectionView, indexPath: IndexPath) {
+    private func updateViews(_ type: Element, attributes: UICollectionViewLayoutAttributes, collectionView: UICollectionView, indexPath: IndexPath) {
 
         let headerHeight = settings.headerSize.height
         
         if collectionView.contentOffset.y < 0 {
             
             switch type {
+            case .decoration:
+                if settings.isHeaderStretchy {
+                    let y = min(headerHeight + collectionView.contentOffset.y + settings.headerStretchHeight, headerHeight) - attributes.size.height
+                    attributes.frame = CGRect(origin: CGPoint(x: 0, y: y),
+                                              size: attributes.size)
+                }
+                break
             case .header:
                 if settings.isHeaderStretchy {
                     
@@ -150,21 +179,30 @@ final class CollapseCollectionViewLayout: UICollectionViewLayout {
             case .cell:
                 if settings.isHeaderStretchy {
                     let y = min(headerHeight + collectionView.contentOffset.y + settings.headerStretchHeight, headerHeight)
-                    attributes.frame.origin = CGPoint(x: 0, y: y)
+                    attributes.frame = CGRect(origin: CGPoint(x: 0, y: y),
+                                              size: CGSize(width: attributes.frame.width,
+                                                           height: collectionView.frame.height - headerHeight + collectionView.contentOffset.y))
                 }
+                
                 break
             }
 
         } else {
             
             switch type {
+            case .decoration:
+                attributes.frame = CGRect(origin: CGPoint(x: 0, y: headerHeight - attributes.frame.height),
+                                          size: attributes.size)
+                break
             case .header:
                 attributes.transform = .identity
                 break
             case .footer:
                 break
             case .cell:
-                attributes.frame.origin = CGPoint(x: 0, y: headerHeight)
+                attributes.frame = CGRect(origin: CGPoint(x: 0, y: headerHeight),
+                                          size: CGSize(width: attributes.frame.width,
+                                                       height: collectionView.frame.height - headerHeight + collectionView.contentOffset.y))
                 break
             }
             
@@ -185,23 +223,28 @@ final class CollapseCollectionViewLayout: UICollectionViewLayout {
         
         oldBounds = collectionView.bounds
         
+        let decorationAttributes = UICollectionViewLayoutAttributes(forDecorationViewOfKind: Element.decoration.kind, with: IndexPath(item: 0, section: 0))
+        prepareElement(size: settings.decorationViewSize, type: .decoration, attributes: decorationAttributes)
+        
         let headerAttributes = UICollectionViewLayoutAttributes(forSupplementaryViewOfKind: Element.header.kind,
                                                                 with: IndexPath(item: 0, section: 0))
-        
         prepareElement(size: settings.headerSize, type: .header, attributes: headerAttributes)
         
         for item in 0 ..< collectionView.numberOfItems(inSection: 0) {
             let cellIndexPath = IndexPath(item: item, section: 0)
             let attributes = UICollectionViewLayoutAttributes(forCellWith: cellIndexPath)
+            let size = CGSize(width: collectionView.bounds.width,
+                              height: collectionView.bounds.height - settings.headerMinimumHeight)
+            prepareElement(size: size, type: .cell, attributes: attributes)
             
-            attributes.frame = CGRect(
-                x: 0,
-                y: settings.headerSize.height,
-                width: collectionView.bounds.width,
-                height: collectionView.bounds.height - settings.headerMinimumHeight
-            )
-            
-            cache[.cell]?[cellIndexPath] = attributes
+//            attributes.frame = CGRect(
+//                x: 0,
+//                y: settings.headerSize.height,
+//                width: collectionView.bounds.width,
+//                height: collectionView.bounds.height - settings.headerMinimumHeight
+//            )
+//
+//            cache[.cell]?[cellIndexPath] = attributes
         }
         
     }

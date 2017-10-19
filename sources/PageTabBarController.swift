@@ -129,8 +129,8 @@ internal final class PageTabBarCollectionViewFlowLayout: UICollectionViewFlowLay
     open fileprivate(set) var pageTabBarHeaderView = PageTabBarSupplementaryView(frame: CGRect.zero)
     open fileprivate(set) var pageTabBarBannerView = PageTabBarSupplementaryView(frame: CGRect.zero)
     
-    fileprivate var collectionView: PageTabBarCollectionView?
-    fileprivate(set) var viewControllers = [UIViewController]()
+    internal(set) var collectionView: PageTabBarCollectionView?
+    internal(set) var viewControllers = [UIViewController]()
     fileprivate var tabBarPosition: PageTabBarPosition = .top
     
     internal var pageTabBarItems: [PageTabBarItem] = []
@@ -316,23 +316,6 @@ internal final class PageTabBarCollectionViewFlowLayout: UICollectionViewFlowLay
         }
     }
     
-//    @available(*, deprecated, message: "deprecated")
-//    override open func didRotate(from fromInterfaceOrientation: UIInterfaceOrientation) {
-//        guard let collectionView = collectionView else {
-//            return
-//        }
-//        UIView.animate(withDuration: 0, animations: {
-//            collectionView.reloadData()
-//            collectionView.scrollToItem(at: IndexPath(row: self.pageIndex, section: 0),
-//                                        at: .top,
-//                                        animated: true)
-//            self.view.layoutIfNeeded()
-//        }, completion: { _ in
-//            let diff = collectionView.contentOffset.x * self.pageTabBar.frame.width / collectionView.contentSize.width
-//            self.pageTabBar.setIndicatorPosition(diff)
-//        })
-//    }
-    
     // MARK: - Badge
     open func setBadge(_ value: Int, forItemAt index: Int) {
         guard pageTabBarItems.count > index else { return }
@@ -373,6 +356,25 @@ internal final class PageTabBarCollectionViewFlowLayout: UICollectionViewFlowLay
         if !shouldAnimate {
             delegate?.pageTabBarController?(self, didChangeContentViewController: viewControllers[pageIndex], atIndex: pageIndex)
         }
+    }
+    
+    internal func interceptTouchesScrollViews() -> [UIScrollView] {
+        var scrollViews = [UIScrollView]()
+        for vc in viewControllers {
+            if let tableViewCtl = vc as? UITableViewController, let scrollView = tableViewCtl.view as? UIScrollView {
+                scrollViews.append(scrollView)
+            }
+            else if let collectionViewCtl = vc as? UICollectionViewController, let scrollView = collectionViewCtl.view as? UIScrollView {
+                scrollViews.append(scrollView)
+            }
+            else if let rootView = vc.view as? UIScrollView {
+                scrollViews.append(rootView)
+            }
+            else if let baseScrollView = theMostBelowScrollViewInView(vc.view) {
+                scrollViews.append(baseScrollView)
+            }
+        }
+        return scrollViews
     }
     
     func theMostBelowScrollViewInView(_ view: UIView) -> UIScrollView? {
