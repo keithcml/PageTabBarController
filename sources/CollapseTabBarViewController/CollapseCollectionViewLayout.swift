@@ -27,13 +27,11 @@ public struct CollapseCollectionViewLayoutSettings {
     }
 }
 
-@objc protocol CollapseCollectionViewLayoutDelegate: UICollectionViewDelegate, UICollectionViewDataSource {
-    
-}
+//@objc protocol CollapseCollectionViewLayoutDelegate: CollapseCollectionViewDelegate, UICollectionViewDataSource {}
 
 final class CollapseCollectionViewLayout: UICollectionViewLayout {
     
-    weak var delegate: CollapseCollectionViewLayoutDelegate?
+    //weak var delegate: CollapseCollectionViewLayoutDelegate?
 
     enum Element: String {
         case header

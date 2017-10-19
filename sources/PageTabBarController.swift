@@ -26,6 +26,10 @@
 import Foundation
 import UIKit
 
+class PageTabBarCollectionView: UICollectionView {
+    
+}
+
 public enum PageTabBarTransitionAnimation {
     case none
     case scroll
@@ -125,7 +129,7 @@ internal final class PageTabBarCollectionViewFlowLayout: UICollectionViewFlowLay
     open fileprivate(set) var pageTabBarHeaderView = PageTabBarSupplementaryView(frame: CGRect.zero)
     open fileprivate(set) var pageTabBarBannerView = PageTabBarSupplementaryView(frame: CGRect.zero)
     
-    fileprivate var collectionView: UICollectionView?
+    fileprivate var collectionView: PageTabBarCollectionView?
     fileprivate(set) var viewControllers = [UIViewController]()
     fileprivate var tabBarPosition: PageTabBarPosition = .top
     
@@ -190,7 +194,7 @@ internal final class PageTabBarCollectionViewFlowLayout: UICollectionViewFlowLay
         layout.minimumLineSpacing = 0
         layout.sectionInset = UIEdgeInsets.zero
         
-        collectionView = UICollectionView(frame: view.frame, collectionViewLayout: layout)
+        collectionView = PageTabBarCollectionView(frame: view.frame, collectionViewLayout: layout)
         guard let collectionView = collectionView else { fatalError() }
         collectionView.dataSource = self
         collectionView.delegate = self

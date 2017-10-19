@@ -79,24 +79,11 @@ public typealias CollapseTabBarLayoutSettings = CollapseCollectionViewLayoutSett
         }
     }
     open var autoCollapse = false
-    open var alwaysBouncesAtTop = false
     open var alwaysBouncesAtBottom = true
-    open var minimumHeaderViewHeight: CGFloat = 100
-    open var maximumHeaderViewHeight: CGFloat = 300 {
-        didSet {
-            if maximumHeaderViewHeight > self.view.frame.height - 100 {
-                _maximumHeaderViewHeight = self.view.frame.height - 100
-            }
-            else {
-                _maximumHeaderViewHeight = maximumHeaderViewHeight
-            }
-        }
-    }
-    open fileprivate(set) var defaultHeaderHeight: CGFloat = 200 {
-        didSet {
-            _maximumHeaderViewHeight = defaultHeaderHeight + 64
-        }
-    }
+    
+    open var minimumHeaderViewHeight: CGFloat = 0
+    open fileprivate(set) var defaultHeaderHeight: CGFloat = 200
+    open var headerViewStretchyHeight: CGFloat = 64
     
     /**
      LayoutGuide for attaching views to top of page view
@@ -154,22 +141,23 @@ public typealias CollapseTabBarLayoutSettings = CollapseCollectionViewLayoutSett
         
         let settings = CollapseCollectionViewLayoutSettings(headerSize: CGSize(width: view.frame.width, height: defaultHeaderHeight),
                                                             isHeaderStretchy: true,
-                                                            headerStretchHeight: 64,
-                                                            headerMinimumHeight: 64)
+                                                            headerStretchHeight: headerViewStretchyHeight,
+                                                            headerMinimumHeight: minimumHeaderViewHeight)
         let layout = CollapseCollectionViewLayout(settings: settings)
-        layout.delegate = self
         
         collpaseCollectionView = CollapseCollectionView(frame: view.bounds, collectionViewLayout: layout)
         collpaseCollectionView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "Content")
         collpaseCollectionView.register(UICollectionReusableView.self, forSupplementaryViewOfKind: CollapseCollectionViewLayout.Element.header.kind, withReuseIdentifier: "Header")
         collpaseCollectionView.register(UICollectionReusableView.self, forSupplementaryViewOfKind: CollapseCollectionViewLayout.Element.footer.kind, withReuseIdentifier: "Footer")
         collpaseCollectionView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        collpaseCollectionView.dataSource = self
-        collpaseCollectionView.delegate = self
-        view.addSubview(collpaseCollectionView)
+        collpaseCollectionView.collapseDelegate = self
+        collpaseCollectionView.collapseDelegate = self
         
-        //headerView.frame = CGRect(x: 0, y: 0, width: view.frame.width, height: defaultHeaderHeight)
-        //view.addSubview(headerView)
+        collpaseCollectionView.revealedHeight = minimumHeaderViewHeight
+        collpaseCollectionView.headerHeight = defaultHeaderHeight
+        collpaseCollectionView.stretchyHeight = headerViewStretchyHeight
+        
+        view.addSubview(collpaseCollectionView)
         
         guard let pageTabBarController = pageTabBarController else { fatalError("pagetabbar controller = nil") }
         pageTabBarController.updateIndex = { _, index in
@@ -185,6 +173,9 @@ public typealias CollapseTabBarLayoutSettings = CollapseCollectionViewLayoutSett
         pageTabBarController.didMove(toParentViewController: self)
         
         /*
+         
+         //headerView.frame = CGRect(x: 0, y: 0, width: view.frame.width, height: defaultHeaderHeight)
+         //view.addSubview(headerView)
         pageTabBarController.setPageIndex(pageIndex, animated: false)
         
         addChildViewController(pageTabBarController)
@@ -449,180 +440,21 @@ public typealias CollapseTabBarLayoutSettings = CollapseCollectionViewLayoutSett
 //    }
 }
 
-extension CollapseTabBarViewController: UIGestureRecognizerDelegate {
-    open func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
-        
-        if let panGestureRecognizer = gestureRecognizer as? UIPanGestureRecognizer,
-            let shouldRecognizeSimultaneously = delegate?.collapseTabBarController?(self,
-                                                                                    panGestureRecognizer: panGestureRecognizer,
-                                                                                    shouldRecognizeSimultaneouslyWith: otherGestureRecognizer) {
-                return shouldRecognizeSimultaneously
-        }
-
-        if let gestureView = otherGestureRecognizer.view, gestureView.isKind(of: UIScrollView.self) {
-            return true
-        }
-        
-        return false
-    }
-}
-
 extension CollapseTabBarViewController: CollapseCollectionViewDelegate {
-    func collapseCollectionView(_ collapseCollectionView: CollapseCollectionView,
-                                panGestureRecognizer: UIPanGestureRecognizer,
-                                shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
-        return true
+    func getCollapseTabBarViewController() -> CollapseTabBarViewController? {
+        return self
+    }
+    
+    func getPageTabBarController() -> PageTabBarController? {
+        return pageTabBarController
+    }
+    
+    func getHeaderView() -> UIView? {
+        return headerView
+    }
+    
+    func getContentViewControllers() -> [UIViewController] {
+        return viewControllers
     }
 }
-
-extension CollapseTabBarViewController: CollapseCollectionViewLayoutDelegate {
-    public func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return 1
-    }
-    
-    public func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return 1
-    }
-    
-    public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "Content", for: indexPath)
-        return cell
-    }
-    
-    open func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-        
-        guard let vc = pageTabBarController else { fatalError("pagetabbar controller = nil") }
-        
-        if vc.parent == nil {
-            addChildViewController(vc)
-            cell.contentView.addSubview(vc.view)
-            vc.view.translatesAutoresizingMaskIntoConstraints = false
-            vc.view.topAnchor.constraint(equalTo: cell.contentView.topAnchor).isActive = true
-            vc.view.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor).isActive = true
-            vc.view.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor).isActive = true
-            vc.view.bottomAnchor.constraint(equalTo: cell.contentView.bottomAnchor).isActive = true
-            vc.didMove(toParentViewController: self)
-        }
-        else {
-            cell.contentView.addSubview(vc.view)
-            vc.view.translatesAutoresizingMaskIntoConstraints = false
-            vc.view.topAnchor.constraint(equalTo: cell.contentView.topAnchor).isActive = true
-            vc.view.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor).isActive = true
-            vc.view.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor).isActive = true
-            vc.view.bottomAnchor.constraint(equalTo: cell.contentView.bottomAnchor).isActive = true
-        }
-    }
-    
-    open func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-        let vc = viewControllers[indexPath.row]
-        vc.willMove(toParentViewController: nil)
-        vc.view.removeFromSuperview()
-        vc.removeFromParentViewController()
-    }
-    
-    
-    public func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
-        switch kind {
-        case CollapseCollectionViewLayout.Element.header.kind:
-            let cell = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "Header", for: indexPath)
-            headerView.frame = CGRect(x: 0, y: 0, width: view.frame.width, height: defaultHeaderHeight)
-            cell.addSubview(headerView)
-            return cell
-        case CollapseCollectionViewLayout.Element.footer.kind:
-            let cell = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "Footer", for: indexPath)
-            
-            return cell
-        default:
-            break
-        }
-        
-        return UICollectionReusableView()
-    }
-    
-    // Disable bottom bounces
-    public func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        
-//        let bottomOffsetY = scrollView.contentSize.height - scrollView.bounds.height
-//
-//        if scrollView.contentOffset.y == 0 {
-//            self.delegate?.collapseTabBarController?(self, tabBarDidReach: .bottom)
-//        }
-//
-//        if scrollView.contentOffset.y == bottomOffsetY {
-//            self.delegate?.collapseTabBarController?(self, tabBarDidReach: .top)
-//        }
-//
-//        // Disable Bottom Bounces
-//        if scrollView.contentOffset.y > bottomOffsetY {
-//            scrollView.contentOffset.y = bottomOffsetY
-//        }
-//
-//        // Inner Scroll View Handling
-//        guard let innerScrollView = pageTabBarController?.currentBaseScrollView else { return }
-//
-//        if scrollView.contentOffset.y > 0 && scrollView.contentOffset.y < bottomOffsetY {
-//            // disable inner scroll view scroll
-//            innerScrollView.panGestureRecognizer.isEnabled = false
-//        }
-//        else if scrollView.contentOffset.y == 0 {
-//            // at bottom
-//            if innerScrollView.contentOffset.y + innerScrollView.contentInset.top == 0 {
-//                innerScrollView.panGestureRecognizer.isEnabled = false
-//            }
-//            else {
-//                innerScrollView.panGestureRecognizer.isEnabled = true
-//            }
-//        }
-//        else if scrollView.contentOffset.y == bottomOffsetY {
-//            // at top
-//            if innerScrollView.contentOffset.y + innerScrollView.contentInset.top == 0 {
-//                innerScrollView.panGestureRecognizer.isEnabled = false
-//            }
-//            else {
-//                innerScrollView.panGestureRecognizer.isEnabled = true
-//            }
-//        }
-        
-    }
-    
-}
-
-// Pan Gesture Helpers
-//@objc public enum Direction: Int {
-//    case up
-//    case down
-//    case left
-//    case right
-//    case notMoving
-//
-//    public var isX: Bool { return self == .left || self == .right }
-//    public var isY: Bool { return !isX }
-//}
-//
-//extension UIPanGestureRecognizer {
-//
-//    @objc open var direction: Direction {
-//        let panVelocity = velocity(in: view)
-//        let vertical = fabs(panVelocity.y) > fabs(panVelocity.x)
-//        switch (vertical, panVelocity.x, panVelocity.y) {
-//        case (true, _, let y) where y < 0: return .up
-//        case (true, _, let y) where y > 0: return .down
-//        case (false, let x, _) where x > 0: return .right
-//        case (false, let x, _) where x < 0: return .left
-//        default: return .notMoving
-//        }
-//    }
-//
-//    @objc open var verticalDirection: Direction {
-//        let panVelocity = velocity(in: view)
-//        let vertical = fabs(panVelocity.y) > fabs(panVelocity.x)
-//        switch (vertical, panVelocity.x, panVelocity.y) {
-//        case (true, _, let y) where y < 0: return .up
-//        case (true, _, let y) where y > 0: return .down
-//        case (false, _, let y) where y < 0: return .up
-//        case (false, _, let y) where y > 0: return .down
-//        default: return .notMoving
-//        }
-//    }
-//}
 

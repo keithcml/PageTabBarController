@@ -93,8 +93,8 @@ class ViewController: UIViewController, CollapseTabBarViewControllerDelegate, Pa
                                                                     headerView: headerView,
                                                                     headerHeight: view.frame.width)
         collapseTabBarViewController.pageIndex = 1
-        collapseTabBarViewController.minimumHeaderViewHeight = 0
-        collapseTabBarViewController.maximumHeaderViewHeight = view.frame.height - 150
+        collapseTabBarViewController.minimumHeaderViewHeight = 44
+        collapseTabBarViewController.headerViewStretchyHeight = 64
         collapseTabBarViewController.pageTabBarController?.pageTabBar.barHeight = 40
         collapseTabBarViewController.pageTabBarController?.pageTabBar.indicatorLineColor = tabSelectedColor
         collapseTabBarViewController.pageTabBarController?.pageTabBar.indicatorLineHeight = 2
@@ -118,9 +118,6 @@ class ViewController: UIViewController, CollapseTabBarViewControllerDelegate, Pa
         let topBar = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 64))
         topBar.backgroundColor = tabSelectedColor
         view.addSubview(topBar)
-        
-        let searchBar = UISearchBar(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 44))
-        collapseTabBarViewController.pageTabBarController?.setHeaderViewWithCustomView(searchBar, animated: true)
         
         let banner = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 44))
         banner.backgroundColor = UIColor.gray
