@@ -91,6 +91,11 @@ import UIKit
         }
     }
     
+    /**
+     LayoutGuide for attaching views to top of page view
+     */
+    open fileprivate(set) var topPageTabBarLayoutGuide: UILayoutGuide?
+    
     fileprivate var tabBarItems = [PageTabBarItem]()
     
     // tabbar positioning

@@ -118,6 +118,13 @@ class ViewController: UIViewController, CollapseTabBarViewControllerDelegate, Pa
         let topBar = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 64))
         topBar.backgroundColor = tabSelectedColor
         view.addSubview(topBar)
+        
+        let searchBar = UISearchBar(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 44))
+        collapseTabBarViewController.pageTabBarController?.setHeaderViewWithCustomView(searchBar, animated: true)
+        
+        let banner = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 44))
+        banner.backgroundColor = UIColor.gray
+        collapseTabBarViewController.pageTabBarController?.setBannerViewWithCustomView(banner, animated: true)
     }
 
     func collapseTabBarController(_ controller: CollapseTabBarViewController, tabBarDidReach position: CollapseTabBarPosition) {
@@ -133,6 +140,15 @@ class ViewController: UIViewController, CollapseTabBarViewControllerDelegate, Pa
     
     func pageTabBarController(_ controller: PageTabBarController, didSelectItem item: PageTabBarItem, atIndex index: Int, previousIndex: Int) {
         
+        if index == 0 {
+            let banner = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 88))
+            banner.backgroundColor = UIColor.yellow
+            collapseTabBarViewController.pageTabBarController?.setBannerViewWithCustomView(banner, animated: true)
+        } else {
+            let banner = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 44))
+            banner.backgroundColor = UIColor.gray
+            collapseTabBarViewController.pageTabBarController?.setBannerViewWithCustomView(banner, animated: true)
+        }
         // print("previousIndex: \(previousIndex)")
         // print("currentIndex: \(index)")
         
