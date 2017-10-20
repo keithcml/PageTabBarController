@@ -26,7 +26,7 @@
 import UIKit
 import PageTabBarController
 
-class ViewController: UIViewController, CollapseTabBarViewControllerDelegate, PageTabBarControllerDelegate {
+class ViewController: UIViewController, CollapseTabBarViewControllerDelegate {
 
     override open var preferredStatusBarUpdateAnimation: UIStatusBarAnimation {
         return .slide
@@ -91,19 +91,32 @@ class ViewController: UIViewController, CollapseTabBarViewControllerDelegate, Pa
         collapseTabBarViewController = CollapseTabBarViewController(viewControllers: [vc01, vc02, vc03],
                                                                     tabBarItems: [tab01, tab02, tabA],
                                                                     headerView: headerView,
-                                                                    headerHeight: view.frame.width)
+                                                                    headerHeight: 250)
         collapseTabBarViewController.pageIndex = 1
-        collapseTabBarViewController.minimumHeaderViewHeight = 0
-        collapseTabBarViewController.maximumHeaderViewHeight = view.frame.height - 150
-        collapseTabBarViewController.pageTabBarController?.pageTabBar.barHeight = 40
-        collapseTabBarViewController.pageTabBarController?.pageTabBar.indicatorLineColor = tabSelectedColor
-        collapseTabBarViewController.pageTabBarController?.pageTabBar.indicatorLineHeight = 2
-        collapseTabBarViewController.pageTabBarController?.pageTabBar.bottomLineHidden = true
-        collapseTabBarViewController.pageTabBarController?.pageTabBar.topLineColor = tabSelectedColor
-        collapseTabBarViewController.pageTabBarController?.pageTabBar.barTintColor = UIColor(white: 0.95, alpha: 1)
+        collapseTabBarViewController.minimumHeaderViewHeight = 44
+        collapseTabBarViewController.headerViewStretchyHeight = 64
+        collapseTabBarViewController.pageTabBarController.pageTabBar.barHeight = 40
+        collapseTabBarViewController.pageTabBarController.pageTabBar.indicatorLineColor = tabSelectedColor
+        collapseTabBarViewController.pageTabBarController.pageTabBar.indicatorLineHeight = 2
+        collapseTabBarViewController.pageTabBarController.pageTabBar.bottomLineHidden = true
+        collapseTabBarViewController.pageTabBarController.pageTabBar.topLineColor = tabSelectedColor
+        collapseTabBarViewController.pageTabBarController.pageTabBar.barTintColor = UIColor(white: 0.95, alpha: 1)
         
-        collapseTabBarViewController.pageTabBarController?.transitionAnimation = .scroll
-        collapseTabBarViewController.pageTabBarController?.delegate = self
+        let tempView = UIView(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
+        let button = UIButton(type: .custom)
+        button.setTitle("A Button", for: .normal)
+        button.backgroundColor = .red
+        tempView.addSubview(button)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.topAnchor.constraint(equalTo: tempView.topAnchor).isActive = true
+        button.bottomAnchor.constraint(equalTo: tempView.bottomAnchor).isActive = true
+        button.trailingAnchor.constraint(equalTo: tempView.trailingAnchor).isActive = true
+        button.heightAnchor.constraint(equalToConstant: 100).isActive = true
+        button.addTarget(self, action: #selector(tap(_:)), for: .touchUpInside)
+        collapseTabBarViewController.staticHeaderView = tempView
+        
+        collapseTabBarViewController.pageTabBarController.transitionAnimation = .scroll
+        collapseTabBarViewController.pageTabBarController.delegate = self
         collapseTabBarViewController.delegate = self
         CollapseTabBarViewController.attachCollapseTabBarController(
             collapseTabBarViewController,
@@ -119,48 +132,53 @@ class ViewController: UIViewController, CollapseTabBarViewControllerDelegate, Pa
         topBar.backgroundColor = tabSelectedColor
         view.addSubview(topBar)
         
-        let searchBar = UISearchBar(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 44))
-        collapseTabBarViewController.pageTabBarController?.setHeaderViewWithCustomView(searchBar, animated: true)
-        
-        let banner = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 44))
-        banner.backgroundColor = UIColor.gray
-        collapseTabBarViewController.pageTabBarController?.setBannerViewWithCustomView(banner, animated: true)
+        let banner = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 100))
+        banner.backgroundColor = UIColor.gray.withAlphaComponent(0.5)
+        collapseTabBarViewController.pageTabBarController.setBannerViewWithCustomView(banner, animated: true)
+    }
+    
+    @objc private func tap(_ sender: Any) {
+        print("tap")
     }
 
     func collapseTabBarController(_ controller: CollapseTabBarViewController, tabBarDidReach position: CollapseTabBarPosition) {
         // print("\(position.rawValue)")
     }
     
-    func collapseTabBarController(_ controller: CollapseTabBarViewController, panGestureRecognizer: UIPanGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
-        if let tableViewController = collapseTabBarViewController.pageTabBarController?.selectedViewController as? TableViewController {
-            return otherGestureRecognizer == tableViewController.tableView.panGestureRecognizer
-        }
-        return false
+    func collapseTabBarController(_ controller: CollapseTabBarViewController, scrollViewsForScrollingWithTabBarMoveAtIndex pageIndex: Int) -> [UIScrollView] {
+//        if let tableViewController = collapseTabBarViewController.pageTabBarController.viewControllers[pageIndex] as? TableViewController {
+//            return tableViewController
+//        }
+        return []
     }
     
     func pageTabBarController(_ controller: PageTabBarController, didSelectItem item: PageTabBarItem, atIndex index: Int, previousIndex: Int) {
         
         if index == 0 {
-            let banner = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 88))
-            banner.backgroundColor = UIColor.yellow
-            collapseTabBarViewController.pageTabBarController?.setBannerViewWithCustomView(banner, animated: true)
+            let banner = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 100))
+            banner.backgroundColor = UIColor.yellow.withAlphaComponent(0.5)
+            collapseTabBarViewController.pageTabBarController.setBannerViewWithCustomView(banner, animated: true)
         } else {
-            let banner = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 44))
-            banner.backgroundColor = UIColor.gray
-            collapseTabBarViewController.pageTabBarController?.setBannerViewWithCustomView(banner, animated: true)
+            let banner = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 100))
+            banner.backgroundColor = UIColor.gray.withAlphaComponent(0.5)
+            collapseTabBarViewController.pageTabBarController.setBannerViewWithCustomView(banner, animated: true)
         }
         // print("previousIndex: \(previousIndex)")
         // print("currentIndex: \(index)")
         
-        if index == 3 {
-            collapseTabBarViewController?.scrollTabBar(to: .top)
+        if index == 0 {
+            collapseTabBarViewController.scrollTabBar(to: .top, animated: true)
+        }
+        
+        if index == 1 {
+            collapseTabBarViewController.scrollTabBar(to: .bottom, animated: true)
         }
         
         if index == 2 {
             controller.setBadge(200, forItemAt: index)
         }
         
-        if index == 5 {
+        if index == 1 {
             controller.clearAllBadges()
         }
     }
