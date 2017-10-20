@@ -15,7 +15,6 @@ class CollapseStaticHeaderView: UICollectionReusableView {
     
     override init(frame: CGRect) {
         super.init(frame: frame)
-        backgroundColor = UIColor.white.withAlphaComponent(0.5)
     }
     
     required init?(coder aDecoder: NSCoder) {
