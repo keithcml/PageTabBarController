@@ -87,6 +87,12 @@ public typealias CollapseTabBarLayoutSettings = CollapseCollectionViewLayoutSett
     open fileprivate(set) var defaultHeaderHeight: CGFloat = 200
     open var headerViewStretchyHeight: CGFloat = 64
     
+    open var staticHeaderView: UIView? {
+        didSet {
+            collpaseCollectionView.staticHeaderView = staticHeaderView
+        }
+    }
+    
     /**
      LayoutGuide for attaching views to top of page view
      */
@@ -127,7 +133,7 @@ public typealias CollapseTabBarLayoutSettings = CollapseCollectionViewLayoutSett
         
         collpaseCollectionView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "Content")
         collpaseCollectionView.register(UICollectionReusableView.self, forSupplementaryViewOfKind: CollapseCollectionViewLayout.Element.header.kind, withReuseIdentifier: "Header")
-        collpaseCollectionView.register(UICollectionReusableView.self, forSupplementaryViewOfKind: CollapseCollectionViewLayout.Element.footer.kind, withReuseIdentifier: "Footer")
+        collpaseCollectionView.register(CollapseStaticHeaderView.self, forSupplementaryViewOfKind: CollapseCollectionViewLayout.Element.staticHeader.kind, withReuseIdentifier: "StaticHeader")
         collpaseCollectionView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         collpaseCollectionView.revealedHeight = minimumHeaderViewHeight
         collpaseCollectionView.headerHeight = headerHeight
@@ -142,11 +148,17 @@ public typealias CollapseTabBarLayoutSettings = CollapseCollectionViewLayoutSett
         super.viewDidLoad()
         view.backgroundColor = UIColor.white
         
+        collpaseCollectionView.revealedHeight = minimumHeaderViewHeight
+        collpaseCollectionView.headerHeight = defaultHeaderHeight
+        collpaseCollectionView.stretchyHeight = headerViewStretchyHeight
         let settings = CollapseCollectionViewLayoutSettings(headerSize: CGSize(width: view.frame.width, height: collpaseCollectionView.headerHeight),
                                                             isHeaderStretchy: true,
                                                             headerStretchHeight: collpaseCollectionView.stretchyHeight,
                                                             headerMinimumHeight: collpaseCollectionView.revealedHeight)
-        collpaseCollectionView.collectionViewLayout = CollapseCollectionViewLayout(settings: settings)
+        let newLayout = CollapseCollectionViewLayout(settings: settings)
+        newLayout.delegate = collpaseCollectionView
+        collpaseCollectionView.setCollectionViewLayout(newLayout, animated: false)
+
         collpaseCollectionView.collapseDelegate = self
         
         view.addSubview(collpaseCollectionView)
@@ -191,7 +203,7 @@ public typealias CollapseTabBarLayoutSettings = CollapseCollectionViewLayoutSett
     // MARK: - Select Tab
     @objc open func selectTabAtIndex(_ index: Int, scrollToPosition: CollapseTabBarPosition) {
         pageTabBarController.setPageIndex(index, animated: true)
-        scrollTabBar(to: .top)
+        scrollTabBar(to: .top, animated: true)
     }
     
     // MARK: - Control Scroll
@@ -199,7 +211,7 @@ public typealias CollapseTabBarLayoutSettings = CollapseCollectionViewLayoutSett
         
         switch position {
         case .top:
-            collpaseCollectionView.scrollToItem(at: IndexPath(item: 0, section: 0), at: .bottom, animated: animated)
+            collpaseCollectionView.setContentOffset(CGPoint(x: 0, y: defaultHeaderHeight - minimumHeaderViewHeight), animated: animated)
             break
         case .bottom:
             collpaseCollectionView.scrollRectToVisible(CGRect(x: 0, y: 0, width: 1, height: 1), animated: animated)

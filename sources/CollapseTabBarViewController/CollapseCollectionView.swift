@@ -22,6 +22,8 @@ final class CollapseCollectionView: UICollectionView {
     var headerHeight: CGFloat = 320
     var stretchyHeight: CGFloat = 64
     
+    var staticHeaderView: UIView?
+        
     var otherScrollViews = [UIScrollView]() {
         didSet {
             otherScrollViewsContentOffset = otherScrollViews.map { $0.contentOffset }
@@ -44,6 +46,10 @@ final class CollapseCollectionView: UICollectionView {
         alwaysBounceVertical = true
         showsVerticalScrollIndicator = false
         panGestureRecognizer.delegate = self
+        
+        if let layout = layout as? CollapseCollectionViewLayout {
+            layout.delegate = self
+        }
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -51,13 +57,13 @@ final class CollapseCollectionView: UICollectionView {
     }
 }
 
-extension CollapseCollectionView: UICollectionViewDelegate, UICollectionViewDataSource {
+extension CollapseCollectionView: UICollectionViewDelegate, UICollectionViewDataSource, CollapseCollectionViewLayoutDelegate {
     
     private func shouldIgoreScrolling(at point: CGPoint, on scrollView: UIScrollView) -> Bool {
         for otherScrollView in otherScrollViews {
             let rect = otherScrollView.superview!.convert(otherScrollView.frame, to: scrollView)
             if rect.contains(point) && otherScrollView.contentOffset.y > -otherScrollView.contentInset.top {
-                print(otherScrollView)
+                // print(otherScrollView)
                 return true
             }
         }
@@ -151,15 +157,22 @@ extension CollapseCollectionView: UICollectionViewDelegate, UICollectionViewData
                 return cell
             }
             break
-        case CollapseCollectionViewLayout.Element.footer.kind:
-            let cell = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "Footer", for: indexPath)
-            
+        case CollapseCollectionViewLayout.Element.staticHeader.kind:
+            let cell = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "StaticHeader", for: indexPath) as! CollapseStaticHeaderView
+            cell.configureWithContentView(staticHeaderView)
             return cell
         default:
             break
         }
         
         return UICollectionReusableView()
+    }
+
+    func collapseCollectionView(_ collapseCollectionView: CollapseCollectionView, layout: CollapseCollectionViewLayout, sizeForStaticHeaderAt indexPath: IndexPath) -> CGSize {
+        guard let staticHeaderView = staticHeaderView else { return CGSize(width: collapseCollectionView.bounds.width, height: 0) }
+        
+        let size = staticHeaderView.systemLayoutSizeFitting(UILayoutFittingCompressedSize)
+        return CGSize(width: collapseCollectionView.bounds.width, height: ceil(size.height))
     }
 }
 

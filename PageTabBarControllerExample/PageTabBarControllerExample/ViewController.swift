@@ -102,6 +102,19 @@ class ViewController: UIViewController, CollapseTabBarViewControllerDelegate {
         collapseTabBarViewController.pageTabBarController.pageTabBar.topLineColor = tabSelectedColor
         collapseTabBarViewController.pageTabBarController.pageTabBar.barTintColor = UIColor(white: 0.95, alpha: 1)
         
+        let tempView = UIView(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
+        let button = UIButton(type: .custom)
+        button.setTitle("A Button", for: .normal)
+        button.backgroundColor = .red
+        tempView.addSubview(button)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.topAnchor.constraint(equalTo: tempView.topAnchor).isActive = true
+        button.bottomAnchor.constraint(equalTo: tempView.bottomAnchor).isActive = true
+        button.trailingAnchor.constraint(equalTo: tempView.trailingAnchor).isActive = true
+        button.heightAnchor.constraint(equalToConstant: 100).isActive = true
+        button.addTarget(self, action: #selector(tap(_:)), for: .touchUpInside)
+        collapseTabBarViewController.staticHeaderView = tempView
+        
         collapseTabBarViewController.pageTabBarController.transitionAnimation = .scroll
         collapseTabBarViewController.pageTabBarController.delegate = self
         collapseTabBarViewController.delegate = self
@@ -123,6 +136,10 @@ class ViewController: UIViewController, CollapseTabBarViewControllerDelegate {
         banner.backgroundColor = UIColor.gray.withAlphaComponent(0.5)
         collapseTabBarViewController.pageTabBarController.setBannerViewWithCustomView(banner, animated: true)
     }
+    
+    @objc private func tap(_ sender: Any) {
+        print("tap")
+    }
 
     func collapseTabBarController(_ controller: CollapseTabBarViewController, tabBarDidReach position: CollapseTabBarPosition) {
         // print("\(position.rawValue)")
@@ -134,13 +151,6 @@ class ViewController: UIViewController, CollapseTabBarViewControllerDelegate {
 //        }
         return []
     }
-    
-//    func collapseTabBarController(_ controller: CollapseTabBarViewController, panGestureRecognizer: UIPanGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
-//        if let tableViewController = collapseTabBarViewController.pageTabBarController?.selectedViewController as? TableViewController {
-//            return otherGestureRecognizer == tableViewController.tableView.panGestureRecognizer
-//        }
-//        return false
-//    }
     
     func pageTabBarController(_ controller: PageTabBarController, didSelectItem item: PageTabBarItem, atIndex index: Int, previousIndex: Int) {
         
@@ -157,7 +167,11 @@ class ViewController: UIViewController, CollapseTabBarViewControllerDelegate {
         // print("currentIndex: \(index)")
         
         if index == 0 {
-            collapseTabBarViewController?.scrollTabBar(to: .top)
+            collapseTabBarViewController.scrollTabBar(to: .top, animated: true)
+        }
+        
+        if index == 1 {
+            collapseTabBarViewController.scrollTabBar(to: .bottom, animated: true)
         }
         
         if index == 2 {
