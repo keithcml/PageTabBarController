@@ -18,12 +18,28 @@ import UIKit
 
 final class CollapseCollectionView: UICollectionView {
     
-    var revealedHeight: CGFloat = 0
-    var headerHeight: CGFloat = 320
-    var stretchyHeight: CGFloat = 64
+    var revealedHeight: CGFloat {
+        if let layout = collectionViewLayout as? CollapseCollectionViewLayout {
+            return layout.settings.headerMinimumHeight
+        }
+        return 0
+    }
+    var headerHeight: CGFloat {
+        if let layout = collectionViewLayout as? CollapseCollectionViewLayout {
+            return layout.settings.headerSize.height
+        }
+        return 0
+    }
+    var stretchyHeight: CGFloat {
+        if let layout = collectionViewLayout as? CollapseCollectionViewLayout {
+            return layout.settings.headerStretchHeight
+        }
+        return 0
+    }
     
     var staticHeaderView: UIView?
-        
+    var scrollViewsToBlockCollapseScrolling = [UIScrollView]()
+    
     var otherScrollViews = [UIScrollView]() {
         didSet {
             otherScrollViewsContentOffset = otherScrollViews.map { $0.contentOffset }
@@ -79,12 +95,6 @@ extension CollapseCollectionView: UICollectionViewDelegate, UICollectionViewData
     public func scrollViewDidScroll(_ scrollView: UIScrollView) {
 
         let scrollableOffsetY = headerHeight - revealedHeight
-        
-        defer {
-            if contentOffset.y > scrollableOffsetY {
-                contentOffset.y = scrollableOffsetY
-            }
-        }
         
         if ignoringScroll {
             scrollView.contentOffset = lastContentOffset
@@ -154,6 +164,11 @@ extension CollapseCollectionView: UICollectionViewDelegate, UICollectionViewData
                 let cell = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "Header", for: indexPath)
                 headerView.frame = CGRect(x: 0, y: 0, width: collapseVC.view.frame.width, height: collapseVC.defaultHeaderHeight)
                 cell.addSubview(headerView)
+                headerView.translatesAutoresizingMaskIntoConstraints = false
+                NSLayoutConstraint.activate([headerView.topAnchor.constraint(equalTo: cell.topAnchor),
+                                             headerView.bottomAnchor.constraint(equalTo: cell.bottomAnchor),
+                                             headerView.leadingAnchor.constraint(equalTo: cell.leadingAnchor),
+                                             headerView.trailingAnchor.constraint(equalTo: cell.trailingAnchor)])
                 return cell
             }
             break
@@ -182,6 +197,13 @@ extension CollapseCollectionView: UIGestureRecognizerDelegate {
         if let cv = collapseDelegate?.getPageTabBarController()?.collectionView, let gestureView = otherGestureRecognizer.view, gestureView == cv {
             return false
         }
+        
+        for scrollView in scrollViewsToBlockCollapseScrolling {
+            if let gestureView = otherGestureRecognizer.view as? UIScrollView, gestureView === scrollView {
+                return false
+            }
+        }
+        
         return true
     }
 }

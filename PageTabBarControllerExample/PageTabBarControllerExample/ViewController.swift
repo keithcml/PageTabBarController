@@ -137,6 +137,15 @@ class ViewController: UIViewController, CollapseTabBarViewControllerDelegate {
         collapseTabBarViewController.pageTabBarController.setBannerViewWithCustomView(banner, animated: true)
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        let settings = CollapseCollectionViewLayoutSettings(headerSize: CGSize(width: view.frame.width, height: view.bounds.width),
+                                                            isHeaderStretchy: true,
+                                                            headerStretchHeight: 64,
+                                                            headerMinimumHeight: 0)
+        collapseTabBarViewController.setLayoutSettings(settings, animated: true)
+    }
+    
     @objc private func tap(_ sender: Any) {
         print("tap")
     }

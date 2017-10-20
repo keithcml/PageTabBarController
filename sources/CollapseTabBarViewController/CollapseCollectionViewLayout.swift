@@ -156,41 +156,36 @@ final class CollapseCollectionViewLayout: UICollectionViewLayout {
     private func updateViews(_ type: Element, attributes: UICollectionViewLayoutAttributes, collectionView: UICollectionView, indexPath: IndexPath) {
 
         let headerHeight = settings.headerSize.height
+        let strechyHeight = settings.isHeaderStretchy ? settings.headerStretchHeight : 0
         
         if collectionView.contentOffset.y < 0 {
             
             switch type {
             case .staticHeader:
-                if settings.isHeaderStretchy {
-                    let y = min(headerHeight + collectionView.contentOffset.y + settings.headerStretchHeight, headerHeight) - attributes.size.height
-                    attributes.frame = CGRect(origin: CGPoint(x: 0, y: y),
-                                              size: attributes.size)
-                }
+                let y = min(headerHeight + collectionView.contentOffset.y + strechyHeight, headerHeight) - attributes.size.height
+                attributes.frame = CGRect(origin: CGPoint(x: 0, y: y),
+                                          size: attributes.size)
                 break
             case .header:
-                if settings.isHeaderStretchy {
-                    
-                    let updatedHeight = min(headerHeight + settings.headerStretchHeight,
-                                            max(headerHeight, headerHeight - collectionView.contentOffset.y))
-                    
-                    let scaleFactor = updatedHeight / headerHeight
-                    let delta = (updatedHeight - headerHeight) / 2
-                    
-                    let scale = CGAffineTransform(scaleX: scaleFactor, y: scaleFactor)
-                    let translation = CGAffineTransform(translationX: 0,
-                                                        y: min(collectionView.contentOffset.y, headerHeight) + delta)
-                    
-                    attributes.transform = scale.concatenating(translation)
-                }
+                let updatedHeight = min(headerHeight + strechyHeight,
+                                        max(headerHeight, headerHeight - collectionView.contentOffset.y))
+                
+                let scaleFactor = updatedHeight / headerHeight
+                let delta = (updatedHeight - headerHeight) / 2
+                
+                let scale = CGAffineTransform(scaleX: scaleFactor, y: scaleFactor)
+                let translation = CGAffineTransform(translationX: 0,
+                                                    y: min(collectionView.contentOffset.y, headerHeight) + delta)
+                
+                attributes.transform = scale.concatenating(translation)
                 break
             case .cell:
-                if settings.isHeaderStretchy {
-                    let y = min(headerHeight + collectionView.contentOffset.y + settings.headerStretchHeight, headerHeight)
-                    attributes.frame = CGRect(origin: CGPoint(x: 0, y: y),
-                                              size: CGSize(width: attributes.frame.width,
-                                                           height: collectionView.frame.height - headerHeight + collectionView.contentOffset.y))
-                }
-                
+                let y = min(headerHeight + collectionView.contentOffset.y + strechyHeight, headerHeight)
+                let maxHeight = collectionView.frame.height - headerHeight - strechyHeight
+                let height = collectionView.frame.height - headerHeight + collectionView.contentOffset.y
+                attributes.frame = CGRect(origin: CGPoint(x: 0, y: y),
+                                          size: CGSize(width: attributes.frame.width,
+                                                       height: max(maxHeight, height)))
                 break
             }
 
@@ -206,7 +201,7 @@ final class CollapseCollectionViewLayout: UICollectionViewLayout {
                 attributes.transform = .identity
                 break
             case .cell:
-                let originY = headerHeight
+                let originY = max(headerHeight, collectionView.contentOffset.y)
                 attributes.frame = CGRect(origin: CGPoint(x: 0, y: originY),
                                           size: CGSize(width: attributes.frame.width,
                                                        height: collectionView.frame.height - originY + collectionView.contentOffset.y))
@@ -254,9 +249,9 @@ final class CollapseCollectionViewLayout: UICollectionViewLayout {
     
     // MARK: - Invalidation
     override func shouldInvalidateLayout (forBoundsChange newBounds : CGRect) -> Bool {
-        if oldBounds.size != newBounds.size {
-            cache.removeAll(keepingCapacity: true)
-        }
+//        if oldBounds.size != newBounds.size {
+//            cache.removeAll(keepingCapacity: true)
+//        }
         return true
     }
     
