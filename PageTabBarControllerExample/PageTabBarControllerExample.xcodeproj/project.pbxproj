@@ -27,6 +27,8 @@
 		9B6D043C1F5D69DB00B018E9 /* PageTabBarItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B6D04221F5D69A900B018E9 /* PageTabBarItem.swift */; };
 		9B6D043E1F5E4ED100B018E9 /* TableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B6D043D1F5E4ED100B018E9 /* TableViewController.swift */; };
 		9BE2D5621F99A1B700AB0F35 /* CollapseStaticHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BE2D5611F99A1B700AB0F35 /* CollapseStaticHeaderView.swift */; };
+		9BE2D5661F9A005300AB0F35 /* GalleryCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BE2D5641F9A005300AB0F35 /* GalleryCell.swift */; };
+		9BE2D5671F9A005300AB0F35 /* GalleryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BE2D5651F9A005300AB0F35 /* GalleryView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -77,6 +79,8 @@
 		9B6D043D1F5E4ED100B018E9 /* TableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TableViewController.swift; sourceTree = "<group>"; };
 		9B6D043F1F5FB7BB00B018E9 /* PageTabBarController.podspec */ = {isa = PBXFileReference; lastKnownFileType = text; name = PageTabBarController.podspec; path = ../PageTabBarController.podspec; sourceTree = "<group>"; };
 		9BE2D5611F99A1B700AB0F35 /* CollapseStaticHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollapseStaticHeaderView.swift; sourceTree = "<group>"; };
+		9BE2D5641F9A005300AB0F35 /* GalleryCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GalleryCell.swift; sourceTree = "<group>"; };
+		9BE2D5651F9A005300AB0F35 /* GalleryView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GalleryView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -136,6 +140,7 @@
 				9B6D040E1F5D696D00B018E9 /* ViewController.swift */,
 				9B6D043D1F5E4ED100B018E9 /* TableViewController.swift */,
 				9A4609FB1F62F1C600694602 /* PresentedViewController.swift */,
+				9BE2D5631F9A005300AB0F35 /* GalleryView */,
 				9B6D04101F5D696D00B018E9 /* Main.storyboard */,
 				9B6D04131F5D696D00B018E9 /* Assets.xcassets */,
 				9B6D04151F5D696D00B018E9 /* LaunchScreen.storyboard */,
@@ -166,6 +171,15 @@
 				9B6D042F1F5D69C300B018E9 /* Info.plist */,
 			);
 			path = PageTabBarController;
+			sourceTree = "<group>";
+		};
+		9BE2D5631F9A005300AB0F35 /* GalleryView */ = {
+			isa = PBXGroup;
+			children = (
+				9BE2D5641F9A005300AB0F35 /* GalleryCell.swift */,
+				9BE2D5651F9A005300AB0F35 /* GalleryView.swift */,
+			);
+			path = GalleryView;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -286,6 +300,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				9B6D040F1F5D696D00B018E9 /* ViewController.swift in Sources */,
+				9BE2D5671F9A005300AB0F35 /* GalleryView.swift in Sources */,
+				9BE2D5661F9A005300AB0F35 /* GalleryCell.swift in Sources */,
 				9A4609FC1F62F1C600694602 /* PresentedViewController.swift in Sources */,
 				9B6D043E1F5E4ED100B018E9 /* TableViewController.swift in Sources */,
 				9B6D040D1F5D696D00B018E9 /* AppDelegate.swift in Sources */,

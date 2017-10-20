@@ -27,13 +27,16 @@ import Foundation
 import UIKit
 
 @objc public protocol CollapseTabBarViewControllerDelegate: PageTabBarControllerDelegate {
-    @objc optional func collapseTabBarController(_ controller: CollapseTabBarViewController, tabBarDidReach position: CollapseTabBarPosition)
+    
+    // Don't do heavy task in this delegate
+    @objc optional func collapseTabBarController(_ controller: CollapseTabBarViewController, tabBarRect rect: CGRect, position: CollapseTabBarPosition)
     @objc optional func collapseTabBarController(_ controller: CollapseTabBarViewController, scrollViewsForScrollingWithTabBarMoveAtIndex pageIndex: Int) -> [UIScrollView]
 }
 
 @objc public enum CollapseTabBarPosition: Int {
     case top = 0
     case bottom
+    case inBetween
 }
 
 @objc public enum CollapseTabBarAnimationType: Int {
@@ -106,9 +109,6 @@ public typealias CollapseTabBarLayoutSettings = CollapseCollectionViewLayoutSett
     
     fileprivate var tabBarItems = [PageTabBarItem]()
     
-    // tabbar positioning
-    fileprivate var _maximumHeaderViewHeight: CGFloat = 300
-
     fileprivate var viewControllers = [UIViewController]()
     fileprivate var headerView = UIView(frame: CGRect.zero)
     
@@ -218,6 +218,8 @@ public typealias CollapseTabBarLayoutSettings = CollapseCollectionViewLayoutSett
         case .bottom:
             collpaseCollectionView.scrollRectToVisible(CGRect(x: 0, y: 0, width: 1, height: 1), animated: animated)
             break
+        case .inBetween:
+            break
         }
     }
     
@@ -251,6 +253,22 @@ extension CollapseTabBarViewController: CollapseCollectionViewDelegate {
     
     func getContentViewControllers() -> [UIViewController] {
         return viewControllers
+    }
+    
+    func collapseCollectionViewDidScroll(_ collapseCollectionView: CollapseCollectionView) {
+
+        if let rect = pageTabBarController.pageTabBar.superview?.convert(pageTabBarController.pageTabBar.frame, to: view) {
+            if rect.minY <= minimumHeaderViewHeight {
+                delegate?.collapseTabBarController?(self, tabBarRect: rect, position: .top)
+            }
+            else if rect.minY >= defaultHeaderHeight {
+                delegate?.collapseTabBarController?(self, tabBarRect: rect, position: .bottom)
+            }
+            else {
+                delegate?.collapseTabBarController?(self, tabBarRect: rect, position: .inBetween)
+            }
+        }
+        
     }
 }
 

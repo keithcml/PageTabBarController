@@ -43,6 +43,8 @@ class ViewController: UIViewController, CollapseTabBarViewControllerDelegate {
     //var tabBarController: PageTabBarController!
     var collapseTabBarViewController: CollapseTabBarViewController!
     
+    var galleryView = GalleryView(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.width))
+    
     let vc01 = TableViewController(nibName: nil, bundle: nil)
     let vc02 = TableViewController(nibName: nil, bundle: nil)
     let vc03 = TableViewController(nibName: nil, bundle: nil)
@@ -64,7 +66,7 @@ class ViewController: UIViewController, CollapseTabBarViewControllerDelegate {
         vc05.view.tag = 5
         vc06.view.tag = 6
         
-        let headerView = UIImageView(image: UIImage(named: "cover"))
+        //let headerView = UIImageView(image: UIImage(named: "cover"))
         
         let tab01 = PageTabBarItem(icon: UIImage(named: "img01"))
         tab01.color = tabColor
@@ -90,8 +92,8 @@ class ViewController: UIViewController, CollapseTabBarViewControllerDelegate {
         
         collapseTabBarViewController = CollapseTabBarViewController(viewControllers: [vc01, vc02, vc03],
                                                                     tabBarItems: [tab01, tab02, tabA],
-                                                                    headerView: headerView,
-                                                                    headerHeight: 250)
+                                                                    headerView: galleryView,
+                                                                    headerHeight: galleryView.frame.size.height)
         collapseTabBarViewController.pageIndex = 1
         collapseTabBarViewController.minimumHeaderViewHeight = 44
         collapseTabBarViewController.headerViewStretchyHeight = 64
@@ -128,6 +130,8 @@ class ViewController: UIViewController, CollapseTabBarViewControllerDelegate {
                 collapseVC.view.bottomAnchor.constraint(equalTo: parentVC.view.bottomAnchor).isActive = true
         }
         
+        collapseTabBarViewController.scrollViewsToBlockCollapseScrolling = [galleryView.collectionView]
+        
         let topBar = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 64))
         topBar.backgroundColor = tabSelectedColor
         view.addSubview(topBar)
@@ -135,6 +139,10 @@ class ViewController: UIViewController, CollapseTabBarViewControllerDelegate {
         let banner = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 100))
         banner.backgroundColor = UIColor.gray.withAlphaComponent(0.5)
         collapseTabBarViewController.pageTabBarController.setBannerViewWithCustomView(banner, animated: true)
+        
+        galleryView.images = [GalleryImage.image(image: UIImage(named: "cover")!),
+                              GalleryImage.image(image: UIImage(named: "cover")!),
+                              GalleryImage.image(image: UIImage(named: "cover")!)]
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -142,7 +150,7 @@ class ViewController: UIViewController, CollapseTabBarViewControllerDelegate {
         let settings = CollapseCollectionViewLayoutSettings(headerSize: CGSize(width: view.frame.width, height: view.bounds.width),
                                                             isHeaderStretchy: true,
                                                             headerStretchHeight: 64,
-                                                            headerMinimumHeight: 0)
+                                                            headerMinimumHeight: 64)
         collapseTabBarViewController.setLayoutSettings(settings, animated: true)
     }
     
@@ -150,14 +158,13 @@ class ViewController: UIViewController, CollapseTabBarViewControllerDelegate {
         print("tap")
     }
 
-    func collapseTabBarController(_ controller: CollapseTabBarViewController, tabBarDidReach position: CollapseTabBarPosition) {
-        // print("\(position.rawValue)")
+    
+    // MARK: -
+    func collapseTabBarController(_ controller: CollapseTabBarViewController, tabBarRect rect: CGRect, position: CollapseTabBarPosition) {
+        // print(rect)
     }
     
     func collapseTabBarController(_ controller: CollapseTabBarViewController, scrollViewsForScrollingWithTabBarMoveAtIndex pageIndex: Int) -> [UIScrollView] {
-//        if let tableViewController = collapseTabBarViewController.pageTabBarController.viewControllers[pageIndex] as? TableViewController {
-//            return tableViewController
-//        }
         return []
     }
     

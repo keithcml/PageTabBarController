@@ -193,15 +193,18 @@ final class CollapseCollectionViewLayout: UICollectionViewLayout {
             
             switch type {
             case .staticHeader:
-                let originY = headerHeight - attributes.frame.height
+                let originY = headerHeight - attributes.frame.height + max(0, collectionView.contentOffset.y - headerHeight + settings.headerMinimumHeight)
                 attributes.frame = CGRect(origin: CGPoint(x: 0, y: originY),
                                           size: attributes.size)
                 break
             case .header:
                 attributes.transform = .identity
+                let originY = max(0, collectionView.contentOffset.y - headerHeight + settings.headerMinimumHeight)
+                attributes.frame = CGRect(origin: CGPoint(x: 0, y: originY),
+                                          size: attributes.frame.size)
                 break
             case .cell:
-                let originY = max(headerHeight, collectionView.contentOffset.y)
+                let originY = max(headerHeight, collectionView.contentOffset.y + settings.headerMinimumHeight)
                 attributes.frame = CGRect(origin: CGPoint(x: 0, y: originY),
                                           size: CGSize(width: attributes.frame.width,
                                                        height: collectionView.frame.height - originY + collectionView.contentOffset.y))

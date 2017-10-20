@@ -14,6 +14,7 @@ import UIKit
     @objc func getPageTabBarController() -> PageTabBarController?
     @objc func getHeaderView() -> UIView?
     @objc func getContentViewControllers() -> [UIViewController]
+    @objc optional func collapseCollectionViewDidScroll(_ collapseCollectionView: CollapseCollectionView)
 }
 
 final class CollapseCollectionView: UICollectionView {
@@ -94,12 +95,11 @@ extension CollapseCollectionView: UICollectionViewDelegate, UICollectionViewData
     
     public func scrollViewDidScroll(_ scrollView: UIScrollView) {
 
-        let scrollableOffsetY = headerHeight - revealedHeight
-        
         if ignoringScroll {
             scrollView.contentOffset = lastContentOffset
         } else {
             if lastContentOffset.y < scrollView.contentOffset.y {
+                let scrollableOffsetY = headerHeight - revealedHeight
                 for (otherScrollView, initialContentOffset) in zip(otherScrollViews, otherScrollViewsContentOffset) {
                     if contentOffset.y < scrollableOffsetY {
                         otherScrollView.contentOffset = initialContentOffset
@@ -108,7 +108,9 @@ extension CollapseCollectionView: UICollectionViewDelegate, UICollectionViewData
             }
         }
         
-        lastContentOffset = CGPoint(x: scrollView.contentOffset.x, y: max(scrollView.contentOffset.y, revealedHeight))
+        lastContentOffset = CGPoint(x: scrollView.contentOffset.x, y: scrollView.contentOffset.y)
+        
+        collapseDelegate?.collapseCollectionViewDidScroll?(self)
     }
     
     public func numberOfSections(in collectionView: UICollectionView) -> Int {
@@ -209,41 +211,41 @@ extension CollapseCollectionView: UIGestureRecognizerDelegate {
 }
 
 // MARK: - Pan Gesture Helpers
-@objc public enum Direction: Int {
-    case up
-    case down
-    case left
-    case right
-    case notMoving
-    
-    public var isX: Bool { return self == .left || self == .right }
-    public var isY: Bool { return !isX }
-}
-
-extension UIPanGestureRecognizer {
-    
-    @objc open var direction: Direction {
-        let panVelocity = velocity(in: view)
-        let vertical = fabs(panVelocity.y) > fabs(panVelocity.x)
-        switch (vertical, panVelocity.x, panVelocity.y) {
-        case (true, _, let y) where y < 0: return .up
-        case (true, _, let y) where y > 0: return .down
-        case (false, let x, _) where x > 0: return .right
-        case (false, let x, _) where x < 0: return .left
-        default: return .notMoving
-        }
-    }
-    
-    @objc open var verticalDirection: Direction {
-        let panVelocity = velocity(in: view)
-        let vertical = fabs(panVelocity.y) > fabs(panVelocity.x)
-        switch (vertical, panVelocity.x, panVelocity.y) {
-        case (true, _, let y) where y < 0: return .up
-        case (true, _, let y) where y > 0: return .down
-        case (false, _, let y) where y < 0: return .notMoving
-        case (false, _, let y) where y > 0: return .notMoving
-        default: return .notMoving
-        }
-    }
-}
+//@objc public enum Direction: Int {
+//    case up
+//    case down
+//    case left
+//    case right
+//    case notMoving
+//
+//    public var isX: Bool { return self == .left || self == .right }
+//    public var isY: Bool { return !isX }
+//}
+//
+//extension UIPanGestureRecognizer {
+//
+//    @objc open var direction: Direction {
+//        let panVelocity = velocity(in: view)
+//        let vertical = fabs(panVelocity.y) > fabs(panVelocity.x)
+//        switch (vertical, panVelocity.x, panVelocity.y) {
+//        case (true, _, let y) where y < 0: return .up
+//        case (true, _, let y) where y > 0: return .down
+//        case (false, let x, _) where x > 0: return .right
+//        case (false, let x, _) where x < 0: return .left
+//        default: return .notMoving
+//        }
+//    }
+//
+//    @objc open var verticalDirection: Direction {
+//        let panVelocity = velocity(in: view)
+//        let vertical = fabs(panVelocity.y) > fabs(panVelocity.x)
+//        switch (vertical, panVelocity.x, panVelocity.y) {
+//        case (true, _, let y) where y < 0: return .up
+//        case (true, _, let y) where y > 0: return .down
+//        case (false, _, let y) where y < 0: return .notMoving
+//        case (false, _, let y) where y > 0: return .notMoving
+//        default: return .notMoving
+//        }
+//    }
+//}
 
