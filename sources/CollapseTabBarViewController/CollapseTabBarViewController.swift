@@ -96,9 +96,9 @@ public typealias CollapseTabBarLayoutSettings = CollapseCollectionViewLayoutSett
         }
     }
     
-    open var scrollViewsToBlockCollapseScrolling = [UIScrollView]() {
+    open var preferredRecognizingScrollViews = [UIScrollView]() {
         didSet {
-            collpaseCollectionView.scrollViewsToBlockCollapseScrolling = scrollViewsToBlockCollapseScrolling
+            collpaseCollectionView.preferredRecognizingScrollViews = preferredRecognizingScrollViews
         }
     }
     

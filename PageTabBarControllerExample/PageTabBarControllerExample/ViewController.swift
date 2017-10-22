@@ -130,7 +130,7 @@ class ViewController: UIViewController, CollapseTabBarViewControllerDelegate {
                 collapseVC.view.bottomAnchor.constraint(equalTo: parentVC.view.bottomAnchor).isActive = true
         }
         
-        collapseTabBarViewController.scrollViewsToBlockCollapseScrolling = [galleryView.collectionView]
+        collapseTabBarViewController.preferredRecognizingScrollViews = [galleryView.collectionView]
         
         let topBar = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 64))
         topBar.backgroundColor = tabSelectedColor
@@ -205,7 +205,7 @@ class ViewController: UIViewController, CollapseTabBarViewControllerDelegate {
     }
 
     func pageTabBarController(_ controller: PageTabBarController, transit fromIndex: Int, to toIndex: Int, progress: CGFloat) {
-        print("from index: \(fromIndex), to index: \(toIndex), progress: \(progress)")
+        // print("from index: \(fromIndex), to index: \(toIndex), progress: \(progress)")
     }
 }
 

@@ -39,7 +39,7 @@ final class CollapseCollectionView: UICollectionView {
     }
     
     var staticHeaderView: UIView?
-    var scrollViewsToBlockCollapseScrolling = [UIScrollView]()
+    var preferredRecognizingScrollViews = [UIScrollView]()
     
     var otherScrollViews = [UIScrollView]() {
         didSet {
@@ -158,7 +158,6 @@ extension CollapseCollectionView: UICollectionViewDelegate, UICollectionViewData
         vc.removeFromParentViewController()
     }
     
-    
     public func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         switch kind {
         case CollapseCollectionViewLayout.Element.header.kind:
@@ -195,12 +194,16 @@ extension CollapseCollectionView: UICollectionViewDelegate, UICollectionViewData
 
 extension CollapseCollectionView: UIGestureRecognizerDelegate {
     
+    open override func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        return true
+    }
+    
     open func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         if let cv = collapseDelegate?.getPageTabBarController()?.collectionView, let gestureView = otherGestureRecognizer.view, gestureView == cv {
             return false
         }
         
-        for scrollView in scrollViewsToBlockCollapseScrolling {
+        for scrollView in preferredRecognizingScrollViews {
             if let gestureView = otherGestureRecognizer.view as? UIScrollView, gestureView === scrollView {
                 return false
             }

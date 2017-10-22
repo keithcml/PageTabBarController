@@ -21,13 +21,17 @@ class CollapseStaticHeaderView: UICollectionReusableView {
         fatalError("init(coder:) has not been implemented")
     }
     
-//    override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
-//        return nil
-//    }
-//
-//    override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
-//        <#code#>
-//    }
+    override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
+        if let view = super.hitTest(point, with: event) {
+            
+            if view == contentView {
+                return nil
+            }
+            
+            return view
+        }
+        return nil
+    }
     
     func configureWithContentView(_ view: UIView?) {
         contentView?.removeFromSuperview()
@@ -43,14 +47,4 @@ class CollapseStaticHeaderView: UICollectionReusableView {
                                      contentView.trailingAnchor.constraint(equalTo: trailingAnchor)])
         
     }
-    
-//    override func preferredLayoutAttributesFitting(_ layoutAttributes: UICollectionViewLayoutAttributes) -> UICollectionViewLayoutAttributes {
-//        let layoutAttributes = super.preferredLayoutAttributesFitting(layoutAttributes)
-//
-//        let size = systemLayoutSizeFitting(UILayoutFittingCompressedSize)
-//
-//        layoutAttributes.frame = CGRect(x: 0, y: layoutAttributes.frame.minY - (size.height - layoutAttributes.frame.height), width:  layoutAttributes.frame.width, height: size.height)
-//
-//        return layoutAttributes
-//    }
 }
