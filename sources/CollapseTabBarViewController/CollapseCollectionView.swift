@@ -15,6 +15,8 @@ import UIKit
     @objc func getHeaderView() -> UIView?
     @objc func getContentViewControllers() -> [UIViewController]
     @objc optional func collapseCollectionViewDidScroll(_ collapseCollectionView: CollapseCollectionView)
+    @objc optional func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool
+    
 }
 
 final class CollapseCollectionView: UICollectionView {
@@ -212,6 +214,10 @@ extension CollapseCollectionView: UIGestureRecognizerDelegate {
             if let gestureView = otherGestureRecognizer.view as? UIScrollView, gestureView === scrollView {
                 return false
             }
+        }
+        
+        if let shouldRecognizeSimultaneously = collapseDelegate?.gestureRecognizer?(gestureRecognizer, shouldRecognizeSimultaneouslyWith: otherGestureRecognizer) {
+            return shouldRecognizeSimultaneously
         }
         
         return true

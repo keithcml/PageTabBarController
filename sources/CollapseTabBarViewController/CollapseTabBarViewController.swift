@@ -31,6 +31,8 @@ import UIKit
     // Don't do heavy task in this delegate
     @objc optional func collapseTabBarController(_ controller: CollapseTabBarViewController, tabBarRect rect: CGRect, position: CollapseTabBarPosition)
     @objc optional func collapseTabBarController(_ controller: CollapseTabBarViewController, scrollViewsForScrollingWithTabBarMoveAtIndex pageIndex: Int) -> [UIScrollView]
+    @objc optional func collapseTabBarController(_ controller: CollapseTabBarViewController, gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool
+    
 }
 
 @objc public enum CollapseTabBarPosition: Int {
@@ -277,6 +279,13 @@ extension CollapseTabBarViewController: CollapseCollectionViewDelegate {
             }
         }
         
+    }
+    
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        if let shouldRecognizeSimultaneously = delegate?.collapseTabBarController?(self, gestureRecognizer: gestureRecognizer, shouldRecognizeSimultaneouslyWith: otherGestureRecognizer) {
+            return shouldRecognizeSimultaneously
+        }
+        return true
     }
 }
 
