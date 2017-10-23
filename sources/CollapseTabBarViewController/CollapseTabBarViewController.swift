@@ -31,8 +31,6 @@ import UIKit
     // Don't do heavy task in this delegate
     @objc optional func collapseTabBarController(_ controller: CollapseTabBarViewController, tabBarRect rect: CGRect, position: CollapseTabBarPosition)
     @objc optional func collapseTabBarController(_ controller: CollapseTabBarViewController, scrollViewsForScrollingWithTabBarMoveAtIndex pageIndex: Int) -> [UIScrollView]
-    @objc optional func collapseTabBarController(_ controller: CollapseTabBarViewController, gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool
-    
 }
 
 @objc public enum CollapseTabBarPosition: Int {
@@ -264,28 +262,25 @@ extension CollapseTabBarViewController: CollapseCollectionViewDelegate {
     }
     
     func collapseCollectionViewDidScroll(_ collapseCollectionView: CollapseCollectionView) {
-
-        if let rect = pageTabBarController.pageTabBar.superview?.convert(pageTabBarController.pageTabBar.frame, to: view) {
-            if rect.minY <= minimumHeaderViewHeight {
-                let adjustedRect = CGRect(x: rect.minX, y: minimumHeaderViewHeight, width: rect.width, height: rect.height)
-                delegate?.collapseTabBarController?(self, tabBarRect: adjustedRect, position: .top)
-            }
-            else if rect.minY >= defaultHeaderHeight {
-                let adjustedRect = CGRect(x: rect.minX, y: defaultHeaderHeight, width: rect.width, height: rect.height)
-                delegate?.collapseTabBarController?(self, tabBarRect: adjustedRect, position: .bottom)
-            }
-            else {
-                delegate?.collapseTabBarController?(self, tabBarRect: rect, position: .inBetween)
-            }
+        
+        guard let cell = collapseCollectionView.cellForItem(at: IndexPath(item: 0, section: 0)) else { return }
+        let rect = collapseCollectionView.convert(cell.frame, to: view)
+        
+        if collapseCollectionView.contentOffset.y >= defaultHeaderHeight - minimumHeaderViewHeight {
+            let adjustedRect = CGRect(x: rect.minX, y: minimumHeaderViewHeight, width: rect.width, height: rect.height)
+            delegate?.collapseTabBarController?(self, tabBarRect: adjustedRect, position: .top)
+        }
+        else if collapseCollectionView.contentOffset.y <= 0 {
+            let adjustedRect = CGRect(x: rect.minX,
+                                      y: defaultHeaderHeight + min(abs(collapseCollectionView.contentOffset.y), headerViewStretchyHeight),
+                                      width: rect.width,
+                                      height: rect.height)
+            delegate?.collapseTabBarController?(self, tabBarRect: adjustedRect, position: .bottom)
+        }
+        else {
+            delegate?.collapseTabBarController?(self, tabBarRect: rect, position: .inBetween)
         }
         
-    }
-    
-    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
-        if let shouldRecognizeSimultaneously = delegate?.collapseTabBarController?(self, gestureRecognizer: gestureRecognizer, shouldRecognizeSimultaneouslyWith: otherGestureRecognizer) {
-            return shouldRecognizeSimultaneously
-        }
-        return true
     }
 }
 
