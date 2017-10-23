@@ -102,10 +102,16 @@ public typealias CollapseTabBarLayoutSettings = CollapseCollectionViewLayoutSett
         }
     }
     
+    open var isScrollEnabled = true {
+        didSet {
+            collpaseCollectionView.isScrollEnabled = isScrollEnabled
+        }
+    }
+    
     /**
      LayoutGuide for attaching views to top of page view
      */
-    open fileprivate(set) var topPageTabBarLayoutGuide: UILayoutGuide?
+    // open fileprivate(set) var topPageTabBarLayoutGuide: UILayoutGuide?
     
     fileprivate var tabBarItems = [PageTabBarItem]()
     
@@ -259,10 +265,12 @@ extension CollapseTabBarViewController: CollapseCollectionViewDelegate {
 
         if let rect = pageTabBarController.pageTabBar.superview?.convert(pageTabBarController.pageTabBar.frame, to: view) {
             if rect.minY <= minimumHeaderViewHeight {
-                delegate?.collapseTabBarController?(self, tabBarRect: rect, position: .top)
+                let adjustedRect = CGRect(x: rect.minX, y: minimumHeaderViewHeight, width: rect.width, height: rect.height)
+                delegate?.collapseTabBarController?(self, tabBarRect: adjustedRect, position: .top)
             }
             else if rect.minY >= defaultHeaderHeight {
-                delegate?.collapseTabBarController?(self, tabBarRect: rect, position: .bottom)
+                let adjustedRect = CGRect(x: rect.minX, y: defaultHeaderHeight, width: rect.width, height: rect.height)
+                delegate?.collapseTabBarController?(self, tabBarRect: adjustedRect, position: .bottom)
             }
             else {
                 delegate?.collapseTabBarController?(self, tabBarRect: rect, position: .inBetween)

@@ -129,9 +129,7 @@ class ViewController: UIViewController, CollapseTabBarViewControllerDelegate {
                 collapseVC.view.trailingAnchor.constraint(equalTo: parentVC.view.trailingAnchor).isActive = true
                 collapseVC.view.bottomAnchor.constraint(equalTo: parentVC.view.bottomAnchor).isActive = true
         }
-        
-        collapseTabBarViewController.preferredRecognizingScrollViews = [galleryView.collectionView]
-        
+
         let topBar = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 64))
         topBar.backgroundColor = tabSelectedColor
         view.addSubview(topBar)
