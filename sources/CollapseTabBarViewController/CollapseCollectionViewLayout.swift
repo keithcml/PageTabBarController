@@ -140,12 +140,15 @@ final class CollapseCollectionViewLayout: UICollectionViewLayout {
         
         switch type {
         case .staticHeader:
+            attributes.zIndex = 10
             attributes.frame = CGRect(origin: CGPoint(x: 0, y: settings.headerSize.height - size.height), size: size)
             break
         case .header:
+            attributes.zIndex = 1
             attributes.frame = CGRect(origin: CGPoint.zero, size: size)
             break
         case .cell:
+            attributes.zIndex = 10
             attributes.frame = CGRect(origin: CGPoint(x: 0, y: settings.headerSize.height), size: size)
             break
         }
@@ -252,11 +255,12 @@ final class CollapseCollectionViewLayout: UICollectionViewLayout {
     
     // MARK: - Invalidation
     override func shouldInvalidateLayout (forBoundsChange newBounds : CGRect) -> Bool {
-//        if oldBounds.size != newBounds.size {
-//            cache.removeAll(keepingCapacity: true)
-//        }
         return true
     }
     
+    // MARK: - ContentOffset
+    override func targetContentOffset(forProposedContentOffset proposedContentOffset: CGPoint) -> CGPoint {
+        return CGPoint.zero
+    }
 }
 

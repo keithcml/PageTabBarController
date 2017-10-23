@@ -170,7 +170,7 @@ internal final class PageTabBarCollectionViewFlowLayout: UICollectionViewFlowLay
     
     override open func viewDidLoad() {
         super.viewDidLoad()
-        
+
         pageTabBar.currentIndex = pageIndex
         pageTabBar.delegate = self
         view.addSubview(pageTabBar)

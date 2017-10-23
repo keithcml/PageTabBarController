@@ -145,15 +145,15 @@ class ViewController: UIViewController, CollapseTabBarViewControllerDelegate {
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        let settings = CollapseCollectionViewLayoutSettings(headerSize: CGSize(width: view.frame.width, height: view.bounds.width),
+    }
+    
+    @objc private func tap(_ sender: Any) {
+        let headerHeight: CGFloat = collapseTabBarViewController.defaultHeaderHeight == view.bounds.width ? 100 : view.bounds.width
+        let settings = CollapseCollectionViewLayoutSettings(headerSize: CGSize(width: view.frame.width, height: headerHeight),
                                                             isHeaderStretchy: true,
                                                             headerStretchHeight: 64,
                                                             headerMinimumHeight: 64)
         collapseTabBarViewController.setLayoutSettings(settings, animated: true)
-    }
-    
-    @objc private func tap(_ sender: Any) {
-        print("tap")
     }
 
     
