@@ -95,7 +95,11 @@ class ViewController: UIViewController, CollapseTabBarViewControllerDelegate {
                                                                     headerView: galleryView,
                                                                     headerHeight: galleryView.frame.size.height)
         collapseTabBarViewController.pageIndex = 1
-        collapseTabBarViewController.minimumHeaderViewHeight = 44
+        if #available(iOS 11.0, *) {
+            collapseTabBarViewController.minimumHeaderViewHeight = view.safeAreaInsets.top
+        } else {
+            collapseTabBarViewController.minimumHeaderViewHeight = 0
+        }
         collapseTabBarViewController.headerViewStretchyHeight = 64
         collapseTabBarViewController.pageTabBarController.pageTabBar.barHeight = 40
         collapseTabBarViewController.pageTabBarController.pageTabBar.indicatorLineColor = tabSelectedColor
@@ -124,7 +128,7 @@ class ViewController: UIViewController, CollapseTabBarViewControllerDelegate {
             collapseTabBarViewController,
             into: self) { (collapseVC, parentVC) in
                 collapseVC.view.translatesAutoresizingMaskIntoConstraints = false
-                collapseVC.view.topAnchor.constraint(equalTo: parentVC.view.topAnchor, constant: 64).isActive = true
+                collapseVC.view.topAnchor.constraint(equalTo: parentVC.view.topAnchor).isActive = true
                 collapseVC.view.leadingAnchor.constraint(equalTo: parentVC.view.leadingAnchor).isActive = true
                 collapseVC.view.trailingAnchor.constraint(equalTo: parentVC.view.trailingAnchor).isActive = true
                 collapseVC.view.bottomAnchor.constraint(equalTo: parentVC.view.bottomAnchor).isActive = true
@@ -132,7 +136,7 @@ class ViewController: UIViewController, CollapseTabBarViewControllerDelegate {
 
         let topBar = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 64))
         topBar.backgroundColor = tabSelectedColor
-        view.addSubview(topBar)
+        //view.addSubview(topBar)
         
         let banner = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 100))
         banner.backgroundColor = UIColor.gray.withAlphaComponent(0.5)

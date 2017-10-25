@@ -64,6 +64,10 @@ final class CollapseCollectionView: UICollectionView {
         showsVerticalScrollIndicator = false
         panGestureRecognizer.delegate = self
         
+        if #available(iOS 11.0, *) {
+            contentInsetAdjustmentBehavior = .never
+        }
+        
         if let layout = layout as? CollapseCollectionViewLayout {
             layout.delegate = self
         }
