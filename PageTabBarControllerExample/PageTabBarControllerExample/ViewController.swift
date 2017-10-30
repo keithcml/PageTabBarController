@@ -59,6 +59,10 @@ class ViewController: UIViewController, CollapseTabBarViewControllerDelegate {
         let tabColor = UIColor(red: 215/255.0, green: 215/255.0, blue: 215/255.0, alpha: 1)
         let tabSelectedColor = UIColor(red: 35/255.0, green: 171/255.0, blue: 232/255.0, alpha: 1)
         
+        let topBar = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 64))
+        topBar.backgroundColor = tabSelectedColor
+        view.addSubview(topBar)
+        
         vc01.view.tag = 1
         vc02.view.tag = 2
         vc03.view.tag = 3
@@ -95,11 +99,12 @@ class ViewController: UIViewController, CollapseTabBarViewControllerDelegate {
                                                                     headerView: galleryView,
                                                                     headerHeight: galleryView.frame.size.height)
         collapseTabBarViewController.pageIndex = 1
-        if #available(iOS 11.0, *) {
-            collapseTabBarViewController.minimumHeaderViewHeight = view.safeAreaInsets.top
-        } else {
-            collapseTabBarViewController.minimumHeaderViewHeight = 0
-        }
+//        if #available(iOS 11.0, *) {
+//            collapseTabBarViewController.minimumHeaderViewHeight = view.safeAreaInsets.top
+//        } else {
+//            collapseTabBarViewController.minimumHeaderViewHeight = 0
+//        }
+        collapseTabBarViewController.minimumHeaderViewHeight = 0
         collapseTabBarViewController.headerViewStretchyHeight = 64
         collapseTabBarViewController.pageTabBarController.pageTabBar.barHeight = 40
         collapseTabBarViewController.pageTabBarController.pageTabBar.indicatorLineColor = tabSelectedColor
@@ -128,15 +133,11 @@ class ViewController: UIViewController, CollapseTabBarViewControllerDelegate {
             collapseTabBarViewController,
             into: self) { (collapseVC, parentVC) in
                 collapseVC.view.translatesAutoresizingMaskIntoConstraints = false
-                collapseVC.view.topAnchor.constraint(equalTo: parentVC.view.topAnchor).isActive = true
+                collapseVC.view.topAnchor.constraint(equalTo: topBar.bottomAnchor).isActive = true
                 collapseVC.view.leadingAnchor.constraint(equalTo: parentVC.view.leadingAnchor).isActive = true
                 collapseVC.view.trailingAnchor.constraint(equalTo: parentVC.view.trailingAnchor).isActive = true
                 collapseVC.view.bottomAnchor.constraint(equalTo: parentVC.view.bottomAnchor).isActive = true
         }
-
-        let topBar = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 64))
-        topBar.backgroundColor = tabSelectedColor
-        //view.addSubview(topBar)
         
         let banner = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 100))
         banner.backgroundColor = UIColor.gray.withAlphaComponent(0.5)
@@ -156,7 +157,7 @@ class ViewController: UIViewController, CollapseTabBarViewControllerDelegate {
         let settings = CollapseCollectionViewLayoutSettings(headerSize: CGSize(width: view.frame.width, height: headerHeight),
                                                             isHeaderStretchy: true,
                                                             headerStretchHeight: 64,
-                                                            headerMinimumHeight: 64)
+                                                            headerMinimumHeight: 0)
         collapseTabBarViewController.setLayoutSettings(settings, animated: true)
     }
 

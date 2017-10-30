@@ -147,6 +147,8 @@ public typealias CollapseTabBarLayoutSettings = CollapseCollectionViewLayoutSett
         collpaseCollectionView.register(UICollectionReusableView.self, forSupplementaryViewOfKind: CollapseCollectionViewLayout.Element.header.kind, withReuseIdentifier: "Header")
         collpaseCollectionView.register(CollapseStaticHeaderView.self, forSupplementaryViewOfKind: CollapseCollectionViewLayout.Element.staticHeader.kind, withReuseIdentifier: "StaticHeader")
         collpaseCollectionView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        
+        automaticallyAdjustsScrollViewInsets = false
     }
     
     required public init?(coder aDecoder: NSCoder) {

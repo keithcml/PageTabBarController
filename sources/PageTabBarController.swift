@@ -425,7 +425,7 @@ internal final class PageTabBarCollectionViewFlowLayout: UICollectionViewFlowLay
         }
     }
     
-    open func setBannerViewWithCustomView(_ customView: UIView?, animated: Bool) {
+    @objc open func setBannerViewWithCustomView(_ customView: UIView?, animated: Bool) {
         pageTabBarBannerView.subviews.forEach { $0.removeFromSuperview() }
         
         guard let customView = customView else {
