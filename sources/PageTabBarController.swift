@@ -124,6 +124,7 @@ open class PageTabBarController: UIViewController, UIScrollViewDelegate {
         return nil
     }
     
+    @objc
     open fileprivate(set) var pageTabBar: PageTabBar!
     
     @objc
