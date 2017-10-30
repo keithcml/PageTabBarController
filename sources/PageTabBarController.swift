@@ -461,10 +461,10 @@ open class PageTabBarController: UIViewController, UIScrollViewDelegate {
         
         pageTabBarBannerView.addSubview(customView)
         customView.translatesAutoresizingMaskIntoConstraints = false
-        customView.topAnchor.constraint(equalTo: pageTabBarBannerView.topAnchor)
-        customView.leadingAnchor.constraint(equalTo: pageTabBarBannerView.leadingAnchor)
-        customView.trailingAnchor.constraint(equalTo: pageTabBarBannerView.trailingAnchor)
-        customView.heightAnchor.constraint(equalToConstant: height)
+        customView.topAnchor.constraint(equalTo: pageTabBarBannerView.topAnchor).isActive = true
+        customView.leadingAnchor.constraint(equalTo: pageTabBarBannerView.leadingAnchor).isActive = true
+        customView.trailingAnchor.constraint(equalTo: pageTabBarBannerView.trailingAnchor).isActive = true
+        customView.heightAnchor.constraint(equalToConstant: height).isActive = true
         
         if view.window == nil {
             self.bannerHeightConstraint?.constant = height
