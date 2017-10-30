@@ -193,7 +193,7 @@ open class Badge: UIView {
     }
     
     fileprivate func adjustCornerRadius() {
-        let attriStr = NSAttributedString(string: innerLabel.text ?? "0", attributes: [NSFontAttributeName: innerLabel.font])
+        let attriStr = NSAttributedString(string: innerLabel.text ?? "0", attributes: [NSAttributedStringKey.font: innerLabel.font])
         let size = attriStr.boundingRect(with: CGSize(width: CGFloat.greatestFiniteMagnitude, height: CGFloat.greatestFiniteMagnitude), options: [.usesFontLeading, .usesLineFragmentOrigin], context: nil)
         var viewSize = CGSize(width: ceil(size.width) + insets.left + insets.right, height: ceil(size.height) + insets.top + insets.bottom)
         

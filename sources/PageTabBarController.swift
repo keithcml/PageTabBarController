@@ -89,7 +89,7 @@ internal final class PageTabBarCollectionViewFlowLayout: UICollectionViewFlowLay
         }
     }
     
-    open var updateIndex: (Bool, Int) -> () = { _ in }
+    open var updateIndex: (Bool, Int) -> () = { _,_  in }
     
     open private(set) var pageIndex: Int = 0 {
         willSet {
@@ -317,19 +317,19 @@ internal final class PageTabBarCollectionViewFlowLayout: UICollectionViewFlowLay
     }
     
     // MARK: - Badge
-    open func setBadge(_ value: Int, forItemAt index: Int) {
+    @objc open func setBadge(_ value: Int, forItemAt index: Int) {
         guard pageTabBarItems.count > index else { return }
         pageTabBarItems[index].badgeCount = value
     }
     
-    open func clearAllBadges() {
+    @objc open func clearAllBadges() {
         for item in pageTabBarItems {
             item.badgeCount = 0
         }
     }
     
     // MARK: - PageIndex
-    open func setPageIndex(_ index: Int, animated: Bool) {
+    @objc open func setPageIndex(_ index: Int, animated: Bool) {
         guard pageTabBarItems.count > index else { return }
         
         var shouldAnimate = animated
@@ -398,7 +398,7 @@ internal final class PageTabBarCollectionViewFlowLayout: UICollectionViewFlowLay
     }
     
     // MARK: - Supplementary Views
-    open func setHeaderViewWithCustomView(_ customView: UIView?, animated: Bool) {
+    @objc open func setHeaderViewWithCustomView(_ customView: UIView?, animated: Bool) {
         pageTabBarHeaderView.subviews.forEach { $0.removeFromSuperview() }
         
         guard let customView = customView else {

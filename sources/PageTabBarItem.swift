@@ -66,7 +66,7 @@ private class PageTabBarButton: UIButton {
 
 @objc open class PageTabBarItem: UIView {
     
-    open var font = UIFont.systemFont(ofSize: 12, weight: UIFontWeightMedium) {
+    open var font = UIFont.systemFont(ofSize: 12, weight: UIFont.Weight.medium) {
         didSet {
             tabBarButton.titleLabel?.font = font
         }
@@ -117,7 +117,7 @@ private class PageTabBarButton: UIButton {
         type = .text
         
         tabBarButton.setTitle(title, for: .normal)
-        tabBarButton.titleLabel?.font = UIFont.systemFont(ofSize: 12, weight: UIFontWeightMedium)
+        tabBarButton.titleLabel?.font = UIFont.systemFont(ofSize: 12, weight: UIFont.Weight.medium)
 
         commonInit()
     }

@@ -84,7 +84,6 @@ extension CollapseCollectionView: UICollectionViewDelegate, UICollectionViewData
         for otherScrollView in otherScrollViews {
             let rect = otherScrollView.superview!.convert(otherScrollView.frame, to: scrollView)
             if rect.contains(point) && otherScrollView.contentOffset.y > -otherScrollView.contentInset.top {
-                // print(otherScrollView)
                 return true
             }
         }
@@ -102,7 +101,7 @@ extension CollapseCollectionView: UICollectionViewDelegate, UICollectionViewData
         if ignoringScroll {
             scrollView.contentOffset = lastContentOffset
         } else {
-            if lastContentOffset.y < scrollView.contentOffset.y {
+            if lastContentOffset.y < scrollView.contentOffset.y && stretchyHeight > 0 {
                 let scrollableOffsetY = headerHeight - revealedHeight
                 for (otherScrollView, initialContentOffset) in zip(otherScrollViews, otherScrollViewsContentOffset) {
                     if contentOffset.y < scrollableOffsetY {
