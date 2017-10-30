@@ -9,7 +9,8 @@
 import Foundation
 import UIKit
 
-@objc public final class PageTabBarSupplementaryView: UIView {
+@objc
+public final class PageTabBarSupplementaryView: UIView {
     
     override init(frame: CGRect) {
         super.init(frame: frame)

@@ -66,17 +66,17 @@ private class PageTabBarButton: UIButton {
 
 @objc open class PageTabBarItem: UIView {
     
-    open var font = UIFont.systemFont(ofSize: 12, weight: UIFont.Weight.medium) {
+    @objc open var font = UIFont.systemFont(ofSize: 12, weight: UIFont.Weight.medium) {
         didSet {
             tabBarButton.titleLabel?.font = font
         }
     }
-    open var color = UIColor.lightGray {
+    @objc open var color = UIColor.lightGray {
         didSet {
             tabBarButton.color = color
         }
     }
-    open var selectedColor = UIColor.blue {
+    @objc open var selectedColor = UIColor.blue {
         didSet {
             tabBarButton.selectedColor = selectedColor
         }
@@ -103,14 +103,14 @@ private class PageTabBarButton: UIButton {
         return button
     }()
     
-    open let badgeView: Badge = {
+    @objc open let badgeView: Badge = {
         let badgeView = Badge(type: .number)
         return badgeView
     }()
     
     private var type = PageTabBarItemType.text
     
-    public convenience init(title: String?) {
+    @objc public convenience init(title: String?) {
     
         self.init(frame: CGRect(x: 0, y: 0, width: 30, height: 30))
     
@@ -122,7 +122,7 @@ private class PageTabBarButton: UIButton {
         commonInit()
     }
     
-    public convenience init(icon: UIImage?) {
+    @objc public convenience init(icon: UIImage?) {
         self.init(frame: CGRect(x: 0, y: 0, width: 30, height: 30))
         
         type = .icon

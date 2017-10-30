@@ -45,7 +45,8 @@ public struct CollapseCollectionViewLayoutSettings {
     }
 }
 
-@objc protocol CollapseCollectionViewLayoutDelegate: class {
+@objc
+protocol CollapseCollectionViewLayoutDelegate: class {
     @objc optional func collapseCollectionView(_ collapseCollectionView: CollapseCollectionView, layout: CollapseCollectionViewLayout, sizeForStaticHeaderAt indexPath: IndexPath) -> CGSize
 }
 

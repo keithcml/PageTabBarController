@@ -26,27 +26,31 @@
 import Foundation
 import UIKit
 
-@objc public protocol CollapseTabBarViewControllerDelegate: PageTabBarControllerDelegate {
+@objc
+public protocol CollapseTabBarViewControllerDelegate: PageTabBarControllerDelegate {
     
     // Don't do heavy task in this delegate
     @objc optional func collapseTabBarController(_ controller: CollapseTabBarViewController, tabBarRect rect: CGRect, position: CollapseTabBarPosition)
     @objc optional func collapseTabBarController(_ controller: CollapseTabBarViewController, scrollViewsForScrollingWithTabBarMoveAtIndex pageIndex: Int) -> [UIScrollView]
 }
 
-@objc public enum CollapseTabBarPosition: Int {
+@objc
+public enum CollapseTabBarPosition: Int {
     case top = 0
     case bottom
     case inBetween
 }
 
-@objc public enum CollapseTabBarAnimationType: Int {
+@objc
+public enum CollapseTabBarAnimationType: Int {
     case easeInOut = 0
     case spring
 }
 
 public typealias CollapseTabBarLayoutSettings = CollapseCollectionViewLayoutSettings
 
-@objc open class CollapseTabBarViewController: UIViewController {
+@objc
+open class CollapseTabBarViewController: UIViewController {
     
     override open var childViewControllerForStatusBarHidden: UIViewController? {
         return pageTabBarController
@@ -60,6 +64,7 @@ public typealias CollapseTabBarLayoutSettings = CollapseCollectionViewLayoutSett
         return true
     }
     
+    @objc
     open weak var delegate: CollapseTabBarViewControllerDelegate? {
         didSet {
             pageTabBarController.delegate = delegate
@@ -67,12 +72,16 @@ public typealias CollapseTabBarLayoutSettings = CollapseCollectionViewLayoutSett
     }
     
     // MARK: - PageTabBarController Properties
+    @objc
     open fileprivate(set) var pageTabBarController: PageTabBarController
+    
+    @objc
     open var visibleViewController: UIViewController? {
         return pageTabBarController.selectedViewController
     }
     
     // MARK: - Scroll Control
+    @objc
     open var pageIndex: Int {
         get {
             return pageTabBarController.pageIndex
@@ -83,25 +92,37 @@ public typealias CollapseTabBarLayoutSettings = CollapseCollectionViewLayoutSett
             collpaseCollectionView.otherScrollViews = constructScrollViewsToIgnoreTouches()
         }
     }
+    
+    @objc
     open var autoCollapse = false
+    
+    @objc
     open var alwaysBouncesAtBottom = true
     
+    @objc
     open var minimumHeaderViewHeight: CGFloat = 0
+    
+    @objc
     open var defaultHeaderHeight: CGFloat = 200
+    
+    @objc
     open var headerViewStretchyHeight: CGFloat = 64
     
+    @objc
     open var staticHeaderView: UIView? {
         didSet {
             collpaseCollectionView.staticHeaderView = staticHeaderView
         }
     }
     
+    @objc
     open var preferredRecognizingScrollViews = [UIScrollView]() {
         didSet {
             collpaseCollectionView.preferredRecognizingScrollViews = preferredRecognizingScrollViews
         }
     }
     
+    @objc
     open var isScrollEnabled = true {
         didSet {
             collpaseCollectionView.isScrollEnabled = isScrollEnabled
@@ -120,10 +141,11 @@ public typealias CollapseTabBarLayoutSettings = CollapseCollectionViewLayoutSett
     
     fileprivate var collpaseCollectionView: CollapseCollectionView
     
-    @objc public init(viewControllers: [UIViewController],
-                      tabBarItems: [PageTabBarItem],
-                      headerView: UIView = UIView(frame: CGRect.zero),
-                      headerHeight: CGFloat = 200) {
+    @objc
+    public init(viewControllers: [UIViewController],
+                tabBarItems: [PageTabBarItem],
+                headerView: UIView = UIView(frame: CGRect.zero),
+                headerHeight: CGFloat = 200) {
         
         pageTabBarController =
             PageTabBarController(
@@ -192,6 +214,7 @@ public typealias CollapseTabBarLayoutSettings = CollapseCollectionViewLayoutSett
         super.viewWillDisappear(animated)
     }
     
+    @objc
     public static func attachCollapseTabBarController(_ collapseTabBarViewController: CollapseTabBarViewController, into parentViewController: UIViewController, layoutClosure: (CollapseTabBarViewController, UIViewController) -> ()) {
         parentViewController.addChildViewController(collapseTabBarViewController)
         collapseTabBarViewController.view.frame = CGRect(x: 0, y: 0, width: parentViewController.view.frame.width, height: parentViewController.view.frame.height)
@@ -211,13 +234,15 @@ public typealias CollapseTabBarLayoutSettings = CollapseCollectionViewLayoutSett
     }
     
     // MARK: - Select Tab
-    @objc open func selectTabAtIndex(_ index: Int, scrollToPosition: CollapseTabBarPosition) {
+    @objc
+    open func selectTabAtIndex(_ index: Int, scrollToPosition: CollapseTabBarPosition) {
         pageTabBarController.setPageIndex(index, animated: true)
         scrollTabBar(to: .top, animated: true)
     }
     
     // MARK: - Control Scroll
-    @objc open func scrollTabBar(to position: CollapseTabBarPosition, animated: Bool = false) {
+    @objc
+    open func scrollTabBar(to position: CollapseTabBarPosition, animated: Bool = false) {
         
         switch position {
         case .top:

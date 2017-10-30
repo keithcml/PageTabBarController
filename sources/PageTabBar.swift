@@ -30,7 +30,8 @@ internal protocol PageTabBarDelegate: class {
     func pageTabBar(_ tabBar: PageTabBar, indexDidChanged index: Int)
 }
 
-@objc public enum PageTabBarPosition: Int {
+@objc
+public enum PageTabBarPosition: Int {
     case top = 0
     case bottom
 }
@@ -41,6 +42,7 @@ internal enum PageTabBarItemArrangement {
     case compact
 }
 
+@objc
 open class PageTabBar: UIView {
     
     internal weak var delegate: PageTabBarDelegate?
@@ -55,6 +57,7 @@ open class PageTabBar: UIView {
         }
     }
     
+    @objc
     open var barHeight: CGFloat = 44.0 {
         didSet {
             guard oldValue != barHeight else { return }
@@ -63,6 +66,7 @@ open class PageTabBar: UIView {
         }
     }
     
+    @objc
     open var barTintColor: UIColor = .white {
         didSet {
             backgroundColor = barTintColor
@@ -70,38 +74,51 @@ open class PageTabBar: UIView {
         }
     }
     
+    @objc
     open var indicatorLineHidden = false {
         didSet {
             indicatorLine.isHidden = indicatorLineHidden
         }
     }
+    
+    @objc
     open var topLineHidden = false {
         didSet {
             topLine.isHidden = topLineHidden
         }
     }
+    
+    @objc
     open var bottomLineHidden = false {
         didSet {
             bottomLine.isHidden = bottomLineHidden
         }
     }
+    
+    @objc
     open var indicatorLineColor = UIColor.blue  {
         didSet {
             indicatorLine.backgroundColor = indicatorLineColor
             setNeedsDisplay()
         }
     }
+    
+    @objc
     open var indicatorLineHeight: CGFloat = 1.0  {
         didSet {
             indicatorLine.frame = CGRect(x: indicatorLine.frame.minX, y: barHeight - indicatorLineHeight, width: itemWidth, height: indicatorLineHeight)
         }
     }
+    
+    @objc
     open var topLineColor = UIColor.lightGray  {
         didSet {
             topLine.backgroundColor = topLineColor
             setNeedsDisplay()
         }
     }
+    
+    @objc
     open var bottomLineColor = UIColor.lightGray  {
         didSet {
             bottomLine.backgroundColor = bottomLineColor
@@ -147,6 +164,7 @@ open class PageTabBar: UIView {
         return line
     }()
     
+    @objc
     convenience init(tabBarItems: [PageTabBarItem]) {
         self.init(frame: CGRect(x: 0, y: 0, width: 100, height: 44))
         items = tabBarItems

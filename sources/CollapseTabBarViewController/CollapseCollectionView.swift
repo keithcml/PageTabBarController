@@ -9,7 +9,8 @@
 import Foundation
 import UIKit
 
-@objc protocol CollapseCollectionViewDelegate {
+@objc
+protocol CollapseCollectionViewDelegate {
     @objc func getCollapseTabBarViewController() -> CollapseTabBarViewController?
     @objc func getPageTabBarController() -> PageTabBarController?
     @objc func getHeaderView() -> UIView?

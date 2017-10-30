@@ -35,7 +35,8 @@ public enum PageTabBarTransitionAnimation {
     case scroll
 }
 
-@objc public protocol PageTabBarControllerDelegate: class {
+@objc
+public protocol PageTabBarControllerDelegate: class {
     @objc optional func pageTabBarController(_ controller: PageTabBarController, tabBarHeaderView: PageTabBarSupplementaryView)
     @objc optional func pageTabBarController(_ controller: PageTabBarController, bannerView: PageTabBarSupplementaryView)
     @objc optional func pageTabBarController(_ controller: PageTabBarController, didSelectItem item: PageTabBarItem, atIndex index: Int, previousIndex: Int)
@@ -57,7 +58,8 @@ internal final class PageTabBarCollectionViewFlowLayout: UICollectionViewFlowLay
 
 }
 
-@objc open class PageTabBarController: UIViewController, UIScrollViewDelegate {
+@objc
+open class PageTabBarController: UIViewController, UIScrollViewDelegate {
         
     override open var childViewControllerForStatusBarHidden: UIViewController? {
         return selectedViewController
@@ -76,6 +78,7 @@ internal final class PageTabBarCollectionViewFlowLayout: UICollectionViewFlowLay
         }
     }
     
+    @objc
     open weak var delegate: PageTabBarControllerDelegate?
     
     open var transitionAnimation = PageTabBarTransitionAnimation.scroll {
@@ -89,8 +92,10 @@ internal final class PageTabBarCollectionViewFlowLayout: UICollectionViewFlowLay
         }
     }
     
+    @objc
     open var updateIndex: (Bool, Int) -> () = { _,_  in }
     
+    @objc
     open private(set) var pageIndex: Int = 0 {
         willSet {
             if !shouldAutomaticallyForwardAppearanceMethods {
@@ -111,6 +116,7 @@ internal final class PageTabBarCollectionViewFlowLayout: UICollectionViewFlowLay
         }
     }
     
+    @objc
     open var selectedViewController: UIViewController? {
         if viewControllers.count > pageIndex {
             return viewControllers[pageIndex]
@@ -119,6 +125,8 @@ internal final class PageTabBarCollectionViewFlowLayout: UICollectionViewFlowLay
     }
     
     open fileprivate(set) var pageTabBar: PageTabBar!
+    
+    @objc
     open var isScrollEnabled = true {
         didSet {
             guard let cv = collectionView else { return }
@@ -126,7 +134,10 @@ internal final class PageTabBarCollectionViewFlowLayout: UICollectionViewFlowLay
         }
     }
     
+    @objc
     open fileprivate(set) var pageTabBarHeaderView = PageTabBarSupplementaryView(frame: CGRect.zero)
+    
+    @objc
     open fileprivate(set) var pageTabBarBannerView = PageTabBarSupplementaryView(frame: CGRect.zero)
     
     internal(set) var collectionView: PageTabBarCollectionView?
@@ -144,6 +155,7 @@ internal final class PageTabBarCollectionViewFlowLayout: UICollectionViewFlowLay
     private var didSetInitialOffset = false
     
     // Layout Guide
+    @objc
     open private(set) var tabBarLayoutGuide = UILayoutGuide()
     
     // Constraints
@@ -152,7 +164,8 @@ internal final class PageTabBarCollectionViewFlowLayout: UICollectionViewFlowLay
     fileprivate var headerHeightConstraint: NSLayoutConstraint?
     fileprivate var bannerHeightConstraint: NSLayoutConstraint?
     
-    @objc public convenience init(viewControllers: [UIViewController],
+    @objc
+    public convenience init(viewControllers: [UIViewController],
                                   items: [PageTabBarItem],
                                   tabBarPosition: PageTabBarPosition = .top) {
         
@@ -317,19 +330,22 @@ internal final class PageTabBarCollectionViewFlowLayout: UICollectionViewFlowLay
     }
     
     // MARK: - Badge
-    @objc open func setBadge(_ value: Int, forItemAt index: Int) {
+    @objc
+    open func setBadge(_ value: Int, forItemAt index: Int) {
         guard pageTabBarItems.count > index else { return }
         pageTabBarItems[index].badgeCount = value
     }
     
-    @objc open func clearAllBadges() {
+    @objc
+    open func clearAllBadges() {
         for item in pageTabBarItems {
             item.badgeCount = 0
         }
     }
     
     // MARK: - PageIndex
-    @objc open func setPageIndex(_ index: Int, animated: Bool) {
+    @objc
+    open func setPageIndex(_ index: Int, animated: Bool) {
         guard pageTabBarItems.count > index else { return }
         
         var shouldAnimate = animated
@@ -398,7 +414,8 @@ internal final class PageTabBarCollectionViewFlowLayout: UICollectionViewFlowLay
     }
     
     // MARK: - Supplementary Views
-    @objc open func setHeaderViewWithCustomView(_ customView: UIView?, animated: Bool) {
+    @objc
+    open func setHeaderViewWithCustomView(_ customView: UIView?, animated: Bool) {
         pageTabBarHeaderView.subviews.forEach { $0.removeFromSuperview() }
         
         guard let customView = customView else {
@@ -425,7 +442,8 @@ internal final class PageTabBarCollectionViewFlowLayout: UICollectionViewFlowLay
         }
     }
     
-    @objc open func setBannerViewWithCustomView(_ customView: UIView?, animated: Bool) {
+    @objc
+    open func setBannerViewWithCustomView(_ customView: UIView?, animated: Bool) {
         pageTabBarBannerView.subviews.forEach { $0.removeFromSuperview() }
         
         guard let customView = customView else {

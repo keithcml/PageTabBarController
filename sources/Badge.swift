@@ -34,12 +34,14 @@
 import Foundation
 import UIKit
 
+@objc
 open class Badge: UIView {
     
     public enum BadgeType {
         case number
     }
     
+    @objc
     open var badgeBorderWidth: CGFloat = 0 {
         didSet {
             guard oldValue != badgeBorderWidth else { return }
@@ -48,6 +50,7 @@ open class Badge: UIView {
         }
     }
     
+    @objc
     open var badgeBorderColor: UIColor = UIColor.white {
         didSet {
             guard oldValue != badgeBorderColor else { return }
@@ -56,6 +59,7 @@ open class Badge: UIView {
         }
     }
     
+    @objc
     open var badgeFont: UIFont = UIFont.systemFont(ofSize: 12) {
         didSet {
             guard oldValue != badgeFont else { return }
@@ -65,6 +69,7 @@ open class Badge: UIView {
         }
     }
     
+    @objc
     open var badgeTintColor: UIColor = UIColor.red {
         didSet {
             guard oldValue != badgeTintColor else { return }
@@ -73,6 +78,7 @@ open class Badge: UIView {
         }
     }
     
+    @objc
     open var badgeTextColor: UIColor = UIColor.white {
         didSet {
             guard oldValue != badgeTextColor else { return }
@@ -81,6 +87,7 @@ open class Badge: UIView {
         }
     }
     
+    @objc
     open var badgeValue: Int = 0 {
         didSet {
             guard oldValue != badgeValue else { return }
@@ -95,6 +102,7 @@ open class Badge: UIView {
         }
     }
     
+    @objc
     open var insets: UIEdgeInsets = UIEdgeInsets(top: 3, left: 5, bottom: 3, right: 5) {
         didSet {
             guard oldValue != insets else { return }
