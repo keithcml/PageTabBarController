@@ -139,9 +139,9 @@ class ViewController: UIViewController, CollapseTabBarViewControllerDelegate {
                 collapseVC.view.bottomAnchor.constraint(equalTo: parentVC.view.bottomAnchor).isActive = true
         }
         
-        let banner = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 100))
-        banner.backgroundColor = UIColor.gray.withAlphaComponent(0.5)
-        collapseTabBarViewController.pageTabBarController.setBannerViewWithCustomView(banner, animated: true)
+//        let banner = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 100))
+//        banner.backgroundColor = UIColor.gray.withAlphaComponent(0.5)
+//        collapseTabBarViewController.pageTabBarController.setBannerViewWithCustomView(banner, animated: true)
         
         galleryView.images = [GalleryImage.image(image: UIImage(named: "cover")!),
                               GalleryImage.image(image: UIImage(named: "cover")!),
@@ -153,12 +153,37 @@ class ViewController: UIViewController, CollapseTabBarViewControllerDelegate {
     }
     
     @objc private func tap(_ sender: Any) {
-        let headerHeight: CGFloat = collapseTabBarViewController.defaultHeaderHeight == view.bounds.width ? 100 : view.bounds.width
-        let settings = CollapseCollectionViewLayoutSettings(headerSize: CGSize(width: view.frame.width, height: headerHeight),
-                                                            isHeaderStretchy: true,
-                                                            headerStretchHeight: 64,
-                                                            headerMinimumHeight: 0)
-        collapseTabBarViewController.setLayoutSettings(settings, animated: true)
+//        let headerHeight: CGFloat = collapseTabBarViewController.defaultHeaderHeight == view.bounds.width ? 100 : view.bounds.width
+//        let settings = CollapseCollectionViewLayoutSettings(headerSize: CGSize(width: view.frame.width, height: headerHeight),
+//                                                            isHeaderStretchy: true,
+//                                                            headerStretchHeight: 64,
+//                                                            headerMinimumHeight: 0)
+//        collapseTabBarViewController.setLayoutSettings(settings, animated: true)
+        
+        
+        // set styles
+        let tabColor = UIColor(red: 215/255.0, green: 215/255.0, blue: 215/255.0, alpha: 1)
+        let tabSelectedColor = UIColor(red: 35/255.0, green: 171/255.0, blue: 232/255.0, alpha: 1)
+        
+        let tab01 = PageTabBarItem(title: "Tab A")
+        tab01.color = tabColor
+        tab01.selectedColor = tabSelectedColor
+        let tab02 = PageTabBarItem(title: "Tab B")
+        tab02.color = tabColor
+        tab02.selectedColor = tabSelectedColor
+        let tab03 = PageTabBarItem(title: "Tab C")
+        tab03.color = tabColor
+        tab03.selectedColor = tabSelectedColor
+        let tab04 = PageTabBarItem(title: "Tab D")
+        tab04.color = tabColor
+        tab04.selectedColor = tabSelectedColor
+        
+        let vc01 = TableViewController(nibName: nil, bundle: nil)
+        let vc02 = UIViewController(nibName: nil, bundle: nil)
+        let vc03 = TableViewController(nibName: nil, bundle: nil)
+        let vc04 = UIViewController(nibName: nil, bundle: nil)
+        
+        collapseTabBarViewController?.pageTabBarController.resetPageTabBarController([vc01, vc02, vc03, vc04], items: [tab01, tab02, tab03, tab04], newPageIndex: 1, animated: true)
     }
 
     
@@ -173,24 +198,24 @@ class ViewController: UIViewController, CollapseTabBarViewControllerDelegate {
     
     func pageTabBarController(_ controller: PageTabBarController, didSelectItem item: PageTabBarItem, atIndex index: Int, previousIndex: Int) {
         
-        if index == 0 {
-            let banner = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 100))
-            banner.backgroundColor = UIColor.yellow.withAlphaComponent(0.5)
-            collapseTabBarViewController.pageTabBarController.setBannerViewWithCustomView(banner, animated: true)
-        } else {
-            let banner = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 100))
-            banner.backgroundColor = UIColor.gray.withAlphaComponent(0.5)
-            collapseTabBarViewController.pageTabBarController.setBannerViewWithCustomView(banner, animated: true)
-        }
+//        if index == 0 {
+//            let banner = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 100))
+//            banner.backgroundColor = UIColor.yellow.withAlphaComponent(0.5)
+//            collapseTabBarViewController.pageTabBarController.setBannerViewWithCustomView(banner, animated: true)
+//        } else {
+//            let banner = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 100))
+//            banner.backgroundColor = UIColor.gray.withAlphaComponent(0.5)
+//            collapseTabBarViewController.pageTabBarController.setBannerViewWithCustomView(banner, animated: true)
+//        }
         // print("previousIndex: \(previousIndex)")
         // print("currentIndex: \(index)")
         
         if index == 0 {
-            collapseTabBarViewController.scrollTabBar(to: .top, animated: true)
+            //collapseTabBarViewController.scrollTabBar(to: .top, animated: true)
         }
         
         if index == 1 {
-            collapseTabBarViewController.scrollTabBar(to: .bottom, animated: true)
+            //collapseTabBarViewController.scrollTabBar(to: .bottom, animated: true)
         }
         
         if index == 2 {

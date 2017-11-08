@@ -58,7 +58,7 @@ internal final class PageTabBarCollectionViewFlowLayout: UICollectionViewFlowLay
 
 }
 
-@objc
+@objcMembers
 open class PageTabBarController: UIViewController, UIScrollViewDelegate {
         
     override open var childViewControllerForStatusBarHidden: UIViewController? {
@@ -78,7 +78,6 @@ open class PageTabBarController: UIViewController, UIScrollViewDelegate {
         }
     }
     
-    @objc
     open weak var delegate: PageTabBarControllerDelegate?
     
     open var transitionAnimation = PageTabBarTransitionAnimation.scroll {
@@ -92,10 +91,8 @@ open class PageTabBarController: UIViewController, UIScrollViewDelegate {
         }
     }
     
-    @objc
     open var updateIndex: (Bool, Int) -> () = { _,_  in }
     
-    @objc
     open private(set) var pageIndex: Int = 0 {
         willSet {
             if !shouldAutomaticallyForwardAppearanceMethods {
@@ -116,7 +113,6 @@ open class PageTabBarController: UIViewController, UIScrollViewDelegate {
         }
     }
     
-    @objc
     open var selectedViewController: UIViewController? {
         if viewControllers.count > pageIndex {
             return viewControllers[pageIndex]
@@ -124,10 +120,8 @@ open class PageTabBarController: UIViewController, UIScrollViewDelegate {
         return nil
     }
     
-    @objc
     open fileprivate(set) var pageTabBar: PageTabBar!
     
-    @objc
     open var isScrollEnabled = true {
         didSet {
             guard let cv = collectionView else { return }
@@ -135,10 +129,8 @@ open class PageTabBarController: UIViewController, UIScrollViewDelegate {
         }
     }
     
-    @objc
     open fileprivate(set) var pageTabBarHeaderView = PageTabBarSupplementaryView(frame: CGRect.zero)
     
-    @objc
     open fileprivate(set) var pageTabBarBannerView = PageTabBarSupplementaryView(frame: CGRect.zero)
     
     internal(set) var collectionView: PageTabBarCollectionView?
@@ -156,7 +148,6 @@ open class PageTabBarController: UIViewController, UIScrollViewDelegate {
     private var didSetInitialOffset = false
     
     // Layout Guide
-    @objc
     open private(set) var tabBarLayoutGuide = UILayoutGuide()
     
     // Constraints
@@ -165,19 +156,15 @@ open class PageTabBarController: UIViewController, UIScrollViewDelegate {
     fileprivate var headerHeightConstraint: NSLayoutConstraint?
     fileprivate var bannerHeightConstraint: NSLayoutConstraint?
     
-    @objc
     public convenience init(viewControllers: [UIViewController],
-                                  items: [PageTabBarItem],
-                                  tabBarPosition: PageTabBarPosition = .top) {
+                            items: [PageTabBarItem],
+                            tabBarPosition: PageTabBarPosition = .top) {
         
         self.init(nibName: nil, bundle: nil)
         
         self.viewControllers = viewControllers
         self.tabBarPosition = tabBarPosition
-        for item in items {
-            pageTabBarItems.append(item)
-        }
-        
+        pageTabBarItems = items
         pageTabBar = PageTabBar(tabBarItems: pageTabBarItems)
         pageTabBar.addLayoutGuide(tabBarLayoutGuide)
     }
@@ -331,13 +318,11 @@ open class PageTabBarController: UIViewController, UIScrollViewDelegate {
     }
     
     // MARK: - Badge
-    @objc
     open func setBadge(_ value: Int, forItemAt index: Int) {
         guard pageTabBarItems.count > index else { return }
         pageTabBarItems[index].badgeCount = value
     }
     
-    @objc
     open func clearAllBadges() {
         for item in pageTabBarItems {
             item.badgeCount = 0
@@ -345,7 +330,6 @@ open class PageTabBarController: UIViewController, UIScrollViewDelegate {
     }
     
     // MARK: - PageIndex
-    @objc
     open func setPageIndex(_ index: Int, animated: Bool) {
         guard pageTabBarItems.count > index else { return }
         
@@ -415,7 +399,6 @@ open class PageTabBarController: UIViewController, UIScrollViewDelegate {
     }
     
     // MARK: - Supplementary Views
-    @objc
     open func setHeaderViewWithCustomView(_ customView: UIView?, animated: Bool) {
         pageTabBarHeaderView.subviews.forEach { $0.removeFromSuperview() }
         
@@ -443,7 +426,6 @@ open class PageTabBarController: UIViewController, UIScrollViewDelegate {
         }
     }
     
-    @objc
     open func setBannerViewWithCustomView(_ customView: UIView?, animated: Bool) {
         pageTabBarBannerView.subviews.forEach { $0.removeFromSuperview() }
         
@@ -475,6 +457,20 @@ open class PageTabBarController: UIViewController, UIScrollViewDelegate {
             self.bannerHeightConstraint?.constant = height
             self.view.layoutIfNeeded()
         }
+    }
+    
+    open func resetPageTabBarController(_ viewControllers: [UIViewController], items: [PageTabBarItem], newPageIndex: Int, animated: Bool) {
+        pageTabBar.replaceTabBarItems(items, animated: animated)
+        
+        self.viewControllers.forEach { vc in
+            if vc.parent != nil {
+                vc.willMove(toParentViewController: nil)
+                vc.view.removeFromSuperview()
+                vc.removeFromParentViewController()
+            }
+        }
+        self.viewControllers = viewControllers
+        collectionView?.reloadData()
     }
 }
 

@@ -42,7 +42,7 @@ internal enum PageTabBarItemArrangement {
     case compact
 }
 
-@objc
+@objcMembers
 open class PageTabBar: UIView {
     
     internal weak var delegate: PageTabBarDelegate?
@@ -57,7 +57,6 @@ open class PageTabBar: UIView {
         }
     }
     
-    @objc
     open var barHeight: CGFloat = 44.0 {
         didSet {
             guard oldValue != barHeight else { return }
@@ -66,7 +65,6 @@ open class PageTabBar: UIView {
         }
     }
     
-    @objc
     open var barTintColor: UIColor = .white {
         didSet {
             backgroundColor = barTintColor
@@ -74,28 +72,24 @@ open class PageTabBar: UIView {
         }
     }
     
-    @objc
     open var indicatorLineHidden = false {
         didSet {
             indicatorLine.isHidden = indicatorLineHidden
         }
     }
     
-    @objc
     open var topLineHidden = false {
         didSet {
             topLine.isHidden = topLineHidden
         }
     }
     
-    @objc
     open var bottomLineHidden = false {
         didSet {
             bottomLine.isHidden = bottomLineHidden
         }
     }
     
-    @objc
     open var indicatorLineColor = UIColor.blue  {
         didSet {
             indicatorLine.backgroundColor = indicatorLineColor
@@ -103,14 +97,12 @@ open class PageTabBar: UIView {
         }
     }
     
-    @objc
     open var indicatorLineHeight: CGFloat = 1.0  {
         didSet {
             indicatorLine.frame = CGRect(x: indicatorLine.frame.minX, y: barHeight - indicatorLineHeight, width: itemWidth, height: indicatorLineHeight)
         }
     }
     
-    @objc
     open var topLineColor = UIColor.lightGray  {
         didSet {
             topLine.backgroundColor = topLineColor
@@ -118,7 +110,6 @@ open class PageTabBar: UIView {
         }
     }
     
-    @objc
     open var bottomLineColor = UIColor.lightGray  {
         didSet {
             bottomLine.backgroundColor = bottomLineColor
@@ -164,7 +155,6 @@ open class PageTabBar: UIView {
         return line
     }()
     
-    @objc
     convenience init(tabBarItems: [PageTabBarItem]) {
         self.init(frame: CGRect(x: 0, y: 0, width: 100, height: 44))
         items = tabBarItems
@@ -177,7 +167,6 @@ open class PageTabBar: UIView {
             addSubview(item)
             item.didTap = { [unowned self] _ in
                 self.currentIndex = idx
-                self.delegate?.pageTabBar(self, indexDidChanged: self.currentIndex)
             }
         }
         
@@ -203,10 +192,7 @@ open class PageTabBar: UIView {
     
     override open func layoutSubviews() {
         super.layoutSubviews()
-        for (idx, item) in items.enumerated() {
-            let originX: CGFloat = CGFloat(idx) * itemWidth
-            item.frame = CGRect(x: originX, y: 0, width: itemWidth, height: bounds.height)
-        }
+        layoutItems(items, itemWidth: itemWidth)
     }
     
     internal func setIndicatorPosition(_ position: CGFloat) -> Int {
@@ -234,6 +220,45 @@ open class PageTabBar: UIView {
         indicatorLine.frame = CGRect(origin: origin, size: size)
         for (idx, button) in items.enumerated() {
             button.isSelected = idx == index ? true : false
+        }
+    }
+    
+    internal func replaceTabBarItems(_ newTabBarItems: [PageTabBarItem], animated: Bool) {
+        
+        for (idx, item) in newTabBarItems.enumerated() {
+            item.alpha = 0
+            addSubview(item)
+            item.didTap = { [unowned self] _ in
+                self.currentIndex = idx
+            }
+        }
+        bringSubview(toFront: self.topLine)
+        bringSubview(toFront: self.bottomLine)
+        bringSubview(toFront: self.indicatorLine)
+        
+        let newItemWidth = bounds.width/CGFloat(newTabBarItems.count)
+        indicatorLine.bounds = CGRect(x: 0, y: 0, width: newItemWidth, height: indicatorLine.bounds.height)
+        layoutItems(newTabBarItems, itemWidth: newItemWidth)
+        
+        if animated {
+            UIView.animate(withDuration: 0.2, delay: 0, options: .curveLinear, animations: {
+                self.items.forEach { $0.alpha = 0 }
+                newTabBarItems.forEach { $0.alpha = 1 }
+            }) { (_) in
+                self.items.forEach { $0.removeFromSuperview() }
+                self.items = newTabBarItems
+            }
+        } else {
+            newTabBarItems.forEach { $0.alpha = 1 }
+            self.items.forEach { $0.removeFromSuperview() }
+            self.items = newTabBarItems
+        }
+    }
+    
+    private func layoutItems(_ items: [PageTabBarItem], itemWidth: CGFloat) {
+        for (idx, item) in items.enumerated() {
+            let originX: CGFloat = CGFloat(idx) * itemWidth
+            item.frame = CGRect(x: originX, y: 0, width: itemWidth, height: bounds.height)
         }
     }
 }
