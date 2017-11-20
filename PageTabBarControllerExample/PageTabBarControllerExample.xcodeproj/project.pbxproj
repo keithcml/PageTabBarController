@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		9A06A11F1FBF4730005F0A6D /* CollapseCollectionViewProxyDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A06A11E1FBF4730005F0A6D /* CollapseCollectionViewProxyDelegate.swift */; };
 		9A3FD9281F5DBD6300C24A1B /* Badge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A3FD9271F5DBD6300C24A1B /* Badge.swift */; };
 		9A3FD92A1F5E319B00C24A1B /* CollapseTabBarViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A3FD9291F5E319B00C24A1B /* CollapseTabBarViewController.swift */; };
 		9A4609FC1F62F1C600694602 /* PresentedViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A4609FB1F62F1C600694602 /* PresentedViewController.swift */; };
@@ -56,6 +57,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		9A06A11E1FBF4730005F0A6D /* CollapseCollectionViewProxyDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollapseCollectionViewProxyDelegate.swift; sourceTree = "<group>"; };
 		9A3FD9271F5DBD6300C24A1B /* Badge.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Badge.swift; sourceTree = "<group>"; };
 		9A3FD9291F5E319B00C24A1B /* CollapseTabBarViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CollapseTabBarViewController.swift; sourceTree = "<group>"; };
 		9A4609FB1F62F1C600694602 /* PresentedViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PresentedViewController.swift; sourceTree = "<group>"; };
@@ -107,6 +109,7 @@
 			children = (
 				9A3FD9291F5E319B00C24A1B /* CollapseTabBarViewController.swift */,
 				9B168F681F976287009281A9 /* CollapseCollectionView.swift */,
+				9A06A11E1FBF4730005F0A6D /* CollapseCollectionViewProxyDelegate.swift */,
 				9B168F691F976287009281A9 /* CollapseCollectionViewLayout.swift */,
 				9BE2D5611F99A1B700AB0F35 /* CollapseStaticHeaderView.swift */,
 			);
@@ -251,7 +254,7 @@
 					};
 					9B6D042B1F5D69C300B018E9 = {
 						CreatedOnToolsVersion = 8.3.3;
-						LastSwiftMigration = 0900;
+						LastSwiftMigration = 0910;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -316,6 +319,7 @@
 				9B6D043A1F5D69DB00B018E9 /* PageTabBar.swift in Sources */,
 				9B168F6A1F976287009281A9 /* CollapseCollectionView.swift in Sources */,
 				9A3FD9281F5DBD6300C24A1B /* Badge.swift in Sources */,
+				9A06A11F1FBF4730005F0A6D /* CollapseCollectionViewProxyDelegate.swift in Sources */,
 				9BE2D5621F99A1B700AB0F35 /* CollapseStaticHeaderView.swift in Sources */,
 				9A3FD92A1F5E319B00C24A1B /* CollapseTabBarViewController.swift in Sources */,
 				9B168F6B1F976287009281A9 /* CollapseCollectionViewLayout.swift in Sources */,
@@ -498,6 +502,7 @@
 		9B6D04361F5D69C300B018E9 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
@@ -513,6 +518,8 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.mingloan.PageTabBarController;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
 				SWIFT_VERSION = 4.0;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -523,6 +530,7 @@
 		9B6D04371F5D69C300B018E9 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
@@ -537,6 +545,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.mingloan.PageTabBarController;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
 				SWIFT_VERSION = 4.0;
 				VERSIONING_SYSTEM = "apple-generic";

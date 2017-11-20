@@ -460,6 +460,8 @@ open class PageTabBarController: UIViewController, UIScrollViewDelegate {
     }
     
     open func resetPageTabBarController(_ viewControllers: [UIViewController], items: [PageTabBarItem], newPageIndex: Int, animated: Bool) {
+        
+        pageTabBarItems = items
         pageTabBar.replaceTabBarItems(items, animated: animated)
         
         self.viewControllers.forEach { vc in

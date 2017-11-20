@@ -26,6 +26,10 @@
 import Foundation
 import UIKit
 
+protocol PageTabBarItemDelegate: class {
+    func pageTabBarItemDidTap(_ item: PageTabBarItem)
+}
+
 internal enum PageTabBarItemType {
     case text
     case icon
@@ -94,7 +98,7 @@ private class PageTabBarButton: UIButton {
         }
     }
     
-    internal var didTap: ((PageTabBarItem) -> ()) = { _ in }
+    internal var delegate: PageTabBarItemDelegate?
     
     private let tabBarButton: PageTabBarButton = {
         let button = PageTabBarButton(type: .custom)
@@ -115,10 +119,9 @@ private class PageTabBarButton: UIButton {
         self.init(frame: CGRect(x: 0, y: 0, width: 30, height: 30))
     
         type = .text
-        
+
         tabBarButton.setTitle(title, for: .normal)
         tabBarButton.titleLabel?.font = UIFont.systemFont(ofSize: 12, weight: UIFont.Weight.medium)
-
         commonInit()
     }
     
@@ -166,6 +169,6 @@ private class PageTabBarButton: UIButton {
     }
     
     @objc private func press(_ sender: UIButton) {
-        didTap(self)
+        delegate?.pageTabBarItemDidTap(self)
     }
 }

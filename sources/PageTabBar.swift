@@ -155,6 +155,15 @@ open class PageTabBar: UIView {
         return line
     }()
     
+    private var itemStackView: UIStackView = {
+        let stackView = UIStackView()
+        stackView.axis = .horizontal
+        stackView.distribution = .fillEqually
+        stackView.alignment = .fill
+        stackView.spacing = 0
+        return stackView
+    }()
+    
     convenience init(tabBarItems: [PageTabBarItem]) {
         self.init(frame: CGRect(x: 0, y: 0, width: 100, height: 44))
         items = tabBarItems
@@ -163,12 +172,15 @@ open class PageTabBar: UIView {
     
     fileprivate func commonInit() {
         
-        for (idx, item) in items.enumerated() {
-            addSubview(item)
-            item.didTap = { [unowned self] _ in
-                self.currentIndex = idx
-            }
+        items.forEach {
+            itemStackView.addArrangedSubview($0)
+            $0.delegate = self
         }
+        
+        itemStackView.frame = bounds
+        itemStackView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        addSubview(itemStackView)
+        
         
         topLine.frame = CGRect(x: 0, y: 0, width: bounds.width, height: 0.5)
         addSubview(topLine)
@@ -188,11 +200,6 @@ open class PageTabBar: UIView {
         
         addSubview(indicatorLine)
         scrollToItem(at: currentIndex, animated: false)
-    }
-    
-    override open func layoutSubviews() {
-        super.layoutSubviews()
-        layoutItems(items, itemWidth: itemWidth)
     }
     
     internal func setIndicatorPosition(_ position: CGFloat) -> Int {
@@ -223,42 +230,27 @@ open class PageTabBar: UIView {
         }
     }
     
-    internal func replaceTabBarItems(_ newTabBarItems: [PageTabBarItem], animated: Bool) {
+    internal func replaceTabBarItems(_ newTabBarItems: [PageTabBarItem], targetIndex: Int = 0, animated: Bool = true) {
         
-        for (idx, item) in newTabBarItems.enumerated() {
-            item.alpha = 0
-            addSubview(item)
-            item.didTap = { [unowned self] _ in
-                self.currentIndex = idx
-            }
+        itemStackView.arrangedSubviews.forEach {
+            itemStackView.removeArrangedSubview($0)
+            $0.removeFromSuperview()
         }
-        bringSubview(toFront: self.topLine)
-        bringSubview(toFront: self.bottomLine)
-        bringSubview(toFront: self.indicatorLine)
-        
-        let newItemWidth = bounds.width/CGFloat(newTabBarItems.count)
-        indicatorLine.bounds = CGRect(x: 0, y: 0, width: newItemWidth, height: indicatorLine.bounds.height)
-        layoutItems(newTabBarItems, itemWidth: newItemWidth)
-        
-        if animated {
-            UIView.animate(withDuration: 0.2, delay: 0, options: .curveLinear, animations: {
-                self.items.forEach { $0.alpha = 0 }
-                newTabBarItems.forEach { $0.alpha = 1 }
-            }) { (_) in
-                self.items.forEach { $0.removeFromSuperview() }
-                self.items = newTabBarItems
-            }
-        } else {
-            newTabBarItems.forEach { $0.alpha = 1 }
-            self.items.forEach { $0.removeFromSuperview() }
-            self.items = newTabBarItems
+        newTabBarItems.forEach {
+            itemStackView.addArrangedSubview($0)
+            $0.delegate = self
         }
+        
+        items = newTabBarItems
+        currentIndex = targetIndex
+        scrollToItem(at: currentIndex, animated: animated)
     }
-    
-    private func layoutItems(_ items: [PageTabBarItem], itemWidth: CGFloat) {
-        for (idx, item) in items.enumerated() {
-            let originX: CGFloat = CGFloat(idx) * itemWidth
-            item.frame = CGRect(x: originX, y: 0, width: itemWidth, height: bounds.height)
+}
+
+extension PageTabBar: PageTabBarItemDelegate {
+    func pageTabBarItemDidTap(_ item: PageTabBarItem) {
+        if let index = items.index(of: item) {
+            currentIndex = index
         }
     }
 }
