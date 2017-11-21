@@ -13,29 +13,16 @@ import UIKit
 class CollapseCollectionViewProxy: NSObject, CollapseCollectionViewExtendedDelegate {
     
     weak var extendedDelegate: CollapseCollectionViewExtendedDelegate?
+    // dirty
+    weak var extendedDelegateObject: AnyObject?
     
-//    override func responds(to aSelector: Selector!) -> Bool {
-//        return
-//    }
+    override func responds(to aSelector: Selector!) -> Bool {
+        return (extendedDelegateObject?.responds(to: aSelector))! || super.responds(to: aSelector)
+    }
     
     override func forwardingTarget(for aSelector: Selector!) -> Any? {
         return extendedDelegate
     }
 }
 
-extension CollapseCollectionViewProxy: UICollectionViewDelegate {
-    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-        
-        //extendedDelegate?.scrollViewDidEnd
-//        if ([self.delegate respondsToSelector:_cmd]) {
-//            [self.delegate scrollViewDidEndDragging:scrollView willDecelerate:decelerate];
-//        }
-    }
-    
-    func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
-//        [(MXScrollView *)scrollView scrollViewDidEndDragging:scrollView willDecelerate:decelerate];
-//        if ([self.delegate respondsToSelector:_cmd]) {
-//            [self.delegate scrollViewDidEndDragging:scrollView willDecelerate:decelerate];
-//        }
-    }
-}
+extension CollapseCollectionViewProxy: UICollectionViewDelegate {}

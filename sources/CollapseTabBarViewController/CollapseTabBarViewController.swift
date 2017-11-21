@@ -85,8 +85,6 @@ open class CollapseTabBarViewController: UIViewController {
         set {
             guard pageTabBarController.pageIndex != newValue else { return }
             pageTabBarController.setPageIndex(newValue, animated: false)
-            collpaseCollectionView.otherScrollViews = constructScrollViewsToIgnoreTouches()
-            collpaseCollectionView.observedScrollViews = constructScrollViewsToIgnoreTouches()
         }
     }
     
@@ -106,22 +104,11 @@ open class CollapseTabBarViewController: UIViewController {
         }
     }
     
-    open var preferredRecognizingScrollViews = [UIScrollView]() {
-        didSet {
-            collpaseCollectionView.preferredRecognizingScrollViews = preferredRecognizingScrollViews
-        }
-    }
-    
     open var isScrollEnabled = true {
         didSet {
             collpaseCollectionView.isScrollEnabled = isScrollEnabled
         }
     }
-    
-    /**
-     LayoutGuide for attaching views to top of page view
-     */
-    // open fileprivate(set) var topPageTabBarLayoutGuide: UILayoutGuide?
     
     fileprivate var tabBarItems = [PageTabBarItem]()
     
@@ -159,6 +146,10 @@ open class CollapseTabBarViewController: UIViewController {
         collpaseCollectionView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         
         automaticallyAdjustsScrollViewInsets = false
+        
+        if #available(iOS 11.0, *) {
+            collpaseCollectionView.contentInsetAdjustmentBehavior = .never
+        }
     }
     
     required public init?(coder aDecoder: NSCoder) {
@@ -188,11 +179,7 @@ open class CollapseTabBarViewController: UIViewController {
         
         addChildViewController(pageTabBarController)
         pageTabBarController.view.frame = CGRect(x: 0, y: defaultHeaderHeight, width: view.frame.width, height: view.frame.height - defaultHeaderHeight)
-        //view.addSubview(pageTabBarController.view)
         pageTabBarController.didMove(toParentViewController: self)
-        
-        collpaseCollectionView.otherScrollViews = constructScrollViewsToIgnoreTouches()
-        collpaseCollectionView.observedScrollViews = constructScrollViewsToIgnoreTouches()
     }
     
     override open func viewWillAppear(_ animated: Bool) {

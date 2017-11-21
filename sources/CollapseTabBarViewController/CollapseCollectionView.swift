@@ -26,9 +26,9 @@ protocol CollapseCollectionViewDelegate {
 @objcMembers
 final class CollapseCollectionView: UICollectionView {
     
-    var extendedDelegate: CollapseCollectionViewExtendedDelegate?
+    let proxy = CollapseCollectionViewProxy()
     
-    var revealedHeight: CGFloat {
+    var headerMinimumHeight: CGFloat {
         if let layout = collectionViewLayout as? CollapseCollectionViewLayout {
             return layout.settings.headerMinimumHeight
         }
@@ -46,23 +46,13 @@ final class CollapseCollectionView: UICollectionView {
         }
         return 0
     }
+    private lazy var minimumOffsetY = headerHeight - headerMinimumHeight
     
     var staticHeaderView: UIView?
-    var preferredRecognizingScrollViews = [UIScrollView]()
-    
-    var observedScrollViews = [UIScrollView]()
-    var otherScrollViews = [UIScrollView]() {
-        didSet {
-            otherScrollViewsContentOffset = otherScrollViews.map { $0.contentOffset }
-        }
-    }
-    fileprivate var otherScrollViewsContentOffset = [CGPoint]()
-    
-    fileprivate var lastContentOffset = CGPoint.zero
-    fileprivate var ignoringScroll = false
-    
+
+    private var observedScrollViews = [UIScrollView]()
     private var isObserving = false
-    private var isLocked = false
+    private var myScrollIsLocked = false
     private var contentOffsetObservation: NSKeyValueObservation?
     private var observations = [NSKeyValueObservation]()
     
@@ -71,9 +61,10 @@ final class CollapseCollectionView: UICollectionView {
     override init(frame: CGRect, collectionViewLayout layout: UICollectionViewLayout) {
         super.init(frame: frame, collectionViewLayout: layout)
         
-        extendedDelegate = self
         dataSource = self
-        delegate = self
+        proxy.extendedDelegateObject = self
+        proxy.extendedDelegate = self
+        delegate = proxy
         backgroundColor = .white
         bounces = true
         alwaysBounceVertical = true
@@ -88,33 +79,50 @@ final class CollapseCollectionView: UICollectionView {
             layout.delegate = self
         }
         
-        contentOffsetObservation = observe(\.contentOffset, options: [.new, .old]) { collapseCollectionView, change in
+        contentOffsetObservation = observe(\.contentOffset, options: [.new, .old]) { [unowned self] collapseCollectionView, change in
             
-            guard collapseCollectionView.isObserving else { return }
-            
+            guard self.isObserving else { return }
+
             guard let oldValue = change.oldValue, let newValue = change.newValue else {
                 return
             }
             
+            // diff < 0 => scroll up, diff > 0 => scroll down
             let diff = oldValue.y - newValue.y
             
-            guard diff > 0 else { return }
+            guard diff != 0 else { return }
             
-            //Adjust self scroll offset when scroll down
-            if collapseCollectionView.isLocked {
-                collapseCollectionView.setContentOffset(oldValue, for: collapseCollectionView)
+            //print("contentOffset Y: \(self.contentOffset.y)")
+            //print("isLocked: \(self.myScrollIsLocked)")
+            //print("diff: \(diff)")
+            
+            //print("oldValue.y: \(oldValue.y)")
+            //print("newValue.y: \(newValue.y)")
+            
+            // scrolling down
+            if diff < 0 {
                 
-            } else if collapseCollectionView.contentOffset.y < -collapseCollectionView.contentInset.top && !collapseCollectionView.bounces {
-                
-                collapseCollectionView.setContentOffset(CGPoint(x: collapseCollectionView.contentOffset.x, y: -collapseCollectionView.contentInset.top),
-                                                        for: collapseCollectionView)
-                
+                // should scroll down
+                if newValue.y < -self.contentInset.top + self.headerHeight - self.headerMinimumHeight {
+                    // collapse collection view response to scroll down
+                } else {
+                    // locked collapse collection view
+                    self.setContentOffset(CGPoint(x: self.contentOffset.x,
+                                                  y: -self.contentInset.top + self.headerHeight - self.headerMinimumHeight),
+                                          for: self)
+                }
             }
-//            else if collapseCollectionView.contentOffset.y > -collapseCollectionView.parallaxHeader.minimumHeight {
-//                [self scrollView:self setContentOffset:CGPointMake(self.contentOffset.x, -self.parallaxHeader.minimumHeight)];
-//                collapseCollectionView.setContentOffset(CGPoint(x: collapseCollectionView.contentOffset.x, y: -collapseCollectionView.contentInset.top),
-//                                                        for: collapseCollectionView)
-//            }
+            else { // scroll up / strechy
+                
+                if newValue.y < -self.contentInset.top {
+                    // streching
+                }
+                else if newValue.y > -self.contentInset.top && newValue.y < -self.contentInset.top + self.headerHeight - self.headerMinimumHeight {
+                    if self.myScrollIsLocked {
+                        self.setContentOffset(oldValue, for: self)
+                    }
+                }
+            }
         }
         
         isObserving = true
@@ -126,11 +134,16 @@ final class CollapseCollectionView: UICollectionView {
     
     deinit {
         contentOffsetObservation?.invalidate()
-        observations.forEach { $0.invalidate() }
+        removeObservingViews()
+    }
+    
+    // Methods Forwarding
+    override func responds(to aSelector: Selector!) -> Bool {
+        return super.responds(to: aSelector)
     }
     
     // MARK: - Scrolling handler
-    func addObserverFor(scrollView: UIScrollView) {
+    private func addObserverFor(scrollView: UIScrollView) {
         guard !observedScrollViews.contains(scrollView) else { return }
         
         observedScrollViews.append(scrollView)
@@ -143,76 +156,85 @@ final class CollapseCollectionView: UICollectionView {
                 return
             }
             
+            // diff < 0 => scroll up, diff > 0 => scroll down
             let diff = oldValue.y - newValue.y
             
-            guard diff > 0 else { return }
-            
-            //Adjust the observed scrollview's content offset
-            self.isLocked = scrollView.contentOffset.y > -scrollView.contentInset.top
-            
-            //Manage scroll up
-            if self.contentOffset.y < 0 && self.isLocked && diff < 0 {
-                self.setContentOffset(oldValue, for: scrollView)
+            guard diff != 0 else {
+                return
             }
-            //Disable bouncing when scroll down
-            if !self.isLocked && ((self.contentOffset.y > -self.contentInset.top) || self.bounces) {
-                self.setContentOffset(CGPoint(x: scrollView.contentOffset.x, y: -scrollView.contentInset.top),
-                                      for: scrollView)
+            
+            // observing views not reach top, lock it
+            
+            // scrolling down
+            if diff < 0 {
+                
+                self.myScrollIsLocked = !(newValue.y > -scrollView.contentInset.top)
+                
+                if self.contentOffset.y < -self.contentInset.top {
+                    self.myScrollIsLocked = true
+                } else if self.contentOffset.y < -self.contentInset.top + self.headerHeight - self.headerMinimumHeight {
+                    self.myScrollIsLocked = false
+                } else {
+                    self.myScrollIsLocked = true
+                }
+                if !self.myScrollIsLocked {
+                    self.setContentOffset(oldValue, for: scrollView)
+                }
+                
+            }
+            else { // scroll up / strechy
+                
+                self.myScrollIsLocked = !(oldValue.y < -scrollView.contentInset.top)
+                
+                if self.contentOffset.y < -self.contentInset.top {
+                    // streching
+                    print("stretching")
+                    self.myScrollIsLocked = false
+                    self.setContentOffset(oldValue, for: scrollView)
+                }
+                else if self.contentOffset.y > -self.contentInset.top && self.contentOffset.y < -self.contentInset.top + self.headerHeight - self.headerMinimumHeight {
+                    
+                    // just drag down from scroll view top
+                    if oldValue.y < -scrollView.contentInset.top && newValue.y > -scrollView.contentInset.top {
+                        self.myScrollIsLocked = false
+                        //self.setContentOffset(oldValue, for: scrollView)
+                        //self.setContentOffset(CGPoint(x: oldValue.x, y: -scrollView.contentInset.top), for: scrollView)
+                        print("just drag down from scroll view top")
+                    }
+                    else if oldValue.y > -scrollView.contentInset.top && newValue.y > -scrollView.contentInset.top {
+                        //print("drag down in the middle of scroll view")
+                        self.myScrollIsLocked = true
+                    }
+                } else {
+                    print("collapse view reach top")
+                    self.myScrollIsLocked = true
+                }
+                
+                if !self.myScrollIsLocked {
+                    self.setContentOffset(oldValue, for: scrollView)
+                }
             }
         }
         
         observations.append(observation)
     }
     
-    func setContentOffset(_ contentOffset: CGPoint, for scrollView: UIScrollView) {
+    private func removeObservingViews() {
+        observations.forEach { $0.invalidate() }
+        observations.removeAll()
+        observedScrollViews.removeAll()
+    }
+    
+    private func setContentOffset(_ contentOffset: CGPoint, for scrollView: UIScrollView) {
         isObserving = false
         scrollView.contentOffset = contentOffset
-        isObserving = true
+        DispatchQueue.main.async {
+            self.isObserving = true
+        }
     }
 }
 
-extension CollapseCollectionView: UICollectionViewDelegate, UICollectionViewDataSource, CollapseCollectionViewLayoutDelegate {
-    
-    private func shouldIgoreScrolling(at point: CGPoint, on scrollView: UIScrollView) -> Bool {
-        for otherScrollView in otherScrollViews {
-            let rect = otherScrollView.superview!.convert(otherScrollView.frame, to: scrollView)
-            if rect.contains(point) && otherScrollView.contentOffset.y > -otherScrollView.contentInset.top {
-                return true
-            }
-        }
-        return false
-    }
-    
-    public func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
-        
-        let touchLocation = scrollView.panGestureRecognizer.location(in: scrollView)
-        ignoringScroll = shouldIgoreScrolling(at: touchLocation, on: scrollView)
-    }
-    
-    public func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        // print(scrollView.contentOffset)
-        if ignoringScroll {
-            scrollView.contentOffset = lastContentOffset
-        } else {
-            if lastContentOffset.y < scrollView.contentOffset.y && stretchyHeight > 0 {
-                let scrollableOffsetY = headerHeight - revealedHeight
-                for (otherScrollView, initialContentOffset) in zip(otherScrollViews, otherScrollViewsContentOffset) {
-                    if contentOffset.y < scrollableOffsetY {
-                        otherScrollView.contentOffset = initialContentOffset
-                    }
-                }
-            }
-        }
-        
-        lastContentOffset = CGPoint(x: scrollView.contentOffset.x, y: scrollView.contentOffset.y)
-        
-        collapseDelegate?.collapseCollectionViewDidScroll?(self)
-    }
-    
-    public func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
-        print(velocity)
-        print(targetContentOffset.pointee)
-    }
+extension CollapseCollectionView: UICollectionViewDelegate, UICollectionViewDataSource {
     
     public func numberOfSections(in collectionView: UICollectionView) -> Int {
         return 1
@@ -284,7 +306,25 @@ extension CollapseCollectionView: UICollectionViewDelegate, UICollectionViewData
         
         return UICollectionReusableView()
     }
+    
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        //print(scrollView.contentOffset.y)
+    }
+    
+    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        myScrollIsLocked = false
+        removeObservingViews()
+    }
 
+    func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+        if !decelerate {
+            myScrollIsLocked = false
+            removeObservingViews()
+        }
+    }
+}
+
+extension CollapseCollectionView: CollapseCollectionViewLayoutDelegate {
     func collapseCollectionView(_ collapseCollectionView: CollapseCollectionView, layout: CollapseCollectionViewLayout, sizeForStaticHeaderAt indexPath: IndexPath) -> CGSize {
         guard let staticHeaderView = staticHeaderView else { return CGSize(width: collapseCollectionView.bounds.width, height: 0) }
         
@@ -305,22 +345,33 @@ extension CollapseCollectionView: UIGestureRecognizerDelegate {
     }
     
     open func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
-        if let cv = collapseDelegate?.getPageTabBarController()?.collectionView, let gestureView = otherGestureRecognizer.view, gestureView == cv {
+        
+        if otherGestureRecognizer.view == self {
             return false
         }
         
-        for scrollView in preferredRecognizingScrollViews {
-            if let gestureView = otherGestureRecognizer.view as? UIScrollView, gestureView === scrollView {
-                return false
-            }
-        }
-        
-        guard let _ = gestureRecognizer as? UIPanGestureRecognizer else {
+        guard let _ = gestureRecognizer as? UIPanGestureRecognizer,
+             let scrollView = otherGestureRecognizer.view as? UIScrollView else {
             return false
         }
         
+        // Tricky case: UITableViewWrapperView
+        if let _ = scrollView.superview as? UITableView {
+            return false
+        }
         
-        return true
+        var shouldScroll = true
+        
+        if let extendedDelegate = proxy.extendedDelegate,
+            let delegateShouldScroll = extendedDelegate.scrollView?(self, shouldScrollWithSubView: scrollView) {
+            shouldScroll = delegateShouldScroll
+        }
+        
+        if shouldScroll {
+            addObserverFor(scrollView: scrollView)
+        }
+        
+        return shouldScroll
     }
 }
 

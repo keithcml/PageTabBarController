@@ -104,7 +104,7 @@ class ViewController: UIViewController, CollapseTabBarViewControllerDelegate {
 //        } else {
 //            collapseTabBarViewController.minimumHeaderViewHeight = 0
 //        }
-        collapseTabBarViewController.minimumHeaderViewHeight = 0
+        collapseTabBarViewController.minimumHeaderViewHeight = 64
         collapseTabBarViewController.headerViewStretchyHeight = 64
         collapseTabBarViewController.pageTabBarController.pageTabBar.barHeight = 40
         collapseTabBarViewController.pageTabBarController.pageTabBar.indicatorLineColor = tabSelectedColor
