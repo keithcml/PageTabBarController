@@ -251,7 +251,6 @@ final class CollapseCollectionViewLayout: UICollectionViewLayout {
                               height: collectionView.bounds.height - settings.headerMinimumHeight)
             prepareElement(size: size, type: .cell, attributes: attributes)
         }
-        
     }
     
     // MARK: - Invalidation
