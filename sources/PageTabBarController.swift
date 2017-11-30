@@ -210,6 +210,9 @@ open class PageTabBarController: UIViewController, UIScrollViewDelegate {
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
         collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
+        if #available(iOS 11.0, *) {
+            collectionView.contentInsetAdjustmentBehavior = .never
+        }
         
         if case .scroll = transitionAnimation {
             isScrollEnabled = true
@@ -223,17 +226,13 @@ open class PageTabBarController: UIViewController, UIScrollViewDelegate {
             if #available(iOS 11.0, *) {
                 topConstraint = pageTabBarHeaderView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor)
                 topConstraint?.isActive = true
-                
-                bottomConstraint = collectionView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
-                bottomConstraint?.isActive = true
-                
             } else {
                 topConstraint = pageTabBarHeaderView.topAnchor.constraint(equalTo: view.topAnchor)
                 topConstraint?.isActive = true
-                
-                bottomConstraint = collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-                bottomConstraint?.isActive = true
             }
+            
+            bottomConstraint = collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            bottomConstraint?.isActive = true
             
             pageTabBar.topAnchor.constraint(equalTo: pageTabBarHeaderView.bottomAnchor).isActive = true
             pageTabBarBannerView.topAnchor.constraint(equalTo: pageTabBar.bottomAnchor).isActive = true
@@ -245,16 +244,12 @@ open class PageTabBarController: UIViewController, UIScrollViewDelegate {
                 topConstraint = pageTabBarHeaderView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor)
                 topConstraint?.isActive = true
                 
-                bottomConstraint = pageTabBar.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
-                bottomConstraint?.isActive = true
-                
             } else {
                 topConstraint = pageTabBarHeaderView.topAnchor.constraint(equalTo: view.topAnchor)
                 topConstraint?.isActive = true
-                
-                bottomConstraint = pageTabBar.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-                bottomConstraint?.isActive = true
             }
+            bottomConstraint = pageTabBar.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            bottomConstraint?.isActive = true
             
             collectionView.topAnchor.constraint(equalTo: pageTabBarHeaderView.bottomAnchor).isActive = true
             pageTabBarBannerView.topAnchor.constraint(equalTo: collectionView.bottomAnchor).isActive = true
