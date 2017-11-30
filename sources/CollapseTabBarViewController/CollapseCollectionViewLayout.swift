@@ -28,6 +28,8 @@ import UIKit
 
 public struct CollapseCollectionViewLayoutSettings {
     
+    // header scroll with the same speed as scroll without parallex
+    var parallexRate: CGFloat = 0
     var isHeaderStretchy = true
     var headerSize = CGSize.zero
     var headerStretchHeight: CGFloat = 64
@@ -180,7 +182,9 @@ final class CollapseCollectionViewLayout: UICollectionViewLayout {
                 let scale = CGAffineTransform(scaleX: scaleFactor, y: scaleFactor)
                 let translation = CGAffineTransform(translationX: 0,
                                                     y: min(collectionView.contentOffset.y, headerHeight) + delta)
-                
+
+//                attributes.frame = CGRect(origin: CGPoint(x: 0, y: 0),
+//                                          size: attributes.frame.size)
                 attributes.transform = scale.concatenating(translation)
                 break
             case .cell:
@@ -203,8 +207,12 @@ final class CollapseCollectionViewLayout: UICollectionViewLayout {
                 break
             case .header:
                 attributes.transform = .identity
+                
+                let parallexRate = max(0, min(1, settings.parallexRate))
                 let originY = max(0, collectionView.contentOffset.y - headerHeight + settings.headerMinimumHeight)
-                attributes.frame = CGRect(origin: CGPoint(x: 0, y: originY),
+                let parallexOffset = min((headerHeight - settings.headerMinimumHeight), collectionView.contentOffset.y) * parallexRate
+                
+                attributes.frame = CGRect(origin: CGPoint(x: 0, y: originY + parallexOffset),
                                           size: attributes.frame.size)
                 break
             case .cell:
