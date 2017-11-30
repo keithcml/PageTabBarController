@@ -248,7 +248,7 @@
 				TargetAttributes = {
 					9B6D04081F5D696D00B018E9 = {
 						CreatedOnToolsVersion = 8.3.3;
-						DevelopmentTeam = BHCQC66E59;
+						DevelopmentTeam = SHCCY36E8X;
 						LastSwiftMigration = 0900;
 						ProvisioningStyle = Automatic;
 					};
@@ -472,7 +472,7 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = BHCQC66E59;
+				DEVELOPMENT_TEAM = SHCCY36E8X;
 				INFOPLIST_FILE = PageTabBarControllerExample/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -488,7 +488,7 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = BHCQC66E59;
+				DEVELOPMENT_TEAM = SHCCY36E8X;
 				INFOPLIST_FILE = PageTabBarControllerExample/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
