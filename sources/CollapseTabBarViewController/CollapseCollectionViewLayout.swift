@@ -29,7 +29,7 @@ import UIKit
 public struct CollapseCollectionViewLayoutSettings {
     
     // header scroll with the same speed as scroll without parallex
-    var parallexRate: CGFloat = 0.5
+    var parallexRate: CGFloat = 0
     var isHeaderStretchy = true
     var headerSize = CGSize.zero
     var headerStretchHeight: CGFloat = 64
