@@ -82,22 +82,6 @@ final class CollapseCollectionView: UICollectionView {
             layout.delegate = self
         }
         
-        contentOffsetObservation = observe(\.contentOffset, options: [.new, .old]) { [unowned self] myself, change in
-            
-            guard self.isObserving else { return }
-
-            guard let oldValue = change.oldValue, let newValue = change.newValue else {
-                return
-            }
-            
-            // diff < 0 => scroll up, diff > 0 => scroll down
-            let diff = oldValue.y - newValue.y
-            
-            guard diff != 0 else { return }
-            
-            self.handleMultiScroll(oldOffset: oldValue, newOffset: newValue, scrollView: myself)
-        }
-        
         isObserving = true
     }
     
@@ -106,7 +90,6 @@ final class CollapseCollectionView: UICollectionView {
     }
     
     deinit {
-        contentOffsetObservation?.invalidate()
         removeObservingViews()
     }
     
@@ -182,7 +165,10 @@ final class CollapseCollectionView: UICollectionView {
     }
     
     private func removeObservingViews() {
-        observations.forEach { $0.invalidate() }
+        contentOffsetObservation?.invalidate()
+        observations.forEach {
+            $0.invalidate()
+        }
         observations.removeAll()
         observedScrollViews.removeAll()
     }
@@ -330,6 +316,23 @@ extension CollapseCollectionView: UIGestureRecognizerDelegate {
         }
         
         if shouldScroll {
+            
+            contentOffsetObservation = observe(\.contentOffset, options: [.new, .old]) { myself, change in
+                
+                guard myself.isObserving else { return }
+                
+                guard let oldValue = change.oldValue, let newValue = change.newValue else {
+                    return
+                }
+                
+                // diff < 0 => scroll up, diff > 0 => scroll down
+                let diff = oldValue.y - newValue.y
+                
+                guard diff != 0 else { return }
+                
+                myself.handleMultiScroll(oldOffset: oldValue, newOffset: newValue, scrollView: myself)
+            }
+            
             addObserverFor(scrollView: scrollView)
         }
         
