@@ -257,6 +257,7 @@ extension CollapseCollectionView: UICollectionViewDelegate, UICollectionViewData
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         //print(scrollView.contentOffset.y)
+        collapseDelegate?.collapseCollectionViewDidScroll?(self)
     }
     
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {

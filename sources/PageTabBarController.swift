@@ -129,6 +129,13 @@ open class PageTabBarController: UIViewController, UIScrollViewDelegate {
         }
     }
     
+    open var bounces = true {
+        didSet {
+            guard let cv = collectionView else { return }
+            cv.bounces = bounces
+        }
+    }
+    
     open fileprivate(set) var pageTabBarHeaderView = PageTabBarSupplementaryView(frame: CGRect.zero)
     
     open fileprivate(set) var pageTabBarBannerView = PageTabBarSupplementaryView(frame: CGRect.zero)

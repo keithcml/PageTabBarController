@@ -30,7 +30,7 @@ import UIKit
 public protocol CollapseTabBarViewControllerDelegate: PageTabBarControllerDelegate {
     
     // Don't do heavy task in this delegate
-    @objc optional func collapseTabBarController(_ controller: CollapseTabBarViewController, tabBarRect rect: CGRect, position: CollapseTabBarPosition)
+    @objc optional func collapseTabBarController(_ controller: CollapseTabBarViewController, tabBarRect rect: CGRect, position: CollapseTabBarPosition, revealPercentage: CGFloat)
     @objc optional func collapseTabBarController(_ controller: CollapseTabBarViewController, scrollViewsForScrollingWithTabBarMoveAtIndex pageIndex: Int) -> [UIScrollView]
 }
 
@@ -268,17 +268,18 @@ extension CollapseTabBarViewController: CollapseCollectionViewDelegate {
         
         if collapseCollectionView.contentOffset.y >= defaultHeaderHeight - minimumHeaderViewHeight {
             let adjustedRect = CGRect(x: rect.minX, y: minimumHeaderViewHeight, width: rect.width, height: rect.height)
-            delegate?.collapseTabBarController?(self, tabBarRect: adjustedRect, position: .top)
+            delegate?.collapseTabBarController?(self, tabBarRect: adjustedRect, position: .top, revealPercentage: CGFloat(0))
         }
         else if collapseCollectionView.contentOffset.y <= 0 {
             let adjustedRect = CGRect(x: rect.minX,
                                       y: defaultHeaderHeight + min(abs(collapseCollectionView.contentOffset.y), headerViewStretchyHeight),
                                       width: rect.width,
                                       height: rect.height)
-            delegate?.collapseTabBarController?(self, tabBarRect: adjustedRect, position: .bottom)
+            delegate?.collapseTabBarController?(self, tabBarRect: adjustedRect, position: .bottom, revealPercentage: CGFloat(1))
         }
         else {
-            delegate?.collapseTabBarController?(self, tabBarRect: rect, position: .inBetween)
+            let percentage = (rect.minY - minimumHeaderViewHeight) / (defaultHeaderHeight - minimumHeaderViewHeight)
+            delegate?.collapseTabBarController?(self, tabBarRect: rect, position: .inBetween, revealPercentage: percentage)
         }
         
     }

@@ -188,8 +188,10 @@ class ViewController: UIViewController, CollapseTabBarViewControllerDelegate {
 
     
     // MARK: -
-    func collapseTabBarController(_ controller: CollapseTabBarViewController, tabBarRect rect: CGRect, position: CollapseTabBarPosition) {
+    
+    func collapseTabBarController(_ controller: CollapseTabBarViewController, tabBarRect rect: CGRect, position: CollapseTabBarPosition, revealPercentage: CGFloat) {
         // print(rect)
+        print(revealPercentage)
     }
     
     func collapseTabBarController(_ controller: CollapseTabBarViewController, scrollViewsForScrollingWithTabBarMoveAtIndex pageIndex: Int) -> [UIScrollView] {
