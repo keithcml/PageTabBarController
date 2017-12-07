@@ -99,11 +99,8 @@ class ViewController: UIViewController, CollapseTabBarViewControllerDelegate {
                                                                     headerView: galleryView,
                                                                     headerHeight: galleryView.frame.size.height)
         collapseTabBarViewController.pageIndex = 1
-//        if #available(iOS 11.0, *) {
-//            collapseTabBarViewController.minimumHeaderViewHeight = view.safeAreaInsets.top
-//        } else {
-//            collapseTabBarViewController.minimumHeaderViewHeight = 0
-//        }
+
+        collapseTabBarViewController.pageTabBarController.bounces = false
         collapseTabBarViewController.minimumHeaderViewHeight = 64
         collapseTabBarViewController.headerViewStretchyHeight = 64
         collapseTabBarViewController.pageTabBarController.pageTabBar.barHeight = 40
@@ -191,7 +188,7 @@ class ViewController: UIViewController, CollapseTabBarViewControllerDelegate {
     
     func collapseTabBarController(_ controller: CollapseTabBarViewController, tabBarRect rect: CGRect, position: CollapseTabBarPosition, revealPercentage: CGFloat) {
         // print(rect)
-        print(revealPercentage)
+        // print(revealPercentage)
     }
     
     func collapseTabBarController(_ controller: CollapseTabBarViewController, scrollViewsForScrollingWithTabBarMoveAtIndex pageIndex: Int) -> [UIScrollView] {

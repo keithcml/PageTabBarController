@@ -82,7 +82,10 @@ final class CollapseCollectionView: UICollectionView {
             layout.delegate = self
         }
         
-        isObserving = true
+        if #available(iOS 11.0, *) {
+            observeMySelf()
+            isObserving = true
+        }
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -91,6 +94,16 @@ final class CollapseCollectionView: UICollectionView {
     
     deinit {
         removeObservingViews()
+    }
+    
+    // iOS 10 Crahses Fixes - https://bugs.swift.org/browse/SR-5816
+    func registerMultiScrollViewsHandling() {
+        observeMySelf()
+        isObserving = true
+    }
+    
+    func unregisterMultiScrollViewsHandling() {
+        unObserveMySelf()
     }
     
     // Methods Forwarding
@@ -136,6 +149,32 @@ final class CollapseCollectionView: UICollectionView {
     
     
     // MARK: - Scrolling handler
+    private func observeMySelf() {
+        
+        guard contentOffsetObservation == nil else { return }
+        
+        contentOffsetObservation = observe(\.contentOffset, options: [.new, .old]) { myself, change in
+            
+            guard myself.isObserving else { return }
+            
+            guard let oldValue = change.oldValue, let newValue = change.newValue else {
+                return
+            }
+            
+            // diff < 0 => scroll up, diff > 0 => scroll down
+            let diff = oldValue.y - newValue.y
+            
+            guard diff != 0 else { return }
+            
+            myself.handleMultiScroll(oldOffset: oldValue, newOffset: newValue, scrollView: myself)
+        }
+    }
+    
+    private func unObserveMySelf() {
+        contentOffsetObservation?.invalidate()
+        contentOffsetObservation = nil
+    }
+    
     private func addObserverFor(scrollView: UIScrollView) {
         guard !observedScrollViews.contains(scrollView) else { return }
         
@@ -165,7 +204,6 @@ final class CollapseCollectionView: UICollectionView {
     }
     
     private func removeObservingViews() {
-        contentOffsetObservation?.invalidate()
         observations.forEach {
             $0.invalidate()
         }
@@ -199,34 +237,19 @@ extension CollapseCollectionView: UICollectionViewDelegate, UICollectionViewData
     
     open func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         
-        guard let collapseVC = collapseDelegate?.getCollapseTabBarViewController(), let vc = collapseDelegate?.getPageTabBarController() else { fatalError("pagetabbar controller = nil") }
+        guard let vc = collapseDelegate?.getPageTabBarController() else { fatalError("pagetabbar controller = nil") }
         
-        if vc.parent == nil {
-            collapseVC.addChildViewController(vc)
-            cell.contentView.addSubview(vc.view)
-            vc.view.translatesAutoresizingMaskIntoConstraints = false
-            vc.view.topAnchor.constraint(equalTo: cell.contentView.topAnchor).isActive = true
-            vc.view.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor).isActive = true
-            vc.view.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor).isActive = true
-            vc.view.bottomAnchor.constraint(equalTo: cell.contentView.bottomAnchor).isActive = true
-            vc.didMove(toParentViewController: collapseVC)
-        }
-        else {
-            cell.contentView.addSubview(vc.view)
-            vc.view.translatesAutoresizingMaskIntoConstraints = false
-            vc.view.topAnchor.constraint(equalTo: cell.contentView.topAnchor).isActive = true
-            vc.view.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor).isActive = true
-            vc.view.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor).isActive = true
-            vc.view.bottomAnchor.constraint(equalTo: cell.contentView.bottomAnchor).isActive = true
-        }
+        cell.contentView.addSubview(vc.view)
+        vc.view.translatesAutoresizingMaskIntoConstraints = false
+        vc.view.topAnchor.constraint(equalTo: cell.contentView.topAnchor).isActive = true
+        vc.view.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor).isActive = true
+        vc.view.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor).isActive = true
+        vc.view.bottomAnchor.constraint(equalTo: cell.contentView.bottomAnchor).isActive = true
     }
     
     open func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-        guard let viewControllers = collapseDelegate?.getContentViewControllers() else { return }
-        let vc = viewControllers[indexPath.row]
-        vc.willMove(toParentViewController: nil)
+        guard let vc = collapseDelegate?.getPageTabBarController() else { return }
         vc.view.removeFromSuperview()
-        vc.removeFromParentViewController()
     }
     
     public func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
@@ -288,7 +311,7 @@ extension CollapseCollectionView: UIGestureRecognizerDelegate {
         if let panGestureRecognizer = gestureRecognizer as? UIPanGestureRecognizer {
             let velocity = panGestureRecognizer.velocity(in: gestureRecognizer.view)
             let translation = panGestureRecognizer.translation(in: gestureRecognizer.view)
-            return abs(velocity.y) >= abs(velocity.x) && abs(translation.y) >= abs(translation.x)
+            return abs(velocity.y) > abs(velocity.x) && abs(translation.y) > abs(translation.x)
         }
         return true
     }
@@ -318,23 +341,12 @@ extension CollapseCollectionView: UIGestureRecognizerDelegate {
         
         if shouldScroll {
             
-            contentOffsetObservation = observe(\.contentOffset, options: [.new, .old]) { myself, change in
-                
-                guard myself.isObserving else { return }
-                
-                guard let oldValue = change.oldValue, let newValue = change.newValue else {
-                    return
-                }
-                
-                // diff < 0 => scroll up, diff > 0 => scroll down
-                let diff = oldValue.y - newValue.y
-                
-                guard diff != 0 else { return }
-                
-                myself.handleMultiScroll(oldOffset: oldValue, newOffset: newValue, scrollView: myself)
+            if let pageScrollView = collapseDelegate?.getPageTabBarController()?.pageHorizontalScrollView, scrollView == pageScrollView {
+                // skip
+            } else {
+                observeMySelf()
+                addObserverFor(scrollView: scrollView)
             }
-            
-            addObserverFor(scrollView: scrollView)
         }
         
         return shouldScroll

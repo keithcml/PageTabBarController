@@ -61,7 +61,7 @@ open class CollapseTabBarViewController: UIViewController {
     }
     
     override open var shouldAutomaticallyForwardAppearanceMethods: Bool {
-        return true
+        return false
     }
     
     open weak var delegate: CollapseTabBarViewControllerDelegate? {
@@ -110,12 +110,12 @@ open class CollapseTabBarViewController: UIViewController {
         }
     }
     
-    fileprivate var tabBarItems = [PageTabBarItem]()
+    private var tabBarItems = [PageTabBarItem]()
     
-    fileprivate var viewControllers = [UIViewController]()
-    fileprivate var headerView = UIView(frame: CGRect.zero)
+    private var viewControllers = [UIViewController]()
+    private var headerView = UIView(frame: CGRect.zero)
     
-    fileprivate var collpaseCollectionView: CollapseCollectionView
+    private var collpaseCollectionView: CollapseCollectionView
     
     public init(viewControllers: [UIViewController],
                 tabBarItems: [PageTabBarItem],
@@ -177,17 +177,44 @@ open class CollapseTabBarViewController: UIViewController {
         
         pageTabBarController.setPageIndex(pageIndex, animated: false)
         
+        // add child view controller
         addChildViewController(pageTabBarController)
-        pageTabBarController.view.frame = CGRect(x: 0, y: defaultHeaderHeight, width: view.frame.width, height: view.frame.height - defaultHeaderHeight)
         pageTabBarController.didMove(toParentViewController: self)
     }
     
     override open func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        
+        if pageTabBarController.parent != nil {
+            pageTabBarController.beginAppearanceTransition(true, animated: animated)
+        }
+        
+        if #available(iOS 11.0, *) { /* do nothing */ } else {
+            collpaseCollectionView.registerMultiScrollViewsHandling()
+        }
+    }
+    
+    override open func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        if pageTabBarController.parent != nil {
+            pageTabBarController.endAppearanceTransition()
+        }
     }
     
     override open func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
+        
+        pageTabBarController.beginAppearanceTransition(false, animated: animated)
+        
+        if #available(iOS 11.0, *) { /* do nothing */ } else {
+            collpaseCollectionView.unregisterMultiScrollViewsHandling()
+        }
+    }
+    
+    override open func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        pageTabBarController.endAppearanceTransition()
     }
     
     public static func attachCollapseTabBarController(_ collapseTabBarViewController: CollapseTabBarViewController, into parentViewController: UIViewController, layoutClosure: (CollapseTabBarViewController, UIViewController) -> ()) {
