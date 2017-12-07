@@ -26,9 +26,77 @@
 import Foundation
 import UIKit
 
-@objcMembers
-open class PageTabBarCollectionView: UICollectionView {
+@objc
+public protocol PageTabBarCollectionViewTouchDelegate: NSObjectProtocol {
     
+    @objc optional func pageTabBarCollectionView(_ collectionView: PageTabBarCollectionView, gestureRecognizerShouldBegin gestureRecognizer: UIGestureRecognizer) -> Bool
+    
+    @objc optional func pageTabBarCollectionView(_ collectionView: PageTabBarCollectionView, gestureRecognizer: UIGestureRecognizer, shouldRequireFailureOf otherGestureRecognizer: UIGestureRecognizer) -> Bool
+    
+    @objc optional func pageTabBarCollectionView(_ collectionView: PageTabBarCollectionView, gestureRecognizer: UIGestureRecognizer, shouldBeRequiredToFailBy otherGestureRecognizer: UIGestureRecognizer) -> Bool
+    
+    @objc optional func pageTabBarCollectionView(_ collectionView: PageTabBarCollectionView, gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool
+    
+    @objc optional func pageTabBarCollectionView(_ collectionView: PageTabBarCollectionView, gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool
+    
+    @objc optional func pageTabBarCollectionView(_ collectionView: PageTabBarCollectionView, gestureRecognizer: UIGestureRecognizer, shouldReceivePress press: UIPress) -> Bool
+}
+
+@objcMembers
+open class PageTabBarCollectionView: UICollectionView, UIGestureRecognizerDelegate {
+    
+    var touchDelegate: PageTabBarCollectionViewTouchDelegate?
+    
+    override public init(frame: CGRect, collectionViewLayout layout: UICollectionViewLayout) {
+        super.init(frame: frame, collectionViewLayout: layout)
+        panGestureRecognizer.delegate = self
+    }
+    
+    required public init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    open override func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        if let boolean = touchDelegate?.pageTabBarCollectionView?(self, gestureRecognizerShouldBegin: gestureRecognizer) {
+            return boolean
+        }
+        return super.gestureRecognizerShouldBegin(gestureRecognizer)
+    }
+    
+    open func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRequireFailureOf otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        if let boolean = touchDelegate?.pageTabBarCollectionView?(self, gestureRecognizer: gestureRecognizer, shouldRequireFailureOf: otherGestureRecognizer) {
+            return boolean
+        }
+        return false
+    }
+    
+    open func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldBeRequiredToFailBy otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        if let boolean = touchDelegate?.pageTabBarCollectionView?(self, gestureRecognizer: gestureRecognizer, shouldBeRequiredToFailBy: otherGestureRecognizer) {
+            return boolean
+        }
+        return false
+    }
+    
+    open func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        if let boolean = touchDelegate?.pageTabBarCollectionView?(self, gestureRecognizer: gestureRecognizer, shouldRecognizeSimultaneouslyWith: otherGestureRecognizer) {
+            return boolean
+        }
+        return false
+    }
+    
+    open func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
+        if let boolean = touchDelegate?.pageTabBarCollectionView?(self, gestureRecognizer: gestureRecognizer, shouldReceive: touch) {
+            return boolean
+        }
+        return true
+    }
+    
+    open func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive press: UIPress) -> Bool {
+        if let boolean = touchDelegate?.pageTabBarCollectionView?(self, gestureRecognizer: gestureRecognizer, shouldReceivePress: press) {
+            return boolean
+        }
+        return true
+    }
 }
 
 public enum PageTabBarTransitionAnimation {
@@ -80,6 +148,11 @@ open class PageTabBarController: UIViewController, UIScrollViewDelegate {
     }
     
     open weak var delegate: PageTabBarControllerDelegate?
+    open weak var touchDelegate: PageTabBarCollectionViewTouchDelegate? {
+        didSet {
+            pageTabBarCollectionView.touchDelegate = touchDelegate
+        }
+    }
     
     open var transitionAnimation = PageTabBarTransitionAnimation.scroll {
         didSet {
@@ -126,13 +199,13 @@ open class PageTabBarController: UIViewController, UIScrollViewDelegate {
     
     open var isScrollEnabled = true {
         didSet {
-            pageHorizontalScrollView.isScrollEnabled = isScrollEnabled
+            pageTabBarCollectionView.isScrollEnabled = isScrollEnabled
         }
     }
     
     open var bounces = true {
         didSet {
-            pageHorizontalScrollView.bounces = bounces
+            pageTabBarCollectionView.bounces = bounces
         }
     }
     
@@ -140,7 +213,7 @@ open class PageTabBarController: UIViewController, UIScrollViewDelegate {
     
     open private(set) var pageTabBarBannerView = PageTabBarSupplementaryView(frame: CGRect.zero)
     
-    open let pageHorizontalScrollView: PageTabBarCollectionView = {
+    open let pageTabBarCollectionView: PageTabBarCollectionView = {
         let layout = PageTabBarCollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
         layout.minimumInteritemSpacing = 0
@@ -220,13 +293,13 @@ open class PageTabBarController: UIViewController, UIScrollViewDelegate {
         pageTabBarBannerView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
         pageTabBarBannerView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
         
-        pageHorizontalScrollView.dataSource = self
-        pageHorizontalScrollView.delegate = self
+        pageTabBarCollectionView.dataSource = self
+        pageTabBarCollectionView.delegate = self
         
-        view.addSubview(pageHorizontalScrollView)
-        pageHorizontalScrollView.translatesAutoresizingMaskIntoConstraints = false
-        pageHorizontalScrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
-        pageHorizontalScrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
+        view.addSubview(pageTabBarCollectionView)
+        pageTabBarCollectionView.translatesAutoresizingMaskIntoConstraints = false
+        pageTabBarCollectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
+        pageTabBarCollectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
         
         if case .top = tabBarPosition {
             
@@ -240,9 +313,9 @@ open class PageTabBarController: UIViewController, UIScrollViewDelegate {
             
             pageTabBar.topAnchor.constraint(equalTo: pageTabBarHeaderView.bottomAnchor).isActive = true
             pageTabBarBannerView.topAnchor.constraint(equalTo: pageTabBar.bottomAnchor).isActive = true
-            pageHorizontalScrollView.topAnchor.constraint(equalTo: pageTabBarBannerView.bottomAnchor).isActive = true
+            pageTabBarCollectionView.topAnchor.constraint(equalTo: pageTabBarBannerView.bottomAnchor).isActive = true
             
-            bottomConstraint = pageHorizontalScrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            bottomConstraint = pageTabBarCollectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
             bottomConstraint?.isActive = true
         }
         else {
@@ -258,8 +331,8 @@ open class PageTabBarController: UIViewController, UIScrollViewDelegate {
             bottomConstraint = pageTabBar.bottomAnchor.constraint(equalTo: view.bottomAnchor)
             bottomConstraint?.isActive = true
             
-            pageHorizontalScrollView.topAnchor.constraint(equalTo: pageTabBarHeaderView.bottomAnchor).isActive = true
-            pageTabBarBannerView.topAnchor.constraint(equalTo: pageHorizontalScrollView.bottomAnchor).isActive = true
+            pageTabBarCollectionView.topAnchor.constraint(equalTo: pageTabBarHeaderView.bottomAnchor).isActive = true
+            pageTabBarBannerView.topAnchor.constraint(equalTo: pageTabBarCollectionView.bottomAnchor).isActive = true
             pageTabBar.topAnchor.constraint(equalTo: pageTabBarBannerView.bottomAnchor).isActive = true
         }
         
@@ -331,7 +404,7 @@ open class PageTabBarController: UIViewController, UIScrollViewDelegate {
             contentOffsetX = view.frame.width * CGFloat(pageIndex)
             transientIndex = pageIndex
             
-            pageHorizontalScrollView.scrollToItem(at: IndexPath(item: pageIndex, section: 0), at: .centeredHorizontally, animated: false)
+            pageTabBarCollectionView.scrollToItem(at: IndexPath(item: pageIndex, section: 0), at: .centeredHorizontally, animated: false)
             setNeedsStatusBarAppearanceUpdate()
         }
     }
@@ -372,7 +445,7 @@ open class PageTabBarController: UIViewController, UIScrollViewDelegate {
         
         let indexPath = IndexPath(item: index, section: 0)
         if !viewDidLayoutSubviewsForTheFirstTime {
-            pageHorizontalScrollView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: shouldAnimate)
+            pageTabBarCollectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: shouldAnimate)
         }
         
         if !shouldAnimate {
@@ -493,7 +566,7 @@ open class PageTabBarController: UIViewController, UIScrollViewDelegate {
             }
         }
         self.viewControllers = viewControllers
-        pageHorizontalScrollView.reloadData()
+        pageTabBarCollectionView.reloadData()
     }
 }
 

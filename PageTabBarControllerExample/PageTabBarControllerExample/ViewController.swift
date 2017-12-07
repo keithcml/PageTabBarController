@@ -26,7 +26,7 @@
 import UIKit
 import PageTabBarController
 
-class ViewController: UIViewController, CollapseTabBarViewControllerDelegate {
+class ViewController: UIViewController, CollapseTabBarViewControllerDelegate, PageTabBarCollectionViewTouchDelegate {
 
     override open var preferredStatusBarUpdateAnimation: UIStatusBarAnimation {
         return .slide
@@ -126,6 +126,7 @@ class ViewController: UIViewController, CollapseTabBarViewControllerDelegate {
         collapseTabBarViewController.pageTabBarController.transitionAnimation = .scroll
         collapseTabBarViewController.pageTabBarController.delegate = self
         collapseTabBarViewController.delegate = self
+        collapseTabBarViewController.pageTabBarController.touchDelegate = self
         CollapseTabBarViewController.attachCollapseTabBarController(
             collapseTabBarViewController,
             into: self) { (collapseVC, parentVC) in
@@ -234,5 +235,20 @@ class ViewController: UIViewController, CollapseTabBarViewControllerDelegate {
     func pageTabBarController(_ controller: PageTabBarController, transit fromIndex: Int, to toIndex: Int, progress: CGFloat) {
         // print("from index: \(fromIndex), to index: \(toIndex), progress: \(progress)")
     }
+    
+    func pageTabBarCollectionView(_ collectionView: PageTabBarCollectionView, gestureRecognizerShouldBegin gestureRecognizer: UIGestureRecognizer) -> Bool {
+        if collectionView.bounces == false && collectionView.contentOffset.x == 0 {
+            
+            if let panGesture = gestureRecognizer as? UIPanGestureRecognizer,
+                abs(panGesture.velocity(in: panGesture.view).x) > abs(panGesture.velocity(in: panGesture.view).y),
+                panGesture.velocity(in: panGesture.view).x > 0 {
+                return false
+            }
+            
+            //return false
+        }
+        return true
+    }
 }
+
 

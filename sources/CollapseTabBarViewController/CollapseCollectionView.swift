@@ -341,7 +341,7 @@ extension CollapseCollectionView: UIGestureRecognizerDelegate {
         
         if shouldScroll {
             
-            if let pageScrollView = collapseDelegate?.getPageTabBarController()?.pageHorizontalScrollView, scrollView == pageScrollView {
+            if let pageScrollView = collapseDelegate?.getPageTabBarController()?.pageTabBarCollectionView, scrollView == pageScrollView {
                 // skip
             } else {
                 observeMySelf()
