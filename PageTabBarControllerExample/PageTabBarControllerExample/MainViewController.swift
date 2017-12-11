@@ -67,15 +67,15 @@ extension MainViewController: UITableViewDelegate, UITableViewDataSource {
             vc02.view.tag = 2
             vc03.view.tag = 3
             
-            let pageTabBarController = PageTabBarController(viewControllers: [vc01, vc02, vc03], items: [tab01, tab02, tab03], tabBarPosition: .top)
-            pageTabBarController.pageTabBar.barHeight = 60
-            pageTabBarController.pageTabBar.indicatorLineColor = tabSelectedColor
-            pageTabBarController.pageTabBar.indicatorLineHeight = 2
-            pageTabBarController.pageTabBar.bottomLineHidden = true
-            pageTabBarController.pageTabBar.topLineColor = tabSelectedColor
-            pageTabBarController.pageTabBar.barTintColor = UIColor(white: 0.95, alpha: 1)
-            
-            navigationController?.pushViewController(pageTabBarController, animated: true)
+            let parallaxVC = ParallaxHeaderPageTabBarController(viewControllers: [vc01, vc02, vc03], items: [tab01, tab02, tab03], parallaxHeaderHeight: view.frame.width)
+            parallaxVC.pageTabBarController.pageTabBar.barHeight = 60
+            parallaxVC.pageTabBarController.pageTabBar.indicatorLineColor = tabSelectedColor
+            parallaxVC.pageTabBarController.pageTabBar.indicatorLineHeight = 2
+            parallaxVC.pageTabBarController.pageTabBar.bottomLineHidden = true
+            parallaxVC.pageTabBarController.pageTabBar.topLineColor = tabSelectedColor
+            parallaxVC.pageTabBarController.pageTabBar.barTintColor = UIColor(white: 0.95, alpha: 1)
+            parallaxVC.minimumRevealHeight = 200
+            navigationController?.pushViewController(parallaxVC, animated: true)
         }
     }
 }

@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		9A06A11F1FBF4730005F0A6D /* CollapseCollectionViewProxyDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A06A11E1FBF4730005F0A6D /* CollapseCollectionViewProxyDelegate.swift */; };
+		9A0B69881FDED89300FD29EC /* ParallaxHeaderPageTabBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A0B69871FDED89300FD29EC /* ParallaxHeaderPageTabBarController.swift */; };
+		9A0B698A1FDEF64400FD29EC /* SupplementaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A0B69891FDEF64400FD29EC /* SupplementaryView.swift */; };
 		9A18F0711FD703B600F96546 /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A18F0701FD703B600F96546 /* MainViewController.swift */; };
 		9A3FD9281F5DBD6300C24A1B /* Badge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A3FD9271F5DBD6300C24A1B /* Badge.swift */; };
 		9A3FD92A1F5E319B00C24A1B /* CollapseTabBarViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A3FD9291F5E319B00C24A1B /* CollapseTabBarViewController.swift */; };
@@ -61,6 +63,8 @@
 
 /* Begin PBXFileReference section */
 		9A06A11E1FBF4730005F0A6D /* CollapseCollectionViewProxyDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollapseCollectionViewProxyDelegate.swift; sourceTree = "<group>"; };
+		9A0B69871FDED89300FD29EC /* ParallaxHeaderPageTabBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParallaxHeaderPageTabBarController.swift; sourceTree = "<group>"; };
+		9A0B69891FDEF64400FD29EC /* SupplementaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupplementaryView.swift; sourceTree = "<group>"; };
 		9A18F0701FD703B600F96546 /* MainViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewController.swift; sourceTree = "<group>"; };
 		9A3FD9271F5DBD6300C24A1B /* Badge.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Badge.swift; sourceTree = "<group>"; };
 		9A3FD9291F5E319B00C24A1B /* CollapseTabBarViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CollapseTabBarViewController.swift; sourceTree = "<group>"; };
@@ -171,6 +175,8 @@
 				9B6D04201F5D69A900B018E9 /* PageTabBar.swift */,
 				9B6D04221F5D69A900B018E9 /* PageTabBarItem.swift */,
 				9B6D04211F5D69A900B018E9 /* PageTabBarController.swift */,
+				9A0B69871FDED89300FD29EC /* ParallaxHeaderPageTabBarController.swift */,
+				9A0B69891FDEF64400FD29EC /* SupplementaryView.swift */,
 			);
 			name = sources;
 			path = ../../sources;
@@ -330,10 +336,12 @@
 			files = (
 				9B6D043A1F5D69DB00B018E9 /* PageTabBar.swift in Sources */,
 				9B168F6A1F976287009281A9 /* CollapseCollectionView.swift in Sources */,
+				9A0B69881FDED89300FD29EC /* ParallaxHeaderPageTabBarController.swift in Sources */,
 				9A3FD9281F5DBD6300C24A1B /* Badge.swift in Sources */,
 				9A06A11F1FBF4730005F0A6D /* CollapseCollectionViewProxyDelegate.swift in Sources */,
 				9BE2D5621F99A1B700AB0F35 /* CollapseStaticHeaderView.swift in Sources */,
 				9A3FD92A1F5E319B00C24A1B /* CollapseTabBarViewController.swift in Sources */,
+				9A0B698A1FDEF64400FD29EC /* SupplementaryView.swift in Sources */,
 				9B168F6B1F976287009281A9 /* CollapseCollectionViewLayout.swift in Sources */,
 				9B6D04391F5D69DB00B018E9 /* KeyValueObserver.swift in Sources */,
 				9B168F661F975390009281A9 /* PageTabBarSupplementaryView.swift in Sources */,

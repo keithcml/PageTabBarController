@@ -137,9 +137,9 @@ class ViewController: UIViewController, CollapseTabBarViewControllerDelegate, Pa
                 collapseVC.view.bottomAnchor.constraint(equalTo: parentVC.view.bottomAnchor).isActive = true
         }
         
-//        let banner = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 100))
-//        banner.backgroundColor = UIColor.gray.withAlphaComponent(0.5)
-//        collapseTabBarViewController.pageTabBarController.setBannerViewWithCustomView(banner, animated: true)
+        let banner = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 100))
+        banner.backgroundColor = UIColor.gray.withAlphaComponent(0.5)
+        collapseTabBarViewController.pageTabBarController.setBannerViewWithCustomView(banner, animated: true)
         
         galleryView.images = [GalleryImage.image(image: UIImage(named: "cover")!),
                               GalleryImage.image(image: UIImage(named: "cover")!),
@@ -245,7 +245,6 @@ class ViewController: UIViewController, CollapseTabBarViewControllerDelegate, Pa
                 return false
             }
             
-            //return false
         }
         return true
     }

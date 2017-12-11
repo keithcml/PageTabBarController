@@ -12,7 +12,7 @@ import PageTabBarController
 
 class ScrollTabBarViewController: UIViewController {
     
-    private var pageTabBarController: PageTabBarController
+    private var parallaxController: ParallaxHeaderPageTabBarController
     
     private var pageTabBarTopConstraint: NSLayoutConstraint?
     
@@ -40,13 +40,13 @@ class ScrollTabBarViewController: UIViewController {
         let vc02 = TableViewController(nibName: nil, bundle: nil)
         let vc03 = TableViewController(nibName: nil, bundle: nil)
         
-        pageTabBarController = PageTabBarController(viewControllers: [vc01, vc02, vc03], items: [tab01, tab02, tab03], tabBarPosition: .top)
-        pageTabBarController.pageTabBar.barHeight = 60
-        pageTabBarController.pageTabBar.indicatorLineColor = tabSelectedColor
-        pageTabBarController.pageTabBar.indicatorLineHeight = 2
-        pageTabBarController.pageTabBar.bottomLineHidden = true
-        pageTabBarController.pageTabBar.topLineColor = tabSelectedColor
-        pageTabBarController.pageTabBar.barTintColor = UIColor(white: 0.95, alpha: 1)
+        parallaxController = ParallaxHeaderPageTabBarController(viewControllers: [vc01, vc02, vc03], items: [tab01, tab02, tab03], parallaxHeaderHeight: 200)
+        parallaxController.pageTabBarController.pageTabBar.barHeight = 60
+        parallaxController.pageTabBarController.pageTabBar.indicatorLineColor = tabSelectedColor
+        parallaxController.pageTabBarController.pageTabBar.indicatorLineHeight = 2
+        parallaxController.pageTabBarController.pageTabBar.bottomLineHidden = true
+        parallaxController.pageTabBarController.pageTabBar.topLineColor = tabSelectedColor
+        parallaxController.pageTabBarController.pageTabBar.barTintColor = UIColor(white: 0.95, alpha: 1)
         
         super.init(coder: aDecoder)
         
@@ -63,36 +63,36 @@ class ScrollTabBarViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        addChildViewController(pageTabBarController)
-        view.addSubview(pageTabBarController.view)
-        pageTabBarController.view.translatesAutoresizingMaskIntoConstraints = false
-        
-        pageTabBarTopConstraint = pageTabBarController.view.topAnchor.constraint(equalTo: view.topAnchor, constant: view.frame.width)
-        pageTabBarTopConstraint?.isActive = true
-        
-        NSLayoutConstraint.activate([pageTabBarController.view.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-                                     pageTabBarController.view.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-                                     pageTabBarController.view.bottomAnchor.constraint(equalTo: view.bottomAnchor)])
-        
-        pageTabBarController.didMove(toParentViewController: self)
-        
-        pageTabBarController.delegate = self
+//        addChildViewController(parallaxController.view)
+//        view.addSubview(pageTabBarController.view)
+//        pageTabBarController.view.translatesAutoresizingMaskIntoConstraints = false
+//
+//        pageTabBarTopConstraint = pageTabBarController.view.topAnchor.constraint(equalTo: view.topAnchor, constant: view.frame.width)
+//        pageTabBarTopConstraint?.isActive = true
+//
+//        NSLayoutConstraint.activate([pageTabBarController.view.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+//                                     pageTabBarController.view.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+//                                     pageTabBarController.view.bottomAnchor.constraint(equalTo: view.bottomAnchor)])
+//
+//        pageTabBarController.didMove(toParentViewController: self)
+//
+//        pageTabBarController.delegate = self
 
     }
     
     override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        if let vc = pageTabBarController.selectedViewController {
-            for view in vc.view.subviews {
-                if view.isKind(of: UIScrollView.self) {
-                    currentScrollView = view as? UIScrollView
-                    
-                    print("currentScrollView: \(view)")
-                    break
-                }
-            }
-        }
-        addContentOffsetObserve()
+//        super.viewWillAppear(animated)
+//        if let vc = pageTabBarController.selectedViewController {
+//            for view in vc.view.subviews {
+//                if view.isKind(of: UIScrollView.self) {
+//                    currentScrollView = view as? UIScrollView
+//
+//                    print("currentScrollView: \(view)")
+//                    break
+//                }
+//            }
+//        }
+//        addContentOffsetObserve()
     }
     
     override func viewWillDisappear(_ animated: Bool) {

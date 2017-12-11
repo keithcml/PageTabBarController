@@ -117,6 +117,7 @@ public protocol PageTabBarControllerDelegate: NSObjectProtocol {
      */
     @objc optional func pageTabBarController(_ controller: PageTabBarController,
                                              selectedViewController: UIViewController,
+                                             observedScrollView: UIScrollView,
                                              contentOffsetObservingWithOldValue oldValue: CGPoint,
                                              newValue: CGPoint) -> Bool
 }
@@ -353,26 +354,28 @@ open class PageTabBarController: UIViewController, UIScrollViewDelegate {
             selectedViewController?.beginAppearanceTransition(true, animated: animated)
         }
         
-        if isMovingToParentViewController || isBeingPresented {
-            if #available(iOS 11.0, *) {
-                var newSafeArea = UIEdgeInsets()
-                switch tabBarPosition {
-                case .topAttached, .top:
-                    newSafeArea.top += pageTabBar.frame.height
-                    break
-                case .bottom:
-                    newSafeArea.bottom += pageTabBar.frame.height
-                    break
-                }
-                for child in viewControllers {
-                    child.additionalSafeAreaInsets = newSafeArea
-                }
-            } else {
-                // tabBarTopConstraint?.constant =
+        if #available(iOS 11.0, *) {
+            var newSafeArea = UIEdgeInsets()
+            switch tabBarPosition {
+            case .topAttached, .top:
+                newSafeArea.top += pageTabBar.frame.height
+                break
+            case .bottom:
+                newSafeArea.bottom += pageTabBar.frame.height
+                break
             }
+            
+            if let bannerHeight = bannerHeightConstraint?.constant {
+                newSafeArea.top += bannerHeight
+            }
+            for child in viewControllers {
+                child.additionalSafeAreaInsets = newSafeArea
+            }
+        } else {
+            // tabBarTopConstraint?.constant =
         }
         
-        addContentOffsetObserve()
+        addContentOffsetObserver()
     }
     
     override open func viewDidAppear(_ animated: Bool) {
@@ -556,6 +559,23 @@ open class PageTabBarController: UIViewController, UIScrollViewDelegate {
         customView.trailingAnchor.constraint(equalTo: pageTabBarBannerView.trailingAnchor).isActive = true
         customView.heightAnchor.constraint(equalToConstant: height).isActive = true
         
+        if #available(iOS 11.0, *) {
+            var newSafeArea = UIEdgeInsets()
+            switch tabBarPosition {
+            case .topAttached, .top:
+                newSafeArea.top += pageTabBar.frame.height + height
+                break
+            case .bottom:
+                newSafeArea.bottom += pageTabBar.frame.height
+                break
+            }
+            for child in viewControllers {
+                child.additionalSafeAreaInsets = newSafeArea
+            }
+        } else {
+            // tabBarTopConstraint?.constant =
+        }
+        
         if view.window == nil {
             self.bannerHeightConstraint?.constant = height
             return
@@ -717,7 +737,7 @@ extension PageTabBarController: UICollectionViewDelegate {
         for view in vc.view.subviews {
             if view.isKind(of: UIScrollView.self) {
                 currentScrollView = view as? UIScrollView
-                addContentOffsetObserve()
+                addContentOffsetObserver()
                 //print("currentScrollView: \(view)")
                 break
             }
@@ -741,7 +761,7 @@ extension PageTabBarController: UICollectionViewDelegateFlowLayout {
 // MARK: - Scroll Observing
 extension PageTabBarController {
     // MARK: - Scrolling handler
-    private func addContentOffsetObserve() {
+    private func addContentOffsetObserver() {
         
         if contentOffsetObservation != nil {
             removeContentOffsetObserver()
@@ -780,43 +800,18 @@ extension PageTabBarController {
             default:
                 break
             }
-            /*
-            guard let currentSpacing = self.pageTabBarTopConstraint?.constant else {
-                return
-            }
-            
-            // diff < 0 => scroll up, diff > 0 => scroll down
-            let diff = oldValue.y - newValue.y
-            
-            guard diff != 0 else { return }
-            
-            if newValue.y < -observed.contentInset.top {
-                
-                if currentSpacing < self.view.frame.width {
-                    self.setContentOffset(oldValue, forScrollView: observed)
-                    self.pageTabBarTopConstraint?.constant = min(self.view.frame.width, max(150, currentSpacing + diff))
-                    self.view.layoutIfNeeded()
-                }
-                
-            } else if newValue.y > -observed.contentInset.top {
-                
-                if currentSpacing > 150 {
-                    self.setContentOffset(oldValue, forScrollView: observed)
-                    
-                    self.pageTabBarTopConstraint?.constant = min(self.view.frame.width, max(150, currentSpacing + diff))
-                    self.view.layoutIfNeeded()
-                }
-            }*/
-            
+
             if let selectedVC = self.selectedViewController,
-                let boolean = self.delegate?.pageTabBarController?(self, selectedViewController: selectedVC, contentOffsetObservingWithOldValue: oldValue, newValue: newValue) {
+                let acceptNewValue = self.delegate?.pageTabBarController?(self,
+                                                                          selectedViewController: selectedVC,
+                                                                          observedScrollView: observed,
+                                                                          contentOffsetObservingWithOldValue: oldValue,
+                                                                          newValue: newValue) {
                 
-                if boolean {
+                if !acceptNewValue {
                     self.setContentOffset(oldValue, forScrollView: observed)
                 }
             }
-            
-            
         }
     }
     
