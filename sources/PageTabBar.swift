@@ -32,7 +32,8 @@ internal protocol PageTabBarDelegate: class {
 
 @objc
 public enum PageTabBarPosition: Int {
-    case top = 0
+    case topAttached = 0
+    case top
     case bottom
 }
 
@@ -61,6 +62,7 @@ open class PageTabBar: UIView {
         didSet {
             guard oldValue != barHeight else { return }
             indicatorLine.frame.origin = CGPoint(x: indicatorLine.frame.minX, y: barHeight - indicatorLineHeight)
+            bounds = CGRect(x: bounds.origin.x, y: bounds.origin.y, width: bounds.width, height: barHeight)
             //superview?.setNeedsLayout()
         }
     }
@@ -244,6 +246,16 @@ open class PageTabBar: UIView {
         items = newTabBarItems
         currentIndex = targetIndex
         scrollToItem(at: currentIndex, animated: animated)
+    }
+    
+    open func setBarHeight(_ height: CGFloat, animated: Bool) {
+        if animated {
+            UIView.animate(withDuration: 0.3, animations: {
+                self.barHeight = height
+            })
+        } else {
+            barHeight = height
+        }
     }
 }
 

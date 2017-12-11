@@ -105,12 +105,20 @@ public enum PageTabBarTransitionAnimation {
 }
 
 @objc
-public protocol PageTabBarControllerDelegate: class {
+public protocol PageTabBarControllerDelegate: NSObjectProtocol {
     @objc optional func pageTabBarController(_ controller: PageTabBarController, tabBarHeaderView: PageTabBarSupplementaryView)
     @objc optional func pageTabBarController(_ controller: PageTabBarController, bannerView: PageTabBarSupplementaryView)
     @objc optional func pageTabBarController(_ controller: PageTabBarController, didSelectItem item: PageTabBarItem, atIndex index: Int, previousIndex: Int)
     @objc optional func pageTabBarController(_ controller: PageTabBarController, didChangeContentViewController vc: UIViewController, atIndex index: Int)
     @objc optional func pageTabBarController(_ controller: PageTabBarController, transit fromIndex: Int, to toIndex: Int, progress: CGFloat)
+    
+    /*  @return true to accept newValue, false to reset to old value
+     *
+     */
+    @objc optional func pageTabBarController(_ controller: PageTabBarController,
+                                             selectedViewController: UIViewController,
+                                             contentOffsetObservingWithOldValue oldValue: CGPoint,
+                                             newValue: CGPoint) -> Bool
 }
 
 internal final class PageTabBarCollectionViewFlowLayout: UICollectionViewFlowLayout {
@@ -197,19 +205,19 @@ open class PageTabBarController: UIViewController, UIScrollViewDelegate {
     
     open internal(set) var pageTabBar: PageTabBar
     
+    // horizontal paging scrolling
     open var isScrollEnabled = true {
         didSet {
             pageTabBarCollectionView.isScrollEnabled = isScrollEnabled
         }
     }
     
+    // paging horizontal bounces
     open var bounces = true {
         didSet {
             pageTabBarCollectionView.bounces = bounces
         }
     }
-    
-    open private(set) var pageTabBarHeaderView = PageTabBarSupplementaryView(frame: CGRect.zero)
     
     open private(set) var pageTabBarBannerView = PageTabBarSupplementaryView(frame: CGRect.zero)
     
@@ -237,7 +245,7 @@ open class PageTabBarController: UIViewController, UIScrollViewDelegate {
     }()
     
     internal(set) var viewControllers = [UIViewController]()
-    private var tabBarPosition: PageTabBarPosition = .top
+    private var tabBarPosition: PageTabBarPosition = .topAttached
     
     var pageTabBarItems: [PageTabBarItem] = []
     
@@ -248,16 +256,20 @@ open class PageTabBarController: UIViewController, UIScrollViewDelegate {
     
     // Layout Guide
     open private(set) var tabBarLayoutGuide = UILayoutGuide()
+    open private(set) var bannerViewLayoutGuide = UILayoutGuide()
     
     // Constraints
-    fileprivate var topConstraint: NSLayoutConstraint?
-    fileprivate var bottomConstraint: NSLayoutConstraint?
-    fileprivate var headerHeightConstraint: NSLayoutConstraint?
+    fileprivate var tabBarTopConstraint: NSLayoutConstraint?
     fileprivate var bannerHeightConstraint: NSLayoutConstraint?
     
+    // Scroll Observing
+    private var isObservingContentOffset = true
+    private var currentScrollView: UIScrollView?
+    private var contentOffsetObservation: NSKeyValueObservation?
+    
     public required init(viewControllers: [UIViewController],
-                items: [PageTabBarItem],
-                tabBarPosition: PageTabBarPosition = .top) {
+                         items: [PageTabBarItem],
+                         tabBarPosition: PageTabBarPosition = .topAttached) {
         
         self.pageTabBar = PageTabBar(tabBarItems: items)
         
@@ -267,6 +279,11 @@ open class PageTabBarController: UIViewController, UIScrollViewDelegate {
         self.tabBarPosition = tabBarPosition
         pageTabBarItems = items
         pageTabBar.addLayoutGuide(tabBarLayoutGuide)
+        
+        for vc in viewControllers {
+            addChildViewController(vc)
+            vc.didMove(toParentViewController: self)
+        }
     }
     
     required public init?(coder aDecoder: NSCoder) {
@@ -276,17 +293,21 @@ open class PageTabBarController: UIViewController, UIScrollViewDelegate {
     override open func viewDidLoad() {
         super.viewDidLoad()
 
+        automaticallyAdjustsScrollViewInsets = false
+        
+        view.addSubview(pageTabBarCollectionView)
+        pageTabBarCollectionView.translatesAutoresizingMaskIntoConstraints = false
+        pageTabBarCollectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
+        pageTabBarCollectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
+        pageTabBarCollectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
+        pageTabBarCollectionView.topAnchor.constraint(equalTo: view.topAnchor).isActive = true
+        
         pageTabBar.currentIndex = pageIndex
         pageTabBar.delegate = self
         view.addSubview(pageTabBar)
         pageTabBar.translatesAutoresizingMaskIntoConstraints = false
         pageTabBar.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
         pageTabBar.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
-        
-        view.addSubview(pageTabBarHeaderView)
-        pageTabBarHeaderView.translatesAutoresizingMaskIntoConstraints = false
-        pageTabBarHeaderView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
-        pageTabBarHeaderView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
         
         view.addSubview(pageTabBarBannerView)
         pageTabBarBannerView.translatesAutoresizingMaskIntoConstraints = false
@@ -296,50 +317,34 @@ open class PageTabBarController: UIViewController, UIScrollViewDelegate {
         pageTabBarCollectionView.dataSource = self
         pageTabBarCollectionView.delegate = self
         
-        view.addSubview(pageTabBarCollectionView)
-        pageTabBarCollectionView.translatesAutoresizingMaskIntoConstraints = false
-        pageTabBarCollectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
-        pageTabBarCollectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
-        
-        if case .top = tabBarPosition {
-            
-            if #available(iOS 11.0, *) {
-                topConstraint = pageTabBarHeaderView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor)
-                topConstraint?.isActive = true
-            } else {
-                topConstraint = pageTabBarHeaderView.topAnchor.constraint(equalTo: view.topAnchor)
-                topConstraint?.isActive = true
-            }
-            
-            pageTabBar.topAnchor.constraint(equalTo: pageTabBarHeaderView.bottomAnchor).isActive = true
-            pageTabBarBannerView.topAnchor.constraint(equalTo: pageTabBar.bottomAnchor).isActive = true
-            pageTabBarCollectionView.topAnchor.constraint(equalTo: pageTabBarBannerView.bottomAnchor).isActive = true
-            
-            bottomConstraint = pageTabBarCollectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-            bottomConstraint?.isActive = true
-        }
-        else {
-            
-            if #available(iOS 11.0, *) {
-                topConstraint = pageTabBarHeaderView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor)
-                topConstraint?.isActive = true
-                
-            } else {
-                topConstraint = pageTabBarHeaderView.topAnchor.constraint(equalTo: view.topAnchor)
-                topConstraint?.isActive = true
-            }
-            bottomConstraint = pageTabBar.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-            bottomConstraint?.isActive = true
-            
-            pageTabBarCollectionView.topAnchor.constraint(equalTo: pageTabBarHeaderView.bottomAnchor).isActive = true
-            pageTabBarBannerView.topAnchor.constraint(equalTo: pageTabBarCollectionView.bottomAnchor).isActive = true
-            pageTabBar.topAnchor.constraint(equalTo: pageTabBarBannerView.bottomAnchor).isActive = true
-        }
-        
-        headerHeightConstraint = pageTabBarHeaderView.heightAnchor.constraint(equalToConstant: 0)
         bannerHeightConstraint = pageTabBarBannerView.heightAnchor.constraint(equalToConstant: 0)
-        headerHeightConstraint?.isActive = true
         bannerHeightConstraint?.isActive = true
+        
+        var topAnchor = view.topAnchor
+        var bottomAnchor = view.bottomAnchor
+        var topConstraintConstant = pageTabBar.frame.height
+        if #available(iOS 11.0, *) {
+            topAnchor = view.safeAreaLayoutGuide.topAnchor
+            bottomAnchor = view.safeAreaLayoutGuide.bottomAnchor
+            topConstraintConstant = 0
+        }
+        
+        switch tabBarPosition {
+        case .topAttached:
+            pageTabBarBannerView.topAnchor.constraint(equalTo: pageTabBar.bottomAnchor).isActive = true
+            tabBarTopConstraint = pageTabBar.topAnchor.constraint(equalTo: topAnchor, constant: topConstraintConstant)
+            tabBarTopConstraint?.isActive = true
+            break
+        case .top:
+            tabBarTopConstraint = pageTabBar.topAnchor.constraint(equalTo: topAnchor, constant: topConstraintConstant)
+            tabBarTopConstraint?.isActive = true
+            break
+        case .bottom:
+            pageTabBar.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true
+            break
+        }
+        
+        didChangeContentViewController(viewControllers[0], at: 0)
     }
     
     override open func viewWillAppear(_ animated: Bool) {
@@ -347,6 +352,27 @@ open class PageTabBarController: UIViewController, UIScrollViewDelegate {
         if !shouldAutomaticallyForwardAppearanceMethods {
             selectedViewController?.beginAppearanceTransition(true, animated: animated)
         }
+        
+        if isMovingToParentViewController || isBeingPresented {
+            if #available(iOS 11.0, *) {
+                var newSafeArea = UIEdgeInsets()
+                switch tabBarPosition {
+                case .topAttached, .top:
+                    newSafeArea.top += pageTabBar.frame.height
+                    break
+                case .bottom:
+                    newSafeArea.bottom += pageTabBar.frame.height
+                    break
+                }
+                for child in viewControllers {
+                    child.additionalSafeAreaInsets = newSafeArea
+                }
+            } else {
+                // tabBarTopConstraint?.constant =
+            }
+        }
+        
+        addContentOffsetObserve()
     }
     
     override open func viewDidAppear(_ animated: Bool) {
@@ -355,23 +381,22 @@ open class PageTabBarController: UIViewController, UIScrollViewDelegate {
             selectedViewController?.endAppearanceTransition()
         }
         
-        if isMovingToParentViewController || isBeingPresented {
-            if #available(iOS 11.0, *) { /* do nothing */ } else {
-                if let top = topConstraint, let bottom = bottomConstraint {
-                    if case .bottom = tabBarPosition {
-                        NSLayoutConstraint.deactivate([top, bottom])
-                        topConstraint = pageTabBarHeaderView.topAnchor.constraint(equalTo: topLayoutGuide.bottomAnchor)
-                        topConstraint?.isActive = true
-                        bottomConstraint = pageTabBar.bottomAnchor.constraint(equalTo: bottomLayoutGuide.topAnchor)
-                        bottomConstraint?.isActive = true
-                    } else {
-                        NSLayoutConstraint.deactivate([top])
-                        topConstraint = pageTabBarHeaderView.topAnchor.constraint(equalTo: topLayoutGuide.bottomAnchor)
-                        topConstraint?.isActive = true
-                    }
-                }
-            }
+        if #available(iOS 11.0, *) {
+            
+        } else {
+//            var newContentInsets = UIEdgeInsets()
+//            switch tabBarPosition {
+//            case .topAttached, .top:
+//                newContentInsets.top += pageTabBar.frame.maxY
+//                break
+//            case .bottom:
+//                newContentInsets.bottom += pageTabBar.frame.height
+//                break
+//            }
+//            pageTabBarCollectionView.contentInset = newContentInsets
         }
+        
+        
     }
     
     override open func viewWillDisappear(_ animated: Bool) {
@@ -379,6 +404,8 @@ open class PageTabBarController: UIViewController, UIScrollViewDelegate {
         if !shouldAutomaticallyForwardAppearanceMethods {
             selectedViewController?.beginAppearanceTransition(false, animated: animated)
         }
+        
+        removeContentOffsetObserver()
     }
     
     override open func viewDidDisappear(_ animated: Bool) {
@@ -400,6 +427,13 @@ open class PageTabBarController: UIViewController, UIScrollViewDelegate {
             else {
                 isScrollEnabled = false
             }
+            
+//            if #available(iOS 11.0, *) {
+//
+//            } else {
+//                pageTabBarCollectionView.contentInset = UIEdgeInsets(top: pageTabBar.frame.maxY, left: 0, bottom: 0, right: 0)
+//                pageTabBarCollectionView.scrollIndicatorInsets = pageTabBarCollectionView.contentInset
+//            }
             
             contentOffsetX = view.frame.width * CGFloat(pageIndex)
             transientIndex = pageIndex
@@ -449,7 +483,7 @@ open class PageTabBarController: UIViewController, UIScrollViewDelegate {
         }
         
         if !shouldAnimate {
-            delegate?.pageTabBarController?(self, didChangeContentViewController: viewControllers[pageIndex], atIndex: pageIndex)
+            didChangeContentViewController(viewControllers[pageIndex], at: pageIndex)
         }
     }
     
@@ -493,34 +527,12 @@ open class PageTabBarController: UIViewController, UIScrollViewDelegate {
     }
     
     // MARK: - Supplementary Views
-    open func setHeaderViewWithCustomView(_ customView: UIView?, animated: Bool) {
-        pageTabBarHeaderView.subviews.forEach { $0.removeFromSuperview() }
-        
-        guard let customView = customView else {
-            
-            UIView.animate(withDuration: 0.3) {
-                self.headerHeightConstraint?.constant = 0
-                self.view.layoutIfNeeded()
-            }
-            
-            return
-        }
-        
-        pageTabBarHeaderView.addSubview(customView)
-        let height = ceil(customView.systemLayoutSizeFitting(UILayoutFittingCompressedSize).height)
-        
-        if view.window == nil {
-            self.headerHeightConstraint?.constant = height
-            return
-        }
-        
-        UIView.animate(withDuration: 0.3) {
-            self.headerHeightConstraint?.constant = height
-            self.view.layoutIfNeeded()
-        }
-    }
-    
     open func setBannerViewWithCustomView(_ customView: UIView?, animated: Bool) {
+        
+        guard case .topAttached = tabBarPosition else {
+            fatalError("position top not supporting banner view")
+        }
+        
         pageTabBarBannerView.subviews.forEach { $0.removeFromSuperview() }
         
         guard let customView = customView else {
@@ -534,6 +546,8 @@ open class PageTabBarController: UIViewController, UIScrollViewDelegate {
         }
         
         let height = ceil(customView.systemLayoutSizeFitting(UILayoutFittingCompressedSize).height)
+        
+        pageTabBarBannerView.addLayoutGuide(bannerViewLayoutGuide)
         
         pageTabBarBannerView.addSubview(customView)
         customView.translatesAutoresizingMaskIntoConstraints = false
@@ -566,6 +580,12 @@ open class PageTabBarController: UIViewController, UIScrollViewDelegate {
             }
         }
         self.viewControllers = viewControllers
+        
+        for vc in viewControllers {
+            addChildViewController(vc)
+            vc.didMove(toParentViewController: self)
+        }
+        
         pageTabBarCollectionView.reloadData()
     }
 }
@@ -596,32 +616,18 @@ extension PageTabBarController: UICollectionViewDelegate {
     open func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         
         let vc = viewControllers[indexPath.row]
-        if vc.parent == nil {
-            addChildViewController(vc)
-            cell.contentView.addSubview(vc.view)
-            vc.view.translatesAutoresizingMaskIntoConstraints = false
-            vc.view.topAnchor.constraint(equalTo: cell.contentView.topAnchor).isActive = true
-            vc.view.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor).isActive = true
-            vc.view.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor).isActive = true
-            vc.view.bottomAnchor.constraint(equalTo: cell.contentView.bottomAnchor).isActive = true
-            vc.didMove(toParentViewController: self)
-        }
-        else {
-            cell.contentView.addSubview(vc.view)
-            vc.view.translatesAutoresizingMaskIntoConstraints = false
-            vc.view.topAnchor.constraint(equalTo: cell.contentView.topAnchor).isActive = true
-            vc.view.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor).isActive = true
-            vc.view.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor).isActive = true
-            vc.view.bottomAnchor.constraint(equalTo: cell.contentView.bottomAnchor).isActive = true
-        }
+        cell.contentView.addSubview(vc.view)
+        vc.view.translatesAutoresizingMaskIntoConstraints = false
+        vc.view.topAnchor.constraint(equalTo: cell.contentView.topAnchor).isActive = true
+        vc.view.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor).isActive = true
+        vc.view.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor).isActive = true
+        vc.view.bottomAnchor.constraint(equalTo: cell.contentView.bottomAnchor).isActive = true
         updateIndex(false, indexPath.row)
     }
     
     open func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         let vc = viewControllers[indexPath.row]
-        vc.willMove(toParentViewController: nil)
         vc.view.removeFromSuperview()
-        vc.removeFromParentViewController()
     }
     
     open func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
@@ -698,19 +704,130 @@ extension PageTabBarController: UICollectionViewDelegate {
     }
     
     open func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
-        delegate?.pageTabBarController?(self, didChangeContentViewController: viewControllers[pageIndex], atIndex: pageIndex)
+        didChangeContentViewController(viewControllers[pageIndex], at: pageIndex)
     }
     
-    fileprivate func didDragAndEnd() {
+    private func didDragAndEnd() {
         pageTabBar.isInteracting = false
         pageTabBar.updateCurrentIndex()
-        delegate?.pageTabBarController?(self, didChangeContentViewController: viewControllers[pageIndex], atIndex: pageIndex)
+        didChangeContentViewController(viewControllers[pageIndex], at: pageIndex)
     }
     
+    private func didChangeContentViewController(_ vc: UIViewController, at index: Int) {
+        for view in vc.view.subviews {
+            if view.isKind(of: UIScrollView.self) {
+                currentScrollView = view as? UIScrollView
+                addContentOffsetObserve()
+                //print("currentScrollView: \(view)")
+                break
+            }
+        }
+        delegate?.pageTabBarController?(self, didChangeContentViewController: vc, atIndex: index)
+    }
 }
 
 extension PageTabBarController: UICollectionViewDelegateFlowLayout {
     open func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        return collectionView.frame.size
+        var contentInsets = collectionView.contentInset
+        if #available(iOS 11.0, *) {
+            contentInsets = collectionView.adjustedContentInset
+        }
+        
+        return CGSize(width: collectionView.frame.width - contentInsets.left - contentInsets.right,
+                      height: collectionView.frame.height - contentInsets.top - contentInsets.bottom)
+    }
+}
+
+// MARK: - Scroll Observing
+extension PageTabBarController {
+    // MARK: - Scrolling handler
+    private func addContentOffsetObserve() {
+        
+        if contentOffsetObservation != nil {
+            removeContentOffsetObserver()
+        }
+        
+        guard let scrollView = currentScrollView else { return }
+        
+        contentOffsetObservation = scrollView.observe(\.contentOffset, options: [.new, .old]) { [unowned self] observed, change in
+            
+            guard self.isObservingContentOffset else { return }
+            
+            guard let oldValue = change.oldValue, let newValue = change.newValue else {
+                return
+            }
+
+            // diff < 0 => scroll up, diff > 0 => scroll down
+            let diff = oldValue.y - newValue.y
+            
+            guard diff != 0 else { return }
+            
+            switch self.tabBarPosition {
+            case .top:
+                
+                var minimumTopConstraintConstant = self.pageTabBar.frame.height
+                var contentInset = observed.contentInset
+                
+                if #available(iOS 11.0, *) {
+                    minimumTopConstraintConstant = 0
+                    contentInset = observed.adjustedContentInset
+                }
+
+                let offset = min(0, newValue.y + contentInset.top)
+                self.tabBarTopConstraint?.constant = max(minimumTopConstraintConstant, minimumTopConstraintConstant - offset)
+                self.view.layoutIfNeeded()
+                break
+            default:
+                break
+            }
+            /*
+            guard let currentSpacing = self.pageTabBarTopConstraint?.constant else {
+                return
+            }
+            
+            // diff < 0 => scroll up, diff > 0 => scroll down
+            let diff = oldValue.y - newValue.y
+            
+            guard diff != 0 else { return }
+            
+            if newValue.y < -observed.contentInset.top {
+                
+                if currentSpacing < self.view.frame.width {
+                    self.setContentOffset(oldValue, forScrollView: observed)
+                    self.pageTabBarTopConstraint?.constant = min(self.view.frame.width, max(150, currentSpacing + diff))
+                    self.view.layoutIfNeeded()
+                }
+                
+            } else if newValue.y > -observed.contentInset.top {
+                
+                if currentSpacing > 150 {
+                    self.setContentOffset(oldValue, forScrollView: observed)
+                    
+                    self.pageTabBarTopConstraint?.constant = min(self.view.frame.width, max(150, currentSpacing + diff))
+                    self.view.layoutIfNeeded()
+                }
+            }*/
+            
+            if let selectedVC = self.selectedViewController,
+                let boolean = self.delegate?.pageTabBarController?(self, selectedViewController: selectedVC, contentOffsetObservingWithOldValue: oldValue, newValue: newValue) {
+                
+                if boolean {
+                    self.setContentOffset(oldValue, forScrollView: observed)
+                }
+            }
+            
+            
+        }
+    }
+    
+    private func removeContentOffsetObserver() {
+        contentOffsetObservation?.invalidate()
+        contentOffsetObservation = nil
+    }
+    
+    private func setContentOffset(_ offset: CGPoint, forScrollView scrollView: UIScrollView) {
+        isObservingContentOffset = false
+        scrollView.contentOffset = offset
+        isObservingContentOffset = true
     }
 }
