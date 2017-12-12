@@ -20,7 +20,7 @@ class ScrollTabBarViewController: UIViewController {
     private var currentScrollView: UIScrollView?
     private var contentOffsetObservation: NSKeyValueObservation?
     
-    required init?(coder aDecoder: NSCoder) {
+    override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
         
         // set styles
         let tabColor = UIColor(red: 215/255.0, green: 215/255.0, blue: 215/255.0, alpha: 1)
@@ -39,49 +39,59 @@ class ScrollTabBarViewController: UIViewController {
         let vc01 = TableViewController(nibName: nil, bundle: nil)
         let vc02 = TableViewController(nibName: nil, bundle: nil)
         let vc03 = TableViewController(nibName: nil, bundle: nil)
+        vc01.view.tag = 1
+        vc02.view.tag = 2
+        vc03.view.tag = 3
         
-        parallaxController = ParallaxHeaderPageTabBarController(viewControllers: [vc01, vc02, vc03], items: [tab01, tab02, tab03], parallaxHeaderHeight: 200)
+        parallaxController = ParallaxHeaderPageTabBarController(viewControllers: [vc01, vc02, vc03], items: [tab01, tab02, tab03], parallaxHeaderHeight: 500)
         parallaxController.pageTabBarController.pageTabBar.barHeight = 60
         parallaxController.pageTabBarController.pageTabBar.indicatorLineColor = tabSelectedColor
         parallaxController.pageTabBarController.pageTabBar.indicatorLineHeight = 2
         parallaxController.pageTabBarController.pageTabBar.bottomLineHidden = true
         parallaxController.pageTabBarController.pageTabBar.topLineColor = tabSelectedColor
         parallaxController.pageTabBarController.pageTabBar.barTintColor = UIColor(white: 0.95, alpha: 1)
-        
-        super.init(coder: aDecoder)
-        
-        vc01.view.tag = 1
-        vc02.view.tag = 2
-        vc03.view.tag = 3
+        parallaxController.minimumRevealHeight = 0
+        super.init(nibName: nil, bundle: nil)
     }
     
-    deinit {
-        contentOffsetObservation?.invalidate()
-        contentOffsetObservation = nil
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-//        addChildViewController(parallaxController.view)
-//        view.addSubview(pageTabBarController.view)
-//        pageTabBarController.view.translatesAutoresizingMaskIntoConstraints = false
-//
-//        pageTabBarTopConstraint = pageTabBarController.view.topAnchor.constraint(equalTo: view.topAnchor, constant: view.frame.width)
-//        pageTabBarTopConstraint?.isActive = true
-//
-//        NSLayoutConstraint.activate([pageTabBarController.view.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-//                                     pageTabBarController.view.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-//                                     pageTabBarController.view.bottomAnchor.constraint(equalTo: view.bottomAnchor)])
-//
-//        pageTabBarController.didMove(toParentViewController: self)
-//
-//        pageTabBarController.delegate = self
-
+        addChildViewController(parallaxController)
+        
+        parallaxController.view.frame = CGRect(x: 0, y: 0, width: view.frame.width, height: view.frame.height)
+        view.addSubview(parallaxController.view)
+        parallaxController.view.translatesAutoresizingMaskIntoConstraints = false
+        
+        if let _ = parent as? UINavigationController {
+            if #available(iOS 11.0, *) {
+                parallaxController.view.topAnchor.constraint(equalTo: view.topAnchor).isActive = true
+            } else {
+                parallaxController.view.topAnchor.constraint(equalTo: topLayoutGuide.bottomAnchor).isActive = true
+            }
+        } else {
+            parallaxController.view.topAnchor.constraint(equalTo: view.topAnchor).isActive = true
+        }
+        
+        parallaxController.view.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
+        parallaxController.view.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
+        parallaxController.view.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
+        
+        parallaxController.didMove(toParentViewController: self)
     }
     
     override func viewWillAppear(_ animated: Bool) {
-//        super.viewWillAppear(animated)
+        super.viewWillAppear(animated)
+        
+        if #available(iOS 11.0, *) {
+            additionalSafeAreaInsets = UIEdgeInsets(top: 200, left: 0, bottom: 0, right: 0)
+        } else {
+            // Fallback on earlier versions
+        }
 //        if let vc = pageTabBarController.selectedViewController {
 //            for view in vc.view.subviews {
 //                if view.isKind(of: UIScrollView.self) {
@@ -97,131 +107,22 @@ class ScrollTabBarViewController: UIViewController {
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        removeContentOffsetObserver()
     }
     
-    // MARK: - Scrolling handler
-    private func addContentOffsetObserve() {
-        
-        if contentOffsetObservation != nil {
-            removeContentOffsetObserver()
-        }
-        
-        guard let scrollView = currentScrollView else { return }
-        
-        contentOffsetObservation = scrollView.observe(\.contentOffset, options: [.new, .old]) { [unowned self] observed, change in
-            
-            guard self.isObservingContentOffset else { return }
-            
-            guard let oldValue = change.oldValue, let newValue = change.newValue else {
-                return
-            }
-            
-            guard let currentSpacing = self.pageTabBarTopConstraint?.constant else {
-                return
-            }
-            
-            // diff < 0 => scroll up, diff > 0 => scroll down
-            let diff = oldValue.y - newValue.y
-            
-            guard diff != 0 else { return }
-            
-            if newValue.y < -observed.contentInset.top {
-                
-                if currentSpacing < self.view.frame.width {
-                    self.setContentOffset(oldValue, forScrollView: observed)
-                    self.pageTabBarTopConstraint?.constant = min(self.view.frame.width, max(150, currentSpacing + diff))
-                    self.view.layoutIfNeeded()
-                }
-                
-            } else if newValue.y > -observed.contentInset.top {
-                
-                if currentSpacing > 150 {
-                    self.setContentOffset(oldValue, forScrollView: observed)
-                    
-                    self.pageTabBarTopConstraint?.constant = min(self.view.frame.width, max(150, currentSpacing + diff))
-                    self.view.layoutIfNeeded()
-                }
-            }
-        }
-    }
-    
-    private func removeContentOffsetObserver() {
-        contentOffsetObservation?.invalidate()
-        contentOffsetObservation = nil
-    }
-    
-    private func setContentOffset(_ offset: CGPoint, forScrollView scrollView: UIScrollView) {
-        isObservingContentOffset = false
-        scrollView.contentOffset = offset
-        isObservingContentOffset = true
-    }
     
 }
 
 extension ScrollTabBarViewController: PageTabBarControllerDelegate {
     func pageTabBarController(_ controller: PageTabBarController, didSelectItem item: PageTabBarItem, atIndex index: Int, previousIndex: Int) {
-        
-        //        if index == 0 {
-        //            let banner = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 100))
-        //            banner.backgroundColor = UIColor.yellow.withAlphaComponent(0.5)
-        //            collapseTabBarViewController.pageTabBarController.setBannerViewWithCustomView(banner, animated: true)
-        //        } else {
-        //            let banner = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 100))
-        //            banner.backgroundColor = UIColor.gray.withAlphaComponent(0.5)
-        //            collapseTabBarViewController.pageTabBarController.setBannerViewWithCustomView(banner, animated: true)
-        //        }
-        // print("previousIndex: \(previousIndex)")
-        // print("currentIndex: \(index)")
-        
-        if index == 0 {
-            //collapseTabBarViewController.scrollTabBar(to: .top, animated: true)
-        }
-        
-        if index == 1 {
-            //collapseTabBarViewController.scrollTabBar(to: .bottom, animated: true)
-        }
-        
-        if index == 2 {
-            controller.setBadge(200, forItemAt: index)
-        }
-        
-        if index == 1 {
-            controller.clearAllBadges()
-        }
+       
     }
     
     func pageTabBarController(_ controller: PageTabBarController, didChangeContentViewController vc: UIViewController, atIndex index: Int) {
 
-        //print("didChangeContentViewController: \(vc)")
-        //print("index: \(index)")
-        
-        for view in vc.view.subviews {
-            if view.isKind(of: UIScrollView.self) {
-                currentScrollView = view as? UIScrollView
-                addContentOffsetObserve()
-                //print("currentScrollView: \(view)")
-                break
-            }
-        }
-        
     }
     
     func pageTabBarController(_ controller: PageTabBarController, transit fromIndex: Int, to toIndex: Int, progress: CGFloat) {
         // print("from index: \(fromIndex), to index: \(toIndex), progress: \(progress)")
-    }
-    
-    func pageTabBarCollectionView(_ collectionView: PageTabBarCollectionView, gestureRecognizerShouldBegin gestureRecognizer: UIGestureRecognizer) -> Bool {
-        if collectionView.bounces == false && collectionView.contentOffset.x == 0 {
-            
-            if let panGesture = gestureRecognizer as? UIPanGestureRecognizer,
-                abs(panGesture.velocity(in: panGesture.view).x) > abs(panGesture.velocity(in: panGesture.view).y),
-                panGesture.velocity(in: panGesture.view).x > 0 {
-                return false
-            }
-            
-        }
-        return true
     }
 }
 

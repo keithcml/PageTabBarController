@@ -174,6 +174,8 @@ open class PageTabBar: UIView {
     
     fileprivate func commonInit() {
         
+        backgroundColor = barTintColor
+        
         items.forEach {
             itemStackView.addArrangedSubview($0)
             $0.delegate = self

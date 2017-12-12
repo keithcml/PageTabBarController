@@ -33,7 +33,7 @@ extension MainViewController: UITableViewDelegate, UITableViewDataSource {
         if indexPath.row == 0 {
             cell.textLabel?.text = "Top Tab Bar"
         } else if indexPath.row == 1 {
-            cell.textLabel?.text = "Bottom Tab Bar"
+            cell.textLabel?.text = "Embeded Parallax Page Tab Bar"
         } else {
             cell.textLabel?.text = "Parallax Page Tab Bar"
         }
@@ -90,8 +90,9 @@ extension MainViewController: UITableViewDelegate, UITableViewDataSource {
             navigationController?.pushViewController(vc, animated: true)
             
         } else if indexPath.row == 1 {
-            let vc = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "ScrollTabBarViewController")
-            navigationController?.pushViewController(vc, animated: true)
+            let vc = ScrollTabBarViewController(nibName: nil, bundle: nil)
+            present(vc, animated: true, completion: nil)
+            //navigationController?.pushViewController(vc, animated: true)
         } else {
             
             let tabColor = UIColor(red: 215/255.0, green: 215/255.0, blue: 215/255.0, alpha: 1)
@@ -127,7 +128,7 @@ extension MainViewController: UITableViewDelegate, UITableViewDataSource {
             parallaxVC.pageTabBarController.pageTabBar.indicatorLineHeight = 2
             parallaxVC.pageTabBarController.pageTabBar.bottomLineHidden = true
             parallaxVC.pageTabBarController.pageTabBar.topLineColor = tabSelectedColor
-            parallaxVC.pageTabBarController.pageTabBar.barTintColor = UIColor(white: 0.95, alpha: 1)
+            //parallaxVC.pageTabBarController.pageTabBar.barTintColor = UIColor(white: 0.95, alpha: 1)
             parallaxVC.pageTabBarController.delegate = self
             parallaxVC.minimumRevealHeight = 200
             parallaxVC.setSelfSizingParallexHeaderView(galleryView)
@@ -193,6 +194,10 @@ extension MainViewController: PageTabBarControllerDelegate {
         if index == 2 {
             //parallaxVC.setParallexHeaderHeight(view.frame.width, animated: true)
             controller.setBadge(200, forItemAt: index)
+            
+            if let _ = parallaxVC {
+                parallaxVC.scrollTabBar(to: true, animated: true)
+            }
         }
     }
 }

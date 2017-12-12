@@ -9,8 +9,15 @@
 import Foundation
 import UIKit
 
+@objc
+public protocol ParallaxHeaderPageTabBarControllerDelegate: NSObjectProtocol {
+    @objc optional func parallaxHeaderPageTabBarController(_ controller: ParallaxHeaderPageTabBarController, revealPercentage: CGFloat)
+}
+
 @objcMembers
 open class ParallaxHeaderPageTabBarController: UIViewController {
+    
+    open weak var delegate: ParallaxHeaderPageTabBarControllerDelegate?
     
     open let pageTabBarController: PageTabBarController
     open let parallaxHeaderContainerView: UIView = {
@@ -26,7 +33,7 @@ open class ParallaxHeaderPageTabBarController: UIViewController {
         return view
     }()
     
-    open var isStretchy = true{
+    open var isStretchy = true {
         didSet {
             if isStretchy {
                 pageTabBarController.setTabBarTopPosition(.topInsetAttached)
@@ -118,7 +125,10 @@ open class ParallaxHeaderPageTabBarController: UIViewController {
         pageTabBarTopConstraint = pageTabBarController.view.topAnchor.constraint(equalTo: view.topAnchor, constant: parallaxHeaderHeight)
         pageTabBarTopConstraint?.isActive = true
         
-        view.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(pan(_:))))
+        let panGesture = UIPanGestureRecognizer(target: self, action: #selector(pan(_:)))
+        panGesture.delegate = self
+        view.addGestureRecognizer(panGesture)
+        
     }
     
     @objc private func pan(_ gesture: UIPanGestureRecognizer) {
@@ -162,6 +172,36 @@ open class ParallaxHeaderPageTabBarController: UIViewController {
 // MARK: - Public Methods
 
 extension ParallaxHeaderPageTabBarController {
+    
+    open func scrollTabBar(to top: Bool, animated: Bool = false) {
+        
+        if top {
+            if animated {
+                UIView.animate(withDuration: 0.3, animations: {
+                    self.parallaxHeaderViewTopConstraint?.constant = 0
+                    self.pageTabBarTopConstraint?.constant = self.parallaxHeaderHeight
+                    self.view.layoutIfNeeded()
+                }, completion: nil)
+            } else {
+                parallaxHeaderViewTopConstraint?.constant = 0
+                pageTabBarTopConstraint?.constant = self.parallaxHeaderHeight
+                view.layoutIfNeeded()
+            }
+        }
+        else {
+            if animated {
+                UIView.animate(withDuration: 0.3, animations: {
+                    self.parallaxHeaderViewTopConstraint?.constant = self.minimumRevealHeight - self.parallaxHeaderHeight
+                    self.pageTabBarTopConstraint?.constant = self.minimumRevealHeight
+                    self.view.layoutIfNeeded()
+                }, completion: nil)
+            } else {
+                parallaxHeaderViewTopConstraint?.constant = self.minimumRevealHeight - self.parallaxHeaderHeight
+                pageTabBarTopConstraint?.constant = self.minimumRevealHeight
+                view.layoutIfNeeded()
+            }
+        }
+    }
     
     open func setSelfSizingParallexHeaderView(_ view: UIView?) {
         
@@ -267,33 +307,49 @@ extension ParallaxHeaderPageTabBarController: PageTabBarControllerParallaxDelega
             }
         }
         
-        if newValue.y < -contentInset.top {
-            
-            // finger moving down
-            if currentSpacing < parallaxHeaderHeight && diff > 0 {
-                
+        print("contentInset \(contentInset.top)")
+        print("newValue.y \(newValue.y)")
+        print("diff \(diff)")
+        if diff < 0 {
+            // collpasing
+            let shouldCollapse = pageTabBarController.view.frame.minY > minimumRevealHeight && newValue.y > -contentInset.top
+
+            if shouldCollapse {
                 let newConstant = min(parallaxHeaderHeight, max(minimumRevealHeight, currentSpacing + diff))
                 pageTabBarTopConstraint?.constant = newConstant
                 parallaxHeaderViewTopConstraint?.constant = newConstant - parallaxHeaderHeight
                 view.layoutIfNeeded()
-                
-                return false
             }
             
-        } else if newValue.y > -contentInset.top {
+            return !shouldCollapse
             
-            // finger moving up
-            if currentSpacing > minimumRevealHeight && diff < 0 {
-                
+        } else {
+            // expanding
+            let shouldExpand = pageTabBarController.view.frame.minY < parallaxHeaderHeight && newValue.y < -contentInset.top
+            
+            if shouldExpand {
                 let newConstant = min(parallaxHeaderHeight, max(minimumRevealHeight, currentSpacing + diff))
                 pageTabBarTopConstraint?.constant = newConstant
                 parallaxHeaderViewTopConstraint?.constant = newConstant - parallaxHeaderHeight
                 view.layoutIfNeeded()
-                
-                return false
             }
+            
+            return !shouldExpand
         }
         
+        //return true
+    }
+}
+
+extension ParallaxHeaderPageTabBarController: UIGestureRecognizerDelegate {
+    
+    open func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        if let panGestureRecognizer = gestureRecognizer as? UIPanGestureRecognizer {
+            let velocity = panGestureRecognizer.velocity(in: gestureRecognizer.view)
+            let translation = panGestureRecognizer.translation(in: gestureRecognizer.view)
+            return abs(velocity.y) > abs(velocity.x) && abs(translation.y) > abs(translation.x)
+        }
         return true
     }
+    
 }
