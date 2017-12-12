@@ -329,7 +329,7 @@ extension ParallaxHeaderPageTabBarController: PageTabBarControllerParallaxDelega
             if shouldCollapse {
                 print("Collapsing... \(newConstant)")
             }
-            
+
             if shouldExpand {
                 print("Expanding... \(newConstant)")
             }

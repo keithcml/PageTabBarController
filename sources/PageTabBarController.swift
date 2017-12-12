@@ -697,11 +697,12 @@ extension PageTabBarController {
                 return
             }
 
+            
             // diff < 0 => scroll up, diff > 0 => scroll down
             let diff = oldValue.y - newValue.y
             
             guard diff != 0 else { return }
-            
+
             switch self.tabBarPosition {
             case .topInsetAttached:
                 
