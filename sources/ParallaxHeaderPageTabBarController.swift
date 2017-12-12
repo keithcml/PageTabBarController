@@ -52,9 +52,13 @@ open class ParallaxHeaderPageTabBarController: UIViewController {
         }
     }
     
-    private var headerFrameObserver: NSKeyValueObservation?
     private var minimumCollapseOffset: CGFloat {
-        return minimumRevealHeight - parallaxHeaderHeight
+        if #available(iOS 11.0, *) {
+            // print(max(minimumRevealHeight - parallaxHeaderHeight, -view.safeAreaInsets.top))
+            return max(minimumRevealHeight, view.safeAreaInsets.top) - parallaxHeaderHeight
+        } else {
+            return minimumRevealHeight - parallaxHeaderHeight
+        }
     }
     private var parallaxHeaderViewTopConstraint: NSLayoutConstraint?
     private var parallaxHeaderViewHeightConstraint: NSLayoutConstraint?
@@ -136,12 +140,10 @@ open class ParallaxHeaderPageTabBarController: UIViewController {
     
     override open func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        addObserver()
     }
     
     override open func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        removeObserver()
     }
     
     @objc private func pan(_ gesture: UIPanGestureRecognizer) {
@@ -176,28 +178,6 @@ open class ParallaxHeaderPageTabBarController: UIViewController {
             isPanning = false
             break
         }
-    }
-    
-    // MARK: - KVO
-    // MARK: - Scrolling handler
-    private func addObserver() {
-        
-        guard headerFrameObserver == nil else { return }
-        
-        headerFrameObserver = parallaxHeaderContainerView.observe(\.frame, options: [.new, .old]) { [unowned self] observed, change in
-            
-            guard let _ = change.oldValue, let newValue = change.newValue else {
-                return
-            }
-            
-            let revealPercentage = (abs(self.minimumCollapseOffset) - abs(newValue.minX))/abs(self.minimumCollapseOffset)
-            self.delegate?.parallaxHeaderPageTabBarController?(self, revealPercentage: revealPercentage)
-        }
-    }
-    
-    private func removeObserver() {
-        headerFrameObserver?.invalidate()
-        headerFrameObserver = nil
     }
 }
 
@@ -299,15 +279,20 @@ extension ParallaxHeaderPageTabBarController: PageTabBarControllerParallaxDelega
                               selectedViewController: UIViewController,
                               observedScrollView: UIScrollView,
                               contentOffsetObservingWithOldValue oldValue: CGPoint,
-                              newValue: CGPoint) -> Bool {
+                              newValue: CGPoint,
+                              useOldValue: (Bool) -> ()) {
         
         guard let topConstraint = parallaxHeaderViewTopConstraint else {
-            return true
+            useOldValue(true)
+            return
         }
         // diff < 0 => scroll up, diff > 0 => scroll down
         let diff = oldValue.y - newValue.y
     
-        guard diff != 0 else { return true }
+        guard diff != 0 else {
+            useOldValue(true)
+            return
+        }
         
         var contentInset = observedScrollView.contentInset
         if #available(iOS 11.0, *) {
@@ -336,13 +321,21 @@ extension ParallaxHeaderPageTabBarController: PageTabBarControllerParallaxDelega
         let shouldExpand = topConstraint.constant < 0 && newValue.y < -contentInset.top
 
         if shouldCollapse || shouldExpand {
+            useOldValue(false)
             let newConstant = max(minimumCollapseOffset, min(0, topConstraint.constant + diff))
             parallaxHeaderViewTopConstraint?.constant = newConstant
             view.layoutIfNeeded()
-            return false
+            
+            if shouldCollapse {
+                print("Collapsing... \(newConstant)")
+            }
+            
+            if shouldExpand {
+                print("Expanding... \(newConstant)")
+            }
         }
 
-        return true
+        useOldValue(true)
     }
 }
 

@@ -132,6 +132,7 @@ extension MainViewController: UITableViewDelegate, UITableViewDataSource {
             parallaxVC.pageTabBarController.delegate = self
             parallaxVC.minimumRevealHeight = 200
             parallaxVC.setSelfSizingParallexHeaderView(galleryView)
+            parallaxVC.delegate = self
             
             let button = UIButton(type: .custom)
             button.setTitle("A Button", for: .normal)
@@ -164,7 +165,14 @@ extension MainViewController: UITableViewDelegate, UITableViewDataSource {
     }
 }
 
-extension MainViewController: PageTabBarControllerDelegate {
+extension MainViewController: PageTabBarControllerDelegate, ParallaxHeaderPageTabBarControllerDelegate {
+    
+    func parallaxHeaderPageTabBarController(_ controller: ParallaxHeaderPageTabBarController, revealPercentage: CGFloat) {
+        //currentRevealPercentage = revealPercentage
+        //blurAnimator?.fractionComplete = revealPercentage
+        print("revealPercentage \(revealPercentage)")
+    }
+    
     func pageTabBarController(_ controller: PageTabBarController, didSelectItem item: PageTabBarItem, atIndex index: Int, previousIndex: Int) {
 
         if index == 0 {

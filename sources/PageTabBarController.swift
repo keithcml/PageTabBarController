@@ -49,7 +49,8 @@ protocol PageTabBarControllerParallaxDelegate: NSObjectProtocol {
                                              selectedViewController: UIViewController,
                                              observedScrollView: UIScrollView,
                                              contentOffsetObservingWithOldValue oldValue: CGPoint,
-                                             newValue: CGPoint) -> Bool
+                                             newValue: CGPoint,
+                                             useOldValue: (Bool) -> ())
 }
 
 @objcMembers
@@ -720,16 +721,16 @@ extension PageTabBarController {
                 break
             }
 
-            if let selectedVC = self.selectedViewController,
-                let acceptNewValue = self.parallaxDelegate?.pageTabBarController?(self,
-                                                                                  selectedViewController: selectedVC,
-                                                                                  observedScrollView: observed,
-                                                                                  contentOffsetObservingWithOldValue: oldValue,
-                                                                                  newValue: newValue) {
-                
-                if !acceptNewValue {
-                    self.setContentOffset(oldValue, forScrollView: observed)
-                }
+            if let selectedVC = self.selectedViewController {
+                self.parallaxDelegate?.pageTabBarController?(self,
+                                                             selectedViewController: selectedVC,
+                                                             observedScrollView: observed,
+                                                             contentOffsetObservingWithOldValue: oldValue,
+                                                             newValue: newValue) { accepted in
+                                                                if !accepted {
+                                                                    self.setContentOffset(oldValue, forScrollView: observed)
+                                                                }
+                                                             }
             }
         }
     }
