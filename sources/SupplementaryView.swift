@@ -24,7 +24,11 @@ class SupplementaryView: UICollectionReusableView {
     override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
         if let view = super.hitTest(point, with: event) {
             
-            if view == contentView {
+            if contentView == nil {
+                return nil
+            }
+            
+            if view == self {
                 return nil
             }
             

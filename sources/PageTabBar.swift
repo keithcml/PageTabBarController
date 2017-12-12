@@ -33,7 +33,7 @@ internal protocol PageTabBarDelegate: class {
 @objc
 public enum PageTabBarPosition: Int {
     case topAttached = 0
-    case top
+    case topInsetAttached
     case bottom
 }
 
@@ -219,8 +219,8 @@ open class PageTabBar: UIView {
     }
     
     internal func updateCurrentIndex() {
-        let index = ceil(indicatorLine.frame.minX/itemWidth)
-        currentIndex = Int(index)
+        let index = Int(indicatorLine.frame.midX/itemWidth)
+        currentIndex = index
     }
     
     internal func scrollToItem(at index: Int, animated: Bool) {

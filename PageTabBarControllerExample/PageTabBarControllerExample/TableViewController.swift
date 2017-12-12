@@ -50,7 +50,7 @@ final class TableViewController: UIViewController, UITableViewDelegate, UITableV
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        automaticallyAdjustsScrollViewInsets = false
         tableView = UITableView(frame: view.frame, style: .plain)
         tableView.autoresizingMask = [.flexibleHeight, .flexibleWidth]
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "Cell")

@@ -25,13 +25,13 @@
 		9B6D04301F5D69C300B018E9 /* PageTabBarController.h in Headers */ = {isa = PBXBuildFile; fileRef = 9B6D042E1F5D69C300B018E9 /* PageTabBarController.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		9B6D04331F5D69C300B018E9 /* PageTabBarController.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B6D042C1F5D69C300B018E9 /* PageTabBarController.framework */; };
 		9B6D04341F5D69C300B018E9 /* PageTabBarController.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 9B6D042C1F5D69C300B018E9 /* PageTabBarController.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		9B6D04391F5D69DB00B018E9 /* KeyValueObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B6D041F1F5D69A900B018E9 /* KeyValueObserver.swift */; };
 		9B6D043A1F5D69DB00B018E9 /* PageTabBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B6D04201F5D69A900B018E9 /* PageTabBar.swift */; };
 		9B6D043B1F5D69DB00B018E9 /* PageTabBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B6D04211F5D69A900B018E9 /* PageTabBarController.swift */; };
 		9B6D043C1F5D69DB00B018E9 /* PageTabBarItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B6D04221F5D69A900B018E9 /* PageTabBarItem.swift */; };
 		9B6D043E1F5E4ED100B018E9 /* TableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B6D043D1F5E4ED100B018E9 /* TableViewController.swift */; };
 		9BAB9A861FDE2A2F00F5DD89 /* ScrollTabBarViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BAB9A851FDE2A2F00F5DD89 /* ScrollTabBarViewController.swift */; };
 		9BAB9A881FDE766C00F5DD89 /* PlainPageTabBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BAB9A871FDE766C00F5DD89 /* PlainPageTabBarController.swift */; };
+		9BAB9A8A1FDF80E600F5DD89 /* PageTabBarCollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BAB9A891FDF80E600F5DD89 /* PageTabBarCollectionView.swift */; };
 		9BE2D5621F99A1B700AB0F35 /* CollapseStaticHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BE2D5611F99A1B700AB0F35 /* CollapseStaticHeaderView.swift */; };
 		9BE2D5661F9A005300AB0F35 /* GalleryCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BE2D5641F9A005300AB0F35 /* GalleryCell.swift */; };
 		9BE2D5671F9A005300AB0F35 /* GalleryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BE2D5651F9A005300AB0F35 /* GalleryView.swift */; };
@@ -79,7 +79,6 @@
 		9B6D04131F5D696D00B018E9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		9B6D04161F5D696D00B018E9 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		9B6D04181F5D696D00B018E9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		9B6D041F1F5D69A900B018E9 /* KeyValueObserver.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = KeyValueObserver.swift; sourceTree = "<group>"; };
 		9B6D04201F5D69A900B018E9 /* PageTabBar.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PageTabBar.swift; sourceTree = "<group>"; };
 		9B6D04211F5D69A900B018E9 /* PageTabBarController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PageTabBarController.swift; sourceTree = "<group>"; };
 		9B6D04221F5D69A900B018E9 /* PageTabBarItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PageTabBarItem.swift; sourceTree = "<group>"; };
@@ -90,6 +89,7 @@
 		9B6D043F1F5FB7BB00B018E9 /* PageTabBarController.podspec */ = {isa = PBXFileReference; lastKnownFileType = text; name = PageTabBarController.podspec; path = ../PageTabBarController.podspec; sourceTree = "<group>"; };
 		9BAB9A851FDE2A2F00F5DD89 /* ScrollTabBarViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollTabBarViewController.swift; sourceTree = "<group>"; };
 		9BAB9A871FDE766C00F5DD89 /* PlainPageTabBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlainPageTabBarController.swift; sourceTree = "<group>"; };
+		9BAB9A891FDF80E600F5DD89 /* PageTabBarCollectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PageTabBarCollectionView.swift; sourceTree = "<group>"; };
 		9BE2D5611F99A1B700AB0F35 /* CollapseStaticHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollapseStaticHeaderView.swift; sourceTree = "<group>"; };
 		9BE2D5641F9A005300AB0F35 /* GalleryCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GalleryCell.swift; sourceTree = "<group>"; };
 		9BE2D5651F9A005300AB0F35 /* GalleryView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GalleryView.swift; sourceTree = "<group>"; };
@@ -169,11 +169,11 @@
 			isa = PBXGroup;
 			children = (
 				9B168F671F97625A009281A9 /* CollapseTabBarViewController */,
-				9B6D041F1F5D69A900B018E9 /* KeyValueObserver.swift */,
 				9A3FD9271F5DBD6300C24A1B /* Badge.swift */,
 				9B168F641F97525F009281A9 /* PageTabBarSupplementaryView.swift */,
 				9B6D04201F5D69A900B018E9 /* PageTabBar.swift */,
 				9B6D04221F5D69A900B018E9 /* PageTabBarItem.swift */,
+				9BAB9A891FDF80E600F5DD89 /* PageTabBarCollectionView.swift */,
 				9B6D04211F5D69A900B018E9 /* PageTabBarController.swift */,
 				9A0B69871FDED89300FD29EC /* ParallaxHeaderPageTabBarController.swift */,
 				9A0B69891FDEF64400FD29EC /* SupplementaryView.swift */,
@@ -334,6 +334,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9BAB9A8A1FDF80E600F5DD89 /* PageTabBarCollectionView.swift in Sources */,
 				9B6D043A1F5D69DB00B018E9 /* PageTabBar.swift in Sources */,
 				9B168F6A1F976287009281A9 /* CollapseCollectionView.swift in Sources */,
 				9A0B69881FDED89300FD29EC /* ParallaxHeaderPageTabBarController.swift in Sources */,
@@ -343,7 +344,6 @@
 				9A3FD92A1F5E319B00C24A1B /* CollapseTabBarViewController.swift in Sources */,
 				9A0B698A1FDEF64400FD29EC /* SupplementaryView.swift in Sources */,
 				9B168F6B1F976287009281A9 /* CollapseCollectionViewLayout.swift in Sources */,
-				9B6D04391F5D69DB00B018E9 /* KeyValueObserver.swift in Sources */,
 				9B168F661F975390009281A9 /* PageTabBarSupplementaryView.swift in Sources */,
 				9B6D043B1F5D69DB00B018E9 /* PageTabBarController.swift in Sources */,
 				9B6D043C1F5D69DB00B018E9 /* PageTabBarItem.swift in Sources */,

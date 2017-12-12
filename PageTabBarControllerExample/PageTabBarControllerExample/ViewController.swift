@@ -114,6 +114,7 @@ class ViewController: UIViewController, CollapseTabBarViewControllerDelegate, Pa
         let button = UIButton(type: .custom)
         button.setTitle("A Button", for: .normal)
         button.backgroundColor = .red
+        
         tempView.addSubview(button)
         button.translatesAutoresizingMaskIntoConstraints = false
         button.topAnchor.constraint(equalTo: tempView.topAnchor).isActive = true

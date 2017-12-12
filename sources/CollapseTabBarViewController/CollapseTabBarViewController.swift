@@ -170,11 +170,6 @@ open class CollapseTabBarViewController: UIViewController {
         
         view.addSubview(collpaseCollectionView)
         
-        pageTabBarController.updateIndex = { _, index in
-            if index == 0 {
-            }
-        }
-        
         pageTabBarController.setPageIndex(pageIndex, animated: false)
         
         // add child view controller

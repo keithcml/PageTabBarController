@@ -42,10 +42,10 @@
             </objects>
             <point key="canvasLocation" x="105" y="439"/>
         </scene>
-        <!--Plain Page Tab Bar Controller-->
+        <!--Top Attached-->
         <scene sceneID="kzM-Wu-eUj">
             <objects>
-                <viewController storyboardIdentifier="PlainPageTabBarController" id="vYq-WZ-tA1" customClass="PlainPageTabBarController" customModule="PageTabBarControllerExample" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="PlainPageTabBarController" title="Top Attached" id="vYq-WZ-tA1" customClass="PlainPageTabBarController" customModule="PageTabBarControllerExample" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="Nw1-wh-jqS">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -72,10 +72,10 @@
             </objects>
             <point key="canvasLocation" x="607" y="-348"/>
         </scene>
-        <!--Main View Controller-->
+        <!--Main-->
         <scene sceneID="BnI-tc-SEw">
             <objects>
-                <viewController id="5ht-mt-4HV" customClass="MainViewController" customModule="PageTabBarControllerExample" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController title="Main" id="5ht-mt-4HV" customClass="MainViewController" customModule="PageTabBarControllerExample" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="9B4-k1-Qk2">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>

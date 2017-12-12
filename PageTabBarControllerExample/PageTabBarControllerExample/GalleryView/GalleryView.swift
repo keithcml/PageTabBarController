@@ -17,6 +17,10 @@ enum GalleryImage {
 
 final class GalleryView: UIView {
     
+    override var intrinsicContentSize: CGSize {
+        return CGSize(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.width)
+    }
+    
     var images = [GalleryImage]() {
         didSet {
             pageNumberView.totalNumberOfPage = images.count

@@ -15,18 +15,35 @@ open class ParallaxHeaderPageTabBarController: UIViewController {
     open let pageTabBarController: PageTabBarController
     open let parallaxHeaderContainerView: UIView = {
         let view = UIView()
-        view.backgroundColor = .lightGray
+        view.backgroundColor = .clear
+        view.clipsToBounds = true
         return view
     }()
     let supplementaryContainerView: SupplementaryView = {
         let view = SupplementaryView()
-        view.backgroundColor = UIColor.white.withAlphaComponent(0.5)
+        view.backgroundColor = .clear
+        view.clipsToBounds = true
         return view
     }()
     
+    open var isStretchy = true{
+        didSet {
+            if isStretchy {
+                pageTabBarController.setTabBarTopPosition(.topInsetAttached)
+            } else {
+                pageTabBarController.setTabBarTopPosition(.topAttached)
+            }
+        }
+    }
     open var parallaxOffset = CGFloat(1)
     open var minimumRevealHeight = CGFloat(0)
     open var parallaxHeaderHeight = CGFloat(200)
+    open var supplementaryViewHeight = CGFloat(60) {
+        didSet {
+            supplementaryViewHeightConstraint?.constant = supplementaryViewHeight
+            view.setNeedsLayout()
+        }
+    }
     
     private var parallaxHeaderViewTopConstraint: NSLayoutConstraint?
     private var parallaxHeaderViewHeightConstraint: NSLayoutConstraint?
@@ -34,16 +51,18 @@ open class ParallaxHeaderPageTabBarController: UIViewController {
     private var supplementaryViewHeightConstraint: NSLayoutConstraint?
     private var pageTabBarTopConstraint: NSLayoutConstraint?
     
+    private var isPanning = false
+    private var initialSpacing = CGFloat(0)
+    
     public required init(viewControllers: [UIViewController],
                          items: [PageTabBarItem],
                          parallaxHeaderHeight: CGFloat) {
         
-        pageTabBarController = PageTabBarController(viewControllers: viewControllers, items: items, tabBarPosition: .top)
+        pageTabBarController = PageTabBarController(viewControllers: viewControllers, items: items, tabBarPosition: .topInsetAttached)
         super.init(nibName: nil, bundle: nil)
         
         self.parallaxHeaderHeight = parallaxHeaderHeight
-        pageTabBarController.delegate = self
-        
+        pageTabBarController.parallaxDelegate = self
         addChildViewController(pageTabBarController)
         pageTabBarController.didMove(toParentViewController: self)
     }
@@ -60,7 +79,7 @@ open class ParallaxHeaderPageTabBarController: UIViewController {
         view.addSubview(pageTabBarController.view)
         view.addSubview(parallaxHeaderContainerView)
         view.addSubview(supplementaryContainerView)
-        
+
         parallaxHeaderContainerView.translatesAutoresizingMaskIntoConstraints = false
         pageTabBarController.view.translatesAutoresizingMaskIntoConstraints = false
         supplementaryContainerView.translatesAutoresizingMaskIntoConstraints = false
@@ -89,7 +108,7 @@ open class ParallaxHeaderPageTabBarController: UIViewController {
         
         supplementaryViewBottomConstraint = supplementaryContainerView.bottomAnchor.constraint(equalTo: parallaxHeaderContainerView.bottomAnchor)
         supplementaryViewBottomConstraint?.isActive = true
-        supplementaryViewHeightConstraint = supplementaryContainerView.heightAnchor.constraint(equalToConstant: 60)
+        supplementaryViewHeightConstraint = supplementaryContainerView.heightAnchor.constraint(equalToConstant: supplementaryViewHeight)
         supplementaryViewHeightConstraint?.isActive = true
         
         NSLayoutConstraint.activate([pageTabBarController.view.leadingAnchor.constraint(equalTo: leadingAnchor),
@@ -98,22 +117,125 @@ open class ParallaxHeaderPageTabBarController: UIViewController {
         
         pageTabBarTopConstraint = pageTabBarController.view.topAnchor.constraint(equalTo: view.topAnchor, constant: parallaxHeaderHeight)
         pageTabBarTopConstraint?.isActive = true
-    }
-    
-    open func addViewOnHeaderView(_ view: UIView?) {
         
+        view.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(pan(_:))))
     }
     
+    @objc private func pan(_ gesture: UIPanGestureRecognizer) {
+        
+        switch gesture.state{
+        case .began:
+            let velocity = gesture.velocity(in: gesture.view)
+            guard abs(velocity.y) > abs(velocity.x) else { return }
+            guard let spacing = pageTabBarTopConstraint?.constant else { return }
+            isPanning = true
+            initialSpacing = spacing
+            break
+        case .changed:
+            guard isPanning else { return }
+            let translate = gesture.translation(in: gesture.view)
+            let newConstant = min(parallaxHeaderHeight, max(minimumRevealHeight, initialSpacing + translate.y))
+//            let newConstant = max(minimumRevealHeight, initialSpacing + translate.y)
+//            if newConstant > parallaxHeaderHeight {
+//                let gap = newConstant - parallaxHeaderHeight
+//                let scale = 1 + (gap * 2)/parallaxHeaderHeight
+//                parallaxHeaderContainerView.transform = CGAffineTransform(scaleX: scale, y: scale)
+//                supplementaryViewBottomConstraint?.constant = gap
+//            } else {
+                parallaxHeaderContainerView.transform = .identity
+                pageTabBarTopConstraint?.constant = newConstant
+                parallaxHeaderViewTopConstraint?.constant = newConstant - parallaxHeaderHeight
+            //}
+            view.layoutIfNeeded()
+            break
+        case .ended, .cancelled:
+            guard isPanning else { return }
+            isPanning = false
+            break
+        default:
+            isPanning = false
+            break
+        }
+    }
 }
 
-extension ParallaxHeaderPageTabBarController: PageTabBarControllerDelegate {
-    public func pageTabBarController(_ controller: PageTabBarController,
-                                     selectedViewController: UIViewController,
-                                     observedScrollView: UIScrollView,
-                                     contentOffsetObservingWithOldValue oldValue: CGPoint,
-                                     newValue: CGPoint) -> Bool {
+// MARK: - Public Methods
+
+extension ParallaxHeaderPageTabBarController {
+    
+    open func setSelfSizingParallexHeaderView(_ view: UIView?) {
         
-        guard let currentSpacing = self.pageTabBarTopConstraint?.constant else {
+        parallaxHeaderContainerView.subviews.forEach { $0.removeFromSuperview() }
+        
+        guard let customView = view else {
+            // setParallexHeaderHeight(height, animated: false)
+            return
+        }
+        
+        parallaxHeaderContainerView.addSubview(customView)
+        customView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([customView.leadingAnchor.constraint(equalTo: parallaxHeaderContainerView.leadingAnchor),
+                                     customView.trailingAnchor.constraint(equalTo: parallaxHeaderContainerView.trailingAnchor),
+                                     customView.topAnchor.constraint(equalTo: parallaxHeaderContainerView.topAnchor),
+                                     customView.bottomAnchor.constraint(equalTo: parallaxHeaderContainerView.bottomAnchor)])
+        let size = parallaxHeaderContainerView.systemLayoutSizeFitting(UILayoutFittingCompressedSize)
+        setParallexHeaderHeight(size.height, animated: false)
+    }
+    
+    open func setParallexHeaderView(_ view: UIView?, height: CGFloat) {
+        
+        parallaxHeaderContainerView.subviews.forEach { $0.removeFromSuperview() }
+        
+        guard let customView = view else {
+            setParallexHeaderHeight(height, animated: false)
+            return
+        }
+        
+        parallaxHeaderContainerView.addSubview(customView)
+        customView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([customView.leadingAnchor.constraint(equalTo: parallaxHeaderContainerView.leadingAnchor),
+                                     customView.trailingAnchor.constraint(equalTo: parallaxHeaderContainerView.trailingAnchor),
+                                     customView.topAnchor.constraint(equalTo: parallaxHeaderContainerView.topAnchor)])
+        
+        setParallexHeaderHeight(height, animated: false)
+    }
+    
+    open func setSupplementaryView(_ view: UIView?) {
+        supplementaryContainerView.configureWithContentView(view)
+    }
+    
+    /* @param height - new height
+     * @param animated - run default animation
+     */
+    open func setParallexHeaderHeight(_ newHeight: CGFloat, animated: Bool) {
+        
+        guard parallaxHeaderHeight != newHeight else { return }
+        parallaxHeaderHeight = newHeight
+        
+        if animated {
+            UIView.animate(withDuration: 0.3, animations: {
+                self.parallaxHeaderViewTopConstraint?.constant = 0
+                self.pageTabBarTopConstraint?.constant = newHeight
+                self.parallaxHeaderViewHeightConstraint?.constant = newHeight
+                self.view.layoutIfNeeded()
+            }, completion: nil)
+        } else {
+            parallaxHeaderViewTopConstraint?.constant = 0
+            pageTabBarTopConstraint?.constant = newHeight
+            parallaxHeaderViewHeightConstraint?.constant = newHeight
+            view.layoutIfNeeded()
+        }
+    }
+}
+
+extension ParallaxHeaderPageTabBarController: PageTabBarControllerParallaxDelegate {
+    func pageTabBarController(_ controller: PageTabBarController,
+                              selectedViewController: UIViewController,
+                              observedScrollView: UIScrollView,
+                              contentOffsetObservingWithOldValue oldValue: CGPoint,
+                              newValue: CGPoint) -> Bool {
+        
+        guard let currentSpacing = pageTabBarTopConstraint?.constant else {
             return true
         }
         
@@ -127,20 +249,28 @@ extension ParallaxHeaderPageTabBarController: PageTabBarControllerDelegate {
             contentInset = observedScrollView.adjustedContentInset
         }
         
-        if observedScrollView.contentOffset.y < -contentInset.top {
-            let gap = -(contentInset.top + newValue.y)
-            let scale = (parallaxHeaderContainerView.frame.height + gap * 2)/parallaxHeaderContainerView.frame.height
-            parallaxHeaderContainerView.transform = CGAffineTransform(scaleX: scale, y: scale)
-            
-            supplementaryViewBottomConstraint?.constant = gap
-        } else {
+        if case .topAttached = controller.tabBarPosition {
             parallaxHeaderContainerView.transform = .identity
+            supplementaryViewBottomConstraint?.constant = 0
+            view.setNeedsLayout()
+        } else {
+            if observedScrollView.contentOffset.y < -contentInset.top {
+                let gap = -contentInset.top - observedScrollView.contentOffset.y
+                let scale = 1 + (gap * 2)/parallaxHeaderHeight
+                parallaxHeaderContainerView.transform = CGAffineTransform(scaleX: scale, y: scale)
+                
+                supplementaryViewBottomConstraint?.constant = gap
+            } else {
+                parallaxHeaderContainerView.transform = .identity
+                supplementaryViewBottomConstraint?.constant = 0
+                view.setNeedsLayout()
+            }
         }
         
         if newValue.y < -contentInset.top {
             
             // finger moving down
-            if currentSpacing < parallaxHeaderHeight {
+            if currentSpacing < parallaxHeaderHeight && diff > 0 {
                 
                 let newConstant = min(parallaxHeaderHeight, max(minimumRevealHeight, currentSpacing + diff))
                 pageTabBarTopConstraint?.constant = newConstant
@@ -153,7 +283,7 @@ extension ParallaxHeaderPageTabBarController: PageTabBarControllerDelegate {
         } else if newValue.y > -contentInset.top {
             
             // finger moving up
-            if currentSpacing > minimumRevealHeight {
+            if currentSpacing > minimumRevealHeight && diff < 0 {
                 
                 let newConstant = min(parallaxHeaderHeight, max(minimumRevealHeight, currentSpacing + diff))
                 pageTabBarTopConstraint?.constant = newConstant
