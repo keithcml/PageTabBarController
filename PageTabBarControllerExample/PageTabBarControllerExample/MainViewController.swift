@@ -91,8 +91,8 @@ extension MainViewController: UITableViewDelegate, UITableViewDataSource {
             
         } else if indexPath.row == 1 {
             let vc = ScrollTabBarViewController(nibName: nil, bundle: nil)
-            present(vc, animated: true, completion: nil)
-            //navigationController?.pushViewController(vc, animated: true)
+            //present(vc, animated: true, completion: nil)
+            navigationController?.pushViewController(vc, animated: true)
         } else {
             
             let tabColor = UIColor(red: 215/255.0, green: 215/255.0, blue: 215/255.0, alpha: 1)
