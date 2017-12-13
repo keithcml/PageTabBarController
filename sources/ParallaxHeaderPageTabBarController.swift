@@ -11,7 +11,7 @@ import UIKit
 
 @objc
 public protocol ParallaxHeaderPageTabBarControllerDelegate: NSObjectProtocol {
-    @objc optional func parallaxHeaderPageTabBarController(_ controller: ParallaxHeaderPageTabBarController, revealPercentage: CGFloat)
+    @objc optional func parallaxHeaderPageTabBarController(_ controller: ParallaxHeaderPageTabBarController, revealPercentage: CGFloat, revealPercentageIncludingTopSafeAreaInset: CGFloat)
 }
 
 @objcMembers
@@ -67,6 +67,7 @@ open class ParallaxHeaderPageTabBarController: UIViewController {
     
     private weak var currentChildScrollViewWeakReference: UIScrollView?
     private var previousChildScrollViewOffset: CGPoint = .zero
+    private var isLatestScrollingUp = false
         
     private var isPanning = false
     private var initialOffset = CGFloat(0)
@@ -293,27 +294,25 @@ extension ParallaxHeaderPageTabBarController {
             }
         }
 
-        var isScrollingUp = false
         if scrollView.panGestureRecognizer.velocity(in: scrollView.superview).y > 0 {
-            isScrollingUp = true
+            isLatestScrollingUp = true
+        } else if scrollView.panGestureRecognizer.velocity(in: scrollView.superview).y < 0 {
+            isLatestScrollingUp = false
         }
         
         let diff = scrollView.contentOffset.y - previousChildScrollViewOffset.y
-        let shouldCollapse = topConstraint.constant > minimumCollapseOffset && scrollView.contentOffset.y > -contentInset.top && !isScrollingUp
-        let shouldExpand = topConstraint.constant < 0 && scrollView.contentOffset.y < -contentInset.top && isScrollingUp
+        let shouldCollapse = topConstraint.constant > minimumCollapseOffset && scrollView.contentOffset.y > -contentInset.top && !isLatestScrollingUp
+        let shouldExpand = topConstraint.constant < 0 && isLatestScrollingUp && scrollView.contentOffset.y < -contentInset.top
         
         if shouldCollapse || shouldExpand {
-            
             let newConstant = max(minimumCollapseOffset, min(0, topConstraint.constant - diff))
             parallaxHeaderViewTopConstraint?.constant = newConstant
-            
-            if shouldCollapse {
-                print("Collapsing... \(newConstant)")
-            }
-            
-            if shouldExpand {
-                print("Expanding... \(newConstant)")
-            }
+        }
+        
+        if let constant = parallaxHeaderViewTopConstraint?.constant {
+            let revealPercentage = 1 - abs(constant) / (minimumRevealHeight - minimumCollapseOffset)
+            let revealPercentageWithSafeAreaInset = 1 - abs(constant) / (parallaxHeaderHeight - minimumCollapseOffset)
+            delegate?.parallaxHeaderPageTabBarController?(self, revealPercentage: revealPercentage, revealPercentageIncludingTopSafeAreaInset: revealPercentageWithSafeAreaInset)
         }
 
         // transformations
@@ -349,6 +348,7 @@ extension ParallaxHeaderPageTabBarController: PageTabBarControllerParallaxDelega
     func pageTabBarController(_ controller: PageTabBarController, childScrollViewDidChange scrollView: UIScrollView) {
         currentChildScrollViewWeakReference = scrollView
         previousChildScrollViewOffset = scrollView.contentOffset
+        isLatestScrollingUp = false
     }
 }
 

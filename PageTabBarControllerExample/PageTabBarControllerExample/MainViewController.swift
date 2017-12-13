@@ -165,10 +165,9 @@ extension MainViewController: UITableViewDelegate, UITableViewDataSource {
 
 extension MainViewController: PageTabBarControllerDelegate, ParallaxHeaderPageTabBarControllerDelegate {
     
-    func parallaxHeaderPageTabBarController(_ controller: ParallaxHeaderPageTabBarController, revealPercentage: CGFloat) {
-        //currentRevealPercentage = revealPercentage
-        //blurAnimator?.fractionComplete = revealPercentage
+    func parallaxHeaderPageTabBarController(_ controller: ParallaxHeaderPageTabBarController, revealPercentage: CGFloat, revealPercentageIncludingTopSafeAreaInset: CGFloat) {
         print("revealPercentage \(revealPercentage)")
+        print("revealPercentageIncludingTopSafeAreaInset \(revealPercentageIncludingTopSafeAreaInset)")
     }
     
     func pageTabBarController(_ controller: PageTabBarController, didSelectItem item: PageTabBarItem, atIndex index: Int, previousIndex: Int) {
