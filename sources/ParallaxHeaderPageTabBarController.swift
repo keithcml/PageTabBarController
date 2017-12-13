@@ -60,6 +60,7 @@ open class ParallaxHeaderPageTabBarController: UIViewController {
             return minimumRevealHeight - parallaxHeaderHeight
         }
     }
+    
     private var parallaxHeaderViewTopConstraint: NSLayoutConstraint?
     private var parallaxHeaderViewHeightConstraint: NSLayoutConstraint?
     private var supplementaryViewBottomConstraint: NSLayoutConstraint?
@@ -183,6 +184,14 @@ open class ParallaxHeaderPageTabBarController: UIViewController {
             break
         }
     }
+    
+    private func tabBarPositionYDidChange() {
+        if let constant = parallaxHeaderViewTopConstraint?.constant {
+            let revealPercentage = 1 - abs(constant) / (minimumRevealHeight - minimumCollapseOffset)
+            let revealPercentageWithSafeAreaInset = 1 - abs(constant) / (parallaxHeaderHeight - minimumCollapseOffset)
+            delegate?.parallaxHeaderPageTabBarController?(self, revealPercentage: revealPercentage, revealPercentageIncludingTopSafeAreaInset: revealPercentageWithSafeAreaInset)
+        }
+    }
 }
 
 // MARK: - Public Methods
@@ -195,10 +204,12 @@ extension ParallaxHeaderPageTabBarController {
             if animated {
                 UIView.animate(withDuration: 0.3, animations: {
                     self.parallaxHeaderViewTopConstraint?.constant = 0
+                    self.tabBarPositionYDidChange()
                     self.view.layoutIfNeeded()
                 }, completion: nil)
             } else {
                 parallaxHeaderViewTopConstraint?.constant = 0
+                tabBarPositionYDidChange()
                 view.layoutIfNeeded()
             }
         }
@@ -206,10 +217,12 @@ extension ParallaxHeaderPageTabBarController {
             if animated {
                 UIView.animate(withDuration: 0.3, animations: {
                     self.parallaxHeaderViewTopConstraint?.constant = self.minimumRevealHeight - self.parallaxHeaderHeight
+                    self.tabBarPositionYDidChange()
                     self.view.layoutIfNeeded()
                 }, completion: nil)
             } else {
                 parallaxHeaderViewTopConstraint?.constant = self.minimumRevealHeight - self.parallaxHeaderHeight
+                tabBarPositionYDidChange()
                 view.layoutIfNeeded()
             }
         }
@@ -268,11 +281,13 @@ extension ParallaxHeaderPageTabBarController {
             UIView.animate(withDuration: 0.3, animations: {
                 self.parallaxHeaderViewTopConstraint?.constant = 0
                 self.parallaxHeaderViewHeightConstraint?.constant = newHeight
+                self.tabBarPositionYDidChange()
                 self.view.layoutIfNeeded()
             }, completion: nil)
         } else {
             parallaxHeaderViewTopConstraint?.constant = 0
             parallaxHeaderViewHeightConstraint?.constant = newHeight
+            tabBarPositionYDidChange()
             view.layoutIfNeeded()
         }
     }
@@ -309,11 +324,7 @@ extension ParallaxHeaderPageTabBarController {
             parallaxHeaderViewTopConstraint?.constant = newConstant
         }
         
-        if let constant = parallaxHeaderViewTopConstraint?.constant {
-            let revealPercentage = 1 - abs(constant) / (minimumRevealHeight - minimumCollapseOffset)
-            let revealPercentageWithSafeAreaInset = 1 - abs(constant) / (parallaxHeaderHeight - minimumCollapseOffset)
-            delegate?.parallaxHeaderPageTabBarController?(self, revealPercentage: revealPercentage, revealPercentageIncludingTopSafeAreaInset: revealPercentageWithSafeAreaInset)
-        }
+        tabBarPositionYDidChange()
 
         // transformations
         if case .topAttached = pageTabBarController.tabBarPosition {
