@@ -105,6 +105,11 @@ final class TableViewController: UIViewController, UITableViewDelegate, UITableV
     }
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
+//        if #available(iOS 11.0, *) {
+//            print(view.safeAreaInsets)
+//            print(scrollView.safeAreaInsets)
+//            print(scrollView.adjustedContentInset)
+//        }
         parallaxHeaderPageTabBarController?.childScrollViewDidScroll(scrollView)
     }
 }

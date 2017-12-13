@@ -284,7 +284,12 @@ extension ParallaxHeaderPageTabBarController {
         
         var contentInset = scrollView.contentInset
         if #available(iOS 11.0, *) {
+            
             contentInset = scrollView.adjustedContentInset
+            
+            if let superview = scrollView.superview, superview.safeAreaInsets.top > contentInset.top {
+                contentInset = superview.safeAreaInsets
+            }
         }
         
         let diff = scrollView.contentOffset.y - previousChildScrollViewOffset.y
@@ -295,7 +300,6 @@ extension ParallaxHeaderPageTabBarController {
             
             let newConstant = max(minimumCollapseOffset, min(0, topConstraint.constant - diff))
             parallaxHeaderViewTopConstraint?.constant = newConstant
-            //view.layoutIfNeeded()
             
             if shouldCollapse {
                 print("Collapsing... \(newConstant)")
@@ -315,7 +319,6 @@ extension ParallaxHeaderPageTabBarController {
         if case .topAttached = pageTabBarController.tabBarPosition {
             parallaxHeaderContainerView.transform = .identity
             supplementaryViewBottomConstraint?.constant = 0
-            //view.setNeedsLayout()
         } else {
             
             pageTabBarController.transformTabBarWithScrollViewBounces(scrollView)
@@ -329,7 +332,6 @@ extension ParallaxHeaderPageTabBarController {
             } else {
                 parallaxHeaderContainerView.transform = .identity
                 supplementaryViewBottomConstraint?.constant = 0
-                //view.setNeedsLayout()
             }
         }
 
