@@ -43,7 +43,7 @@ class ScrollTabBarViewController: UIViewController {
         vc02.view.tag = 2
         vc03.view.tag = 3
         
-        parallaxController = ParallaxHeaderPageTabBarController(viewControllers: [vc01, vc02, vc03], items: [tab01, tab02, tab03], parallaxHeaderHeight: 500)
+        parallaxController = ParallaxHeaderPageTabBarController(viewControllers: [vc01, vc02, vc03], items: [tab01, tab02, tab03], parallaxHeaderHeight: 300)
         parallaxController.pageTabBarController.pageTabBar.barHeight = 60
         parallaxController.pageTabBarController.pageTabBar.indicatorLineColor = tabSelectedColor
         parallaxController.pageTabBarController.pageTabBar.indicatorLineHeight = 2
@@ -52,6 +52,9 @@ class ScrollTabBarViewController: UIViewController {
         parallaxController.pageTabBarController.pageTabBar.barTintColor = UIColor(white: 0.95, alpha: 1)
         parallaxController.minimumRevealHeight = 0
         super.init(nibName: nil, bundle: nil)
+        
+        
+        parallaxController.pageTabBarController.resetPageTabBarController([vc01, vc02, vc03], items: [tab01, tab02, tab03], newPageIndex: 1, animated: false)
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -88,7 +91,7 @@ class ScrollTabBarViewController: UIViewController {
         super.viewWillAppear(animated)
         
         if #available(iOS 11.0, *) {
-            additionalSafeAreaInsets = UIEdgeInsets(top: 200, left: 0, bottom: 200, right: 0)
+            additionalSafeAreaInsets = UIEdgeInsets(top: 50, left: 0, bottom: 100, right: 0)
         } else {
             // Fallback on earlier versions
         }

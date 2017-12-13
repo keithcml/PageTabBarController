@@ -239,8 +239,6 @@ open class PageTabBarController: UIViewController, UIScrollViewDelegate {
         }
         
         adjustsContentInsets()
-        
-//        addContentOffsetObserver()
     }
     
     override open func viewDidAppear(_ animated: Bool) {
@@ -255,8 +253,6 @@ open class PageTabBarController: UIViewController, UIScrollViewDelegate {
         if !shouldAutomaticallyForwardAppearanceMethods {
             selectedViewController?.beginAppearanceTransition(false, animated: animated)
         }
-        
-//        removeContentOffsetObserver()
     }
     
     override open func viewDidDisappear(_ animated: Bool) {
