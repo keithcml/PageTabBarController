@@ -297,7 +297,7 @@ extension ParallaxHeaderPageTabBarController {
             let diff = scrollView.contentOffset.y - previousChildScrollViewOffset.y
             let newConstant = max(minimumCollapseOffset, min(0, topConstraint.constant - diff))
             parallaxHeaderViewTopConstraint?.constant = newConstant
-            view.layoutIfNeeded()
+            //view.layoutIfNeeded()
             
             if shouldCollapse {
                 print("Collapsing... \(newConstant)")
@@ -317,7 +317,7 @@ extension ParallaxHeaderPageTabBarController {
         if case .topAttached = pageTabBarController.tabBarPosition {
             parallaxHeaderContainerView.transform = .identity
             supplementaryViewBottomConstraint?.constant = 0
-            view.setNeedsLayout()
+            //view.setNeedsLayout()
         } else {
             
             pageTabBarController.transformTabBarWithScrollViewBounces(scrollView)
@@ -331,7 +331,7 @@ extension ParallaxHeaderPageTabBarController {
             } else {
                 parallaxHeaderContainerView.transform = .identity
                 supplementaryViewBottomConstraint?.constant = 0
-                view.setNeedsLayout()
+                //view.setNeedsLayout()
             }
         }
 

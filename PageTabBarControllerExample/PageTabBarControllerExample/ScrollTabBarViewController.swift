@@ -88,7 +88,7 @@ class ScrollTabBarViewController: UIViewController {
         super.viewWillAppear(animated)
         
         if #available(iOS 11.0, *) {
-            additionalSafeAreaInsets = UIEdgeInsets(top: 200, left: 0, bottom: 0, right: 0)
+            additionalSafeAreaInsets = UIEdgeInsets(top: 200, left: 0, bottom: 200, right: 0)
         } else {
             // Fallback on earlier versions
         }

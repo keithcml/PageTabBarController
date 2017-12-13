@@ -548,6 +548,14 @@ extension PageTabBarController: UICollectionViewDelegate {
         
         let vc = viewControllers[indexPath.row]
         
+        for view in vc.view.subviews {
+            if let scrollView =  view as? UIScrollView {
+                let offset = scrollView.contentOffset
+                scrollView.setContentOffset(offset, animated: false)
+                break
+            }
+        }
+        
         if !shouldAutomaticallyForwardAppearanceMethods {
             vc.beginAppearanceTransition(false, animated: false)
         }
