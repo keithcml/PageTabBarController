@@ -135,11 +135,11 @@ open class ParallaxHeaderPageTabBarController: UIViewController {
                                      pageTabBarController.view.trailingAnchor.constraint(equalTo: trailingAnchor),
                                      pageTabBarController.view.bottomAnchor.constraint(equalTo: view.bottomAnchor),
                                      pageTabBarController.view.topAnchor.constraint(equalTo: parallaxHeaderContainerView.bottomAnchor)])
-        /*
+        
         let panGesture = UIPanGestureRecognizer(target: self, action: #selector(pan(_:)))
         panGesture.delegate = self
         view.addGestureRecognizer(panGesture)
-        */
+ 
         pageTabBarController.didMove(toParentViewController: self)
     }
     
@@ -163,17 +163,26 @@ open class ParallaxHeaderPageTabBarController: UIViewController {
             break
         case .changed:
             guard isPanning else { return }
-            let translate = gesture.translation(in: gesture.view)
             
+            let velocity = gesture.velocity(in: gesture.view)
+            if velocity.y > 0 {
+                isLatestScrollingUp = true
+            } else if velocity.y < 0 {
+                isLatestScrollingUp = false
+            }
+            
+            let translate = gesture.translation(in: gesture.view)
+
             let newConstant = max(minimumCollapseOffset, min(0, initialOffset + translate.y))
             parallaxHeaderViewTopConstraint?.constant = newConstant
-//            if newConstant > parallaxHeaderHeight {
+            
+            if newConstant == 0 {
 //                let gap = newConstant - parallaxHeaderHeight
 //                let scale = 1 + (gap * 2)/parallaxHeaderHeight
 //                parallaxHeaderContainerView.transform = CGAffineTransform(scaleX: scale, y: scale)
 //                supplementaryViewBottomConstraint?.constant = gap
-//            }
-            view.layoutIfNeeded()
+            }
+            
             break
         case .ended, .cancelled:
             guard isPanning else { return }
