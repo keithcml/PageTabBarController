@@ -25,6 +25,7 @@
 
 import Foundation
 import UIKit
+import PageTabBarController
 
 final class TableViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
     
@@ -84,7 +85,7 @@ final class TableViewController: UIViewController, UITableViewDelegate, UITableV
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 1
+        return 10
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -101,5 +102,9 @@ final class TableViewController: UIViewController, UITableViewDelegate, UITableV
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let presentedViewController = PresentedViewController(nibName: nil, bundle: nil)
         present(presentedViewController, animated: true, completion: nil)
+    }
+    
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        parallaxHeaderPageTabBarController?.childScrollViewDidScroll(scrollView)
     }
 }

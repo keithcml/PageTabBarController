@@ -65,6 +65,9 @@ open class ParallaxHeaderPageTabBarController: UIViewController {
     private var supplementaryViewBottomConstraint: NSLayoutConstraint?
     private var supplementaryViewHeightConstraint: NSLayoutConstraint?
     
+    private weak var currentChildScrollViewWeakReference: UIScrollView?
+    private var previousChildScrollViewOffset: CGPoint = .zero
+        
     private var isPanning = false
     private var initialOffset = CGFloat(0)
     
@@ -272,43 +275,58 @@ extension ParallaxHeaderPageTabBarController {
             view.layoutIfNeeded()
         }
     }
-}
-
-extension ParallaxHeaderPageTabBarController: PageTabBarControllerParallaxDelegate {
-    func pageTabBarController(_ controller: PageTabBarController,
-                              selectedViewController: UIViewController,
-                              observedScrollView: UIScrollView,
-                              contentOffsetObservingWithOldValue oldValue: CGPoint,
-                              newValue: CGPoint,
-                              useOldValue: (Bool) -> ()) {
-        
-        guard let topConstraint = parallaxHeaderViewTopConstraint else {
-            useOldValue(true)
-            return
-        }
-        // diff < 0 => scroll up, diff > 0 => scroll down
-        let diff = oldValue.y - newValue.y
     
-        guard diff != 0 else {
-            useOldValue(true)
-            return
-        }
+    
+    
+    open func childScrollViewDidScroll(_ scrollView: UIScrollView) {
         
-        var contentInset = observedScrollView.contentInset
+        guard let currentScrollView = currentChildScrollViewWeakReference, currentScrollView == scrollView else { return }
+        
+        guard let topConstraint = parallaxHeaderViewTopConstraint else { return }
+        
+        var contentInset = scrollView.contentInset
         if #available(iOS 11.0, *) {
-            contentInset = observedScrollView.adjustedContentInset
+            contentInset = scrollView.adjustedContentInset
         }
         
-        if case .topAttached = controller.tabBarPosition {
+        let shouldCollapse = topConstraint.constant > minimumCollapseOffset && scrollView.contentOffset.y > -contentInset.top
+        let shouldExpand = topConstraint.constant < 0 && scrollView.contentOffset.y < -contentInset.top
+        
+        if shouldCollapse || shouldExpand {
+            
+            let diff = scrollView.contentOffset.y - previousChildScrollViewOffset.y
+            let newConstant = max(minimumCollapseOffset, min(0, topConstraint.constant - diff))
+            parallaxHeaderViewTopConstraint?.constant = newConstant
+            view.layoutIfNeeded()
+            
+            if shouldCollapse {
+                print("Collapsing... \(newConstant)")
+            }
+            
+            if shouldExpand {
+                print("Expanding... \(newConstant)")
+            }
+            
+            scrollView.contentOffset = previousChildScrollViewOffset
+        }
+        else {
+            previousChildScrollViewOffset = scrollView.contentOffset
+        }
+        
+        // transformations
+        if case .topAttached = pageTabBarController.tabBarPosition {
             parallaxHeaderContainerView.transform = .identity
             supplementaryViewBottomConstraint?.constant = 0
             view.setNeedsLayout()
         } else {
-            if observedScrollView.contentOffset.y < -contentInset.top {
-                let gap = -contentInset.top - observedScrollView.contentOffset.y
+            
+            pageTabBarController.transformTabBarWithScrollViewBounces(scrollView)
+            
+            if scrollView.contentOffset.y < -contentInset.top {
+                let gap = -contentInset.top - scrollView.contentOffset.y
                 let scale = 1 + (gap * 2)/parallaxHeaderHeight
                 parallaxHeaderContainerView.transform = CGAffineTransform(scaleX: scale, y: scale)
-                
+
                 supplementaryViewBottomConstraint?.constant = gap
             } else {
                 parallaxHeaderContainerView.transform = .identity
@@ -316,26 +334,16 @@ extension ParallaxHeaderPageTabBarController: PageTabBarControllerParallaxDelega
                 view.setNeedsLayout()
             }
         }
+
         
-        let shouldCollapse = topConstraint.constant > minimumCollapseOffset && newValue.y > -contentInset.top
-        let shouldExpand = topConstraint.constant < 0 && newValue.y < -contentInset.top
+    }
+}
 
-        if shouldCollapse || shouldExpand {
-            useOldValue(false)
-            let newConstant = max(minimumCollapseOffset, min(0, topConstraint.constant + diff))
-            parallaxHeaderViewTopConstraint?.constant = newConstant
-            view.layoutIfNeeded()
-            
-            if shouldCollapse {
-                print("Collapsing... \(newConstant)")
-            }
-
-            if shouldExpand {
-                print("Expanding... \(newConstant)")
-            }
-        }
-
-        useOldValue(true)
+extension ParallaxHeaderPageTabBarController: PageTabBarControllerParallaxDelegate {
+    
+    func pageTabBarController(_ controller: PageTabBarController, childScrollViewDidChange scrollView: UIScrollView) {
+        currentChildScrollViewWeakReference = scrollView
+        previousChildScrollViewOffset = scrollView.contentOffset
     }
 }
 
@@ -350,4 +358,20 @@ extension ParallaxHeaderPageTabBarController: UIGestureRecognizerDelegate {
         return true
     }
     
+}
+
+extension UIViewController {
+    
+    @objc(ml_parallaxHeaderPageTabBarController)
+    open var parallaxHeaderPageTabBarController: ParallaxHeaderPageTabBarController? {
+        var parentVC = parent
+        while parentVC != nil {
+            
+            if let vc = parentVC as? ParallaxHeaderPageTabBarController {
+                return vc
+            }
+            parentVC = parentVC?.parent
+        }
+        return nil
+    }
 }

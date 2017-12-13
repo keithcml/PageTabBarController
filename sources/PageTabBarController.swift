@@ -40,17 +40,8 @@ public protocol PageTabBarControllerDelegate: NSObjectProtocol {
     @objc optional func pageTabBarController(_ controller: PageTabBarController, transit fromIndex: Int, to toIndex: Int, progress: CGFloat)
 }
 
-@objc
 protocol PageTabBarControllerParallaxDelegate: NSObjectProtocol {
-    /*  @return true to accept newValue, false to reset to old value
-     *
-     */
-    @objc optional func pageTabBarController(_ controller: PageTabBarController,
-                                             selectedViewController: UIViewController,
-                                             observedScrollView: UIScrollView,
-                                             contentOffsetObservingWithOldValue oldValue: CGPoint,
-                                             newValue: CGPoint,
-                                             useOldValue: (Bool) -> ())
+    func pageTabBarController(_ controller: PageTabBarController, childScrollViewDidChange scrollView: UIScrollView)
 }
 
 @objcMembers
@@ -160,10 +151,7 @@ open class PageTabBarController: UIViewController, UIScrollViewDelegate {
     fileprivate var tabBarTopConstraint: NSLayoutConstraint?
     fileprivate var bannerHeightConstraint: NSLayoutConstraint?
     
-    // Scroll Observing
-    private var isObservingContentOffset = true
-    private var currentScrollView: UIScrollView?
-    private var contentOffsetObservation: NSKeyValueObservation?
+    open private(set) var currentScrollView: UIScrollView?
     
     public required init(viewControllers: [UIViewController],
                          items: [PageTabBarItem],
@@ -252,7 +240,7 @@ open class PageTabBarController: UIViewController, UIScrollViewDelegate {
         
         adjustsContentInsets()
         
-        addContentOffsetObserver()
+//        addContentOffsetObserver()
     }
     
     override open func viewDidAppear(_ animated: Bool) {
@@ -268,7 +256,7 @@ open class PageTabBarController: UIViewController, UIScrollViewDelegate {
             selectedViewController?.beginAppearanceTransition(false, animated: animated)
         }
         
-        removeContentOffsetObserver()
+//        removeContentOffsetObserver()
     }
     
     override open func viewDidDisappear(_ animated: Bool) {
@@ -658,7 +646,9 @@ extension PageTabBarController: UICollectionViewDelegate {
         for view in vc.view.subviews {
             if view.isKind(of: UIScrollView.self) {
                 currentScrollView = view as? UIScrollView
-                addContentOffsetObserver()
+                if let scrollView = currentScrollView {
+                    parallaxDelegate?.pageTabBarController(self, childScrollViewDidChange: scrollView)
+                }
                 break
             }
         }
@@ -678,72 +668,22 @@ extension PageTabBarController: UICollectionViewDelegateFlowLayout {
     }
 }
 
-// MARK: - Scroll Observing
+// MARK: - TabBar Transform
+
 extension PageTabBarController {
-    // MARK: - Scrolling handler
-    private func addContentOffsetObserver() {
+
+    func transformTabBarWithScrollViewBounces(_ scrollView: UIScrollView) {
         
-        if contentOffsetObservation != nil {
-            removeContentOffsetObserver()
+        var contentInset = scrollView.contentInset
+        var minimumThreshold = self.topLayoutGuide.length
+        if #available(iOS 11.0, *) {
+            minimumThreshold = 0
+            contentInset = scrollView.adjustedContentInset
         }
         
-        guard let scrollView = currentScrollView else { return }
+        let offset = min(0, scrollView.contentOffset.y + contentInset.top)
         
-        contentOffsetObservation = scrollView.observe(\.contentOffset, options: [.new, .old]) { [unowned self] observed, change in
-            
-            guard self.isObservingContentOffset else { return }
-            
-            guard let oldValue = change.oldValue, let newValue = change.newValue else {
-                return
-            }
-
-            
-            // diff < 0 => scroll up, diff > 0 => scroll down
-            let diff = oldValue.y - newValue.y
-            
-            guard diff != 0 else { return }
-
-            switch self.tabBarPosition {
-            case .topInsetAttached:
-                
-                var contentInset = observed.contentInset
-                var minimumThreshold = self.topLayoutGuide.length
-                if #available(iOS 11.0, *) {
-                    minimumThreshold = 0
-                    contentInset = observed.adjustedContentInset
-                }
-
-                let offset = min(0, newValue.y + contentInset.top)
-                
-                self.tabBarTopConstraint?.constant = max(minimumThreshold, minimumThreshold - offset)
-                self.view.layoutIfNeeded()
-                break
-            default:
-                break
-            }
-
-            if let selectedVC = self.selectedViewController {
-                self.parallaxDelegate?.pageTabBarController?(self,
-                                                             selectedViewController: selectedVC,
-                                                             observedScrollView: observed,
-                                                             contentOffsetObservingWithOldValue: oldValue,
-                                                             newValue: newValue) { accepted in
-                                                                if !accepted {
-                                                                    self.setContentOffset(oldValue, forScrollView: observed)
-                                                                }
-                                                             }
-            }
-        }
-    }
-    
-    private func removeContentOffsetObserver() {
-        contentOffsetObservation?.invalidate()
-        contentOffsetObservation = nil
-    }
-    
-    private func setContentOffset(_ offset: CGPoint, forScrollView scrollView: UIScrollView) {
-        isObservingContentOffset = false
-        scrollView.contentOffset = offset
-        isObservingContentOffset = true
+        pageTabBar.transform = CGAffineTransform(translationX: 0, y: max(minimumThreshold, minimumThreshold - offset))
     }
 }
+
