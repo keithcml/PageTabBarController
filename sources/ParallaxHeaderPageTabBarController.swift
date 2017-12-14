@@ -204,20 +204,19 @@ extension ParallaxHeaderPageTabBarController {
     
     open func setParallexHeaderView(_ view: UIView?, height: CGFloat) {
         
+        defer {
+            setParallexHeaderHeight(height, animated: false)
+        }
         parallaxHeaderContainerView.subviews.forEach { $0.removeFromSuperview() }
         
-        guard let customView = view else {
-            setParallexHeaderHeight(height, animated: false)
-            return
-        }
+        guard let customView = view else { return }
         
         parallaxHeaderContainerView.addSubview(customView)
         customView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([customView.leadingAnchor.constraint(equalTo: parallaxHeaderContainerView.leadingAnchor),
                                      customView.trailingAnchor.constraint(equalTo: parallaxHeaderContainerView.trailingAnchor),
-                                     customView.topAnchor.constraint(equalTo: parallaxHeaderContainerView.topAnchor)])
-        
-        setParallexHeaderHeight(height, animated: false)
+                                     customView.topAnchor.constraint(equalTo: parallaxHeaderContainerView.topAnchor),
+                                     customView.heightAnchor.constraint(equalToConstant: height)])
     }
     
     open func setSupplementaryView(_ view: UIView?) {
@@ -234,13 +233,13 @@ extension ParallaxHeaderPageTabBarController {
         
         if animated {
             UIView.animate(withDuration: 0.3, animations: {
-                self.parallaxHeaderViewTopConstraint?.constant = 0
+                //self.parallaxHeaderViewTopConstraint?.constant = 0
                 self.parallaxHeaderViewHeightConstraint?.constant = newHeight
                 self.tabBarPositionYDidChange()
                 self.view.layoutIfNeeded()
             }, completion: nil)
         } else {
-            parallaxHeaderViewTopConstraint?.constant = 0
+            //parallaxHeaderViewTopConstraint?.constant = 0
             parallaxHeaderViewHeightConstraint?.constant = newHeight
             tabBarPositionYDidChange()
             view.layoutIfNeeded()

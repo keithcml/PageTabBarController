@@ -129,7 +129,9 @@ extension MainViewController: UITableViewDelegate, UITableViewDataSource {
             parallaxVC.pageTabBarController.pageTabBar.bottomLineHidden = true
             parallaxVC.pageTabBarController.pageTabBar.topLineColor = tabSelectedColor
             parallaxVC.pageTabBarController.delegate = self
-            parallaxVC.setSelfSizingParallexHeaderView(galleryView)
+            
+            parallaxVC.setParallexHeaderView(galleryView, height: 200)
+            //parallaxVC.setSelfSizingParallexHeaderView(galleryView)
             parallaxVC.delegate = self
             
             let button = UIButton(type: .custom)
@@ -144,9 +146,9 @@ extension MainViewController: UITableViewDelegate, UITableViewDataSource {
     
     @objc private func tap(_ sender: Any) {
         
+        parallaxVC.setParallexHeaderHeight(view.frame.width, animated: true)
         
-        
-        
+        /*
         UIView.animate(withDuration: 0.4, delay: 0.0, usingSpringWithDamping: 0.8, initialSpringVelocity: 10, options: [], animations: {
             self.parallaxVC.setParallexHeaderView(nil, height: 500)
         }) { (_) in
@@ -179,7 +181,7 @@ extension MainViewController: UITableViewDelegate, UITableViewDataSource {
                 
             }
         }
-        
+        */
         
     }
 }
