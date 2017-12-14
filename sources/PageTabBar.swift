@@ -63,7 +63,6 @@ open class PageTabBar: UIView {
             guard oldValue != barHeight else { return }
             indicatorLine.frame.origin = CGPoint(x: indicatorLine.frame.minX, y: barHeight - indicatorLineHeight)
             bounds = CGRect(x: bounds.origin.x, y: bounds.origin.y, width: bounds.width, height: barHeight)
-            //superview?.setNeedsLayout()
         }
     }
     
@@ -125,12 +124,7 @@ open class PageTabBar: UIView {
         }
     }
     
-    internal var currentIndex: Int = 0 {
-        didSet {
-            guard oldValue != currentIndex else { return }
-            delegate?.pageTabBar(self, indexDidChanged: currentIndex)
-        }
-    }
+    internal var currentIndex: Int = 0
     
     fileprivate var items = [PageTabBarItem]()
     fileprivate var itemWidth: CGFloat {
@@ -206,9 +200,17 @@ open class PageTabBar: UIView {
         scrollToItem(at: currentIndex, animated: false)
     }
     
-    internal func setIndicatorPosition(_ position: CGFloat) -> Int {
+    internal func setIndicatorPosition(_ position: CGFloat, animated: Bool = false) -> Int {
 
-        indicatorLine.frame = CGRect(x: position, y: barHeight - indicatorLineHeight, width: itemWidth, height: indicatorLineHeight)
+        if animated {
+            UIView.animate(withDuration: 0.2, animations: {
+                self.indicatorLine.frame = CGRect(x: position, y: self.barHeight - self.indicatorLineHeight, width: self.itemWidth, height: self.indicatorLineHeight)
+            })
+        }
+        else {
+            indicatorLine.frame = CGRect(x: position, y: barHeight - indicatorLineHeight, width: itemWidth, height: indicatorLineHeight)
+        }
+        
         
         let location = position + itemWidth/2
         let index = Int(ceil(location/itemWidth)) - 1
@@ -220,10 +222,10 @@ open class PageTabBar: UIView {
         return index
     }
     
-    internal func updateCurrentIndex() {
-        let index = Int(indicatorLine.frame.midX/itemWidth)
-        currentIndex = index
-    }
+//    internal func updateCurrentIndex() {
+//        let index = Int(indicatorLine.frame.midX/itemWidth)
+//        currentIndex = index
+//    }
     
     internal func scrollToItem(at index: Int, animated: Bool) {
         let origin = CGPoint(x: ceil(CGFloat(index) * itemWidth), y: barHeight - indicatorLineHeight)
@@ -246,8 +248,9 @@ open class PageTabBar: UIView {
         }
         
         items = newTabBarItems
-        currentIndex = targetIndex
-        scrollToItem(at: currentIndex, animated: animated)
+        //delegate?.pageTabBar(self, indexDidChanged: index)
+        //currentIndex = targetIndex
+        scrollToItem(at: targetIndex, animated: animated)
     }
     
     open func setBarHeight(_ height: CGFloat, animated: Bool) {
@@ -264,7 +267,7 @@ open class PageTabBar: UIView {
 extension PageTabBar: PageTabBarItemDelegate {
     func pageTabBarItemDidTap(_ item: PageTabBarItem) {
         if let index = items.index(of: item) {
-            currentIndex = index
+            delegate?.pageTabBar(self, indexDidChanged: index)
         }
     }
 }

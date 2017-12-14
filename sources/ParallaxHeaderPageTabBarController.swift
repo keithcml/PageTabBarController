@@ -14,6 +14,35 @@ public protocol ParallaxHeaderPageTabBarControllerDelegate: NSObjectProtocol {
     @objc optional func parallaxHeaderPageTabBarController(_ controller: ParallaxHeaderPageTabBarController, revealPercentage: CGFloat, revealPercentageIncludingTopSafeAreaInset: CGFloat)
 }
 
+private class BaseView: UIView {
+    
+    var scrollView: UIScrollView?
+    
+    override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
+        return super.hitTest(point, with: event)
+    }
+    
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        //print("touchesBegan")
+        super.touchesBegan(touches, with: event)
+    }
+    
+    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+        //print("touchesMoved")
+        super.touchesMoved(touches, with: event)
+    }
+    
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        //print("touchesEnded")
+        super.touchesEnded(touches, with: event)
+    }
+    
+    override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
+        //print("touchesCancelled")
+        super.touchesCancelled(touches, with: event)
+    }
+}
+
 @objcMembers
 open class ParallaxHeaderPageTabBarController: UIViewController {
     
@@ -66,6 +95,8 @@ open class ParallaxHeaderPageTabBarController: UIViewController {
     private var supplementaryViewBottomConstraint: NSLayoutConstraint?
     private var supplementaryViewHeightConstraint: NSLayoutConstraint?
     
+    private var hitTestView = BaseView(frame: UIScreen.main.bounds)
+    
     private weak var currentChildScrollViewWeakReference: UIScrollView?
     private var previousChildScrollViewOffset: CGPoint = .zero
     private var isLatestScrollingUp = false
@@ -87,6 +118,10 @@ open class ParallaxHeaderPageTabBarController: UIViewController {
     
     required public init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    override open func loadView() {
+        view = hitTestView
     }
     
     override open func viewDidLoad() {
@@ -136,9 +171,10 @@ open class ParallaxHeaderPageTabBarController: UIViewController {
                                      pageTabBarController.view.bottomAnchor.constraint(equalTo: view.bottomAnchor),
                                      pageTabBarController.view.topAnchor.constraint(equalTo: parallaxHeaderContainerView.bottomAnchor)])
         
-        let panGesture = UIPanGestureRecognizer(target: self, action: #selector(pan(_:)))
-        panGesture.delegate = self
-        view.addGestureRecognizer(panGesture)
+//        let panGesture = UIPanGestureRecognizer(target: self, action: #selector(pan(_:)))
+//        panGesture.cancelsTouchesInView = false
+//        panGesture.delegate = self
+//        view.addGestureRecognizer(panGesture)
  
         pageTabBarController.didMove(toParentViewController: self)
     }
@@ -366,7 +402,15 @@ extension ParallaxHeaderPageTabBarController {
 extension ParallaxHeaderPageTabBarController: PageTabBarControllerParallaxDelegate {
     
     func pageTabBarController(_ controller: PageTabBarController, childScrollViewDidChange scrollView: UIScrollView) {
+        
+        if let currentChildScrollView = currentChildScrollViewWeakReference {
+            view.removeGestureRecognizer(currentChildScrollView.panGestureRecognizer)
+        }
+        
         currentChildScrollViewWeakReference = scrollView
+        
+        view.addGestureRecognizer(scrollView.panGestureRecognizer)
+        
         previousChildScrollViewOffset = scrollView.contentOffset
         isLatestScrollingUp = false
     }

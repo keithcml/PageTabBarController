@@ -252,17 +252,18 @@ open class CollapseTabBarViewController: UIViewController {
     }
     
     private func constructScrollViewsToIgnoreTouches() -> [UIScrollView] {
-        var scrollViews = pageTabBarController.interceptTouchesScrollViews()
-
-        if let fromDelegate = delegate?.collapseTabBarController?(self, scrollViewsForScrollingWithTabBarMoveAtIndex: pageIndex) {
-            
-            fromDelegate.forEach { additionalScrollView in
-                if !scrollViews.contains( where: { $0 === additionalScrollView } ) {
-                    scrollViews.append(additionalScrollView)
-                }
-            }
-        }
-        return scrollViews
+//        var scrollViews = pageTabBarController.interceptTouchesScrollViews()
+//
+//        if let fromDelegate = delegate?.collapseTabBarController?(self, scrollViewsForScrollingWithTabBarMoveAtIndex: pageIndex) {
+//
+//            fromDelegate.forEach { additionalScrollView in
+//                if !scrollViews.contains( where: { $0 === additionalScrollView } ) {
+//                    scrollViews.append(additionalScrollView)
+//                }
+//            }
+//        }
+//        return scrollViews
+        return []
     }
 }
 

@@ -123,7 +123,7 @@ extension MainViewController: UITableViewDelegate, UITableViewDataSource {
             
             parallaxVC = ParallaxHeaderPageTabBarController(viewControllers: [vc01, vc02, vc03], items: [tab01, tab02, tab03], parallaxHeaderHeight: view.frame.width)
             parallaxVC.pageTabBarController.pageTabBar.barHeight = 60
-            parallaxVC.pageTabBarController.transitionAnimation = .none
+            parallaxVC.pageTabBarController.transitionAnimation = .scroll
             parallaxVC.pageTabBarController.pageTabBar.indicatorLineColor = tabSelectedColor
             parallaxVC.pageTabBarController.pageTabBar.indicatorLineHeight = 2
             parallaxVC.pageTabBarController.pageTabBar.bottomLineHidden = true
@@ -144,6 +144,28 @@ extension MainViewController: UITableViewDelegate, UITableViewDataSource {
     
     @objc private func tap(_ sender: Any) {
         
+        let tabColor = UIColor(red: 0/255.0, green: 215/255.0, blue: 215/255.0, alpha: 1)
+        let tabSelectedColor = UIColor(red: 35/255.0, green: 171/255.0, blue: 232/255.0, alpha: 1)
+        
+        let tab01 = PageTabBarItem(icon: UIImage(named: "img01"))
+        tab01.color = tabColor
+        tab01.selectedColor = tabSelectedColor
+        let tab02 = PageTabBarItem(icon: UIImage(named: "img01"))
+        tab02.color = tabColor
+        tab02.selectedColor = tabSelectedColor
+        let tab03 = PageTabBarItem(icon: UIImage(named: "img01"))
+        tab03.color = tabColor
+        tab03.selectedColor = tabSelectedColor
+        
+        let vc01 = UIViewController(nibName: nil, bundle: nil)
+        let vc02 = TableViewController(nibName: nil, bundle: nil)
+        let vc03 = UIViewController(nibName: nil, bundle: nil)
+        vc01.view.tag = 1
+        vc02.view.tag = 2
+        vc03.view.tag = 3
+        
+        parallaxVC.pageTabBarController.resetPageTabBarController([vc01, vc02, vc03], items: [tab01, tab02, tab03], newPageIndex: 0, animated: true)
+        /*
         UIView.animate(withDuration: 0.4, delay: 0.0, usingSpringWithDamping: 0.8, initialSpringVelocity: 10, options: [], animations: {
             self.parallaxVC.setParallexHeaderView(nil, height: 500)
         }) { (_) in
@@ -157,7 +179,7 @@ extension MainViewController: UITableViewDelegate, UITableViewDataSource {
             }) { (_) in
                 
             }
-        }
+        }*/
         
         
     }
@@ -166,8 +188,8 @@ extension MainViewController: UITableViewDelegate, UITableViewDataSource {
 extension MainViewController: PageTabBarControllerDelegate, ParallaxHeaderPageTabBarControllerDelegate {
     
     func parallaxHeaderPageTabBarController(_ controller: ParallaxHeaderPageTabBarController, revealPercentage: CGFloat, revealPercentageIncludingTopSafeAreaInset: CGFloat) {
-        print("revealPercentage \(revealPercentage)")
-        print("revealPercentageIncludingTopSafeAreaInset \(revealPercentageIncludingTopSafeAreaInset)")
+        //print("revealPercentage \(revealPercentage)")
+        //print("revealPercentageIncludingTopSafeAreaInset \(revealPercentageIncludingTopSafeAreaInset)")
     }
     
     func pageTabBarController(_ controller: PageTabBarController, didSelectItem item: PageTabBarItem, atIndex index: Int, previousIndex: Int) {

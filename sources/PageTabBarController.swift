@@ -35,9 +35,7 @@ public enum PageTabBarTransitionAnimation {
 public protocol PageTabBarControllerDelegate: NSObjectProtocol {
     @objc optional func pageTabBarController(_ controller: PageTabBarController, tabBarHeaderView: PageTabBarSupplementaryView)
     @objc optional func pageTabBarController(_ controller: PageTabBarController, bannerView: PageTabBarSupplementaryView)
-    @objc optional func pageTabBarController(_ controller: PageTabBarController, didSelectItem item: PageTabBarItem, atIndex index: Int, previousIndex: Int)
     @objc optional func pageTabBarController(_ controller: PageTabBarController, didChangeContentViewController vc: UIViewController, atIndex index: Int)
-    @objc optional func pageTabBarController(_ controller: PageTabBarController, transit fromIndex: Int, to toIndex: Int, progress: CGFloat)
 }
 
 protocol PageTabBarControllerParallaxDelegate: NSObjectProtocol {
@@ -139,8 +137,6 @@ open class PageTabBarController: UIViewController, UIScrollViewDelegate {
     var pageTabBarItems: [PageTabBarItem] = []
     
     // States
-    private var transientIndex = 0
-    private var contentOffsetX: CGFloat = 0
     private var viewDidLayoutSubviewsForTheFirstTime = true
     
     // Layout Guide
@@ -275,10 +271,8 @@ open class PageTabBarController: UIViewController, UIScrollViewDelegate {
                 isScrollEnabled = false
             }
             
-            contentOffsetX = view.frame.width * CGFloat(pageIndex)
-            transientIndex = pageIndex
-            
             pageTabBarCollectionView.scrollToItem(at: IndexPath(item: pageIndex, section: 0), at: .centeredHorizontally, animated: false)
+            // pageTabBar.setIndicatorPosition(pageTabBarCollectionView.contentOffset)
             setNeedsStatusBarAppearanceUpdate()
             
             if #available(iOS 11.0, *) { /* do nothing */ } else {
@@ -291,7 +285,7 @@ open class PageTabBarController: UIViewController, UIScrollViewDelegate {
         }
     }
     
-    func adjustsContentInsets() {
+    private func adjustsContentInsets() {
         if #available(iOS 11.0, *) {
             var newSafeArea = UIEdgeInsets()
             switch tabBarPosition {
@@ -328,27 +322,8 @@ open class PageTabBarController: UIViewController, UIScrollViewDelegate {
             }
         }
     }
-
-    internal func interceptTouchesScrollViews() -> [UIScrollView] {
-        var scrollViews = [UIScrollView]()
-        for vc in viewControllers {
-            if let tableViewCtl = vc as? UITableViewController, let scrollView = tableViewCtl.view as? UIScrollView {
-                scrollViews.append(scrollView)
-            }
-            else if let collectionViewCtl = vc as? UICollectionViewController, let scrollView = collectionViewCtl.view as? UIScrollView {
-                scrollViews.append(scrollView)
-            }
-            else if let rootView = vc.view as? UIScrollView {
-                scrollViews.append(rootView)
-            }
-            else if let baseScrollView = theMostBelowScrollViewInView(vc.view) {
-                scrollViews.append(baseScrollView)
-            }
-        }
-        return scrollViews
-    }
     
-    func theMostBelowScrollViewInView(_ view: UIView) -> UIScrollView? {
+    private func theMostBelowScrollViewInView(_ view: UIView) -> UIScrollView? {
         
         if let scrollView = view as? UIScrollView {
             return scrollView
@@ -400,19 +375,18 @@ extension PageTabBarController {
             shouldAnimate = false
         }
         
-        guard index != pageIndex else { return }
-        
-        delegate?.pageTabBarController?(self, didSelectItem: pageTabBarItems[index], atIndex: index, previousIndex: pageIndex)
-        
-        pageIndex = index
-        
+        // delay set pageIndex until animation ended
         let indexPath = IndexPath(item: index, section: 0)
         if !viewDidLayoutSubviewsForTheFirstTime {
             pageTabBarCollectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: shouldAnimate)
         }
         
         if !shouldAnimate {
+            guard index != pageIndex else { return }
+            pageIndex = index
+            
             didChangeContentViewController(viewControllers[pageIndex], at: pageIndex)
+            delegate?.pageTabBarController?(self, didChangeContentViewController: viewControllers[pageIndex], atIndex: pageIndex)
         }
     }
     
@@ -479,6 +453,10 @@ extension PageTabBarController {
         }
         
         pageTabBarCollectionView.reloadData()
+        pageTabBarCollectionView.performBatchUpdates(nil) { (_) in
+            self.pageTabBarCollectionView.scrollToItem(at: IndexPath(item: newPageIndex, section: 0), at: .centeredHorizontally, animated: animated)
+            self.didChangeContentViewController(viewControllers[newPageIndex], at: newPageIndex)
+        }
     }
     
     open func setTabBarTopPosition(_ position: PageTabBarPosition) {
@@ -492,6 +470,7 @@ extension PageTabBarController {
 }
 
 extension PageTabBarController: PageTabBarDelegate {
+    // call back from item tapped
     func pageTabBar(_ tabBar: PageTabBar, indexDidChanged index: Int) {
         setPageIndex(index, animated: true)
     }
@@ -569,81 +548,40 @@ extension PageTabBarController: UICollectionViewDelegate {
     
     open func scrollViewDidScroll(_ scrollView: UIScrollView) {
         guard scrollView.contentSize.width > 0 else { return }
-        
-        let previousContentOffsetX = contentOffsetX
-        contentOffsetX = scrollView.contentOffset.x
-        
-        let diff = contentOffsetX * pageTabBar.frame.width/scrollView.contentSize.width
-        
-        let oldTransientIndex = transientIndex
-        transientIndex = pageTabBar.setIndicatorPosition(diff)
-        
-        if oldTransientIndex != transientIndex {
-            //print("changed transientIndex: \(transientIndex)")
-            delegate?.pageTabBarController?(self, transit: oldTransientIndex, to: transientIndex, progress: 1.0)
-        } else {
-            
-            let startOffsetX = CGFloat(oldTransientIndex) * pageTabBar.frame.width
-            let displacement = abs(startOffsetX - contentOffsetX)
-            
-            if displacement <= pageTabBar.frame.width/2 {
-                let progress = displacement/(pageTabBar.frame.width/2)
-                
-                if previousContentOffsetX > contentOffsetX {
-                    // moving left
-                    if startOffsetX < contentOffsetX {
-                        //print("moving back to \(oldTransientIndex) with progress \(1.0 - progress)")
-                        if oldTransientIndex < viewControllers.count - 1 {
-                            delegate?.pageTabBarController?(self, transit: oldTransientIndex, to: oldTransientIndex, progress: progress)
-                        }
-                    } else if startOffsetX > contentOffsetX {
-                        //print("moving from \(oldTransientIndex) to \(oldTransientIndex - 1) with progress \(progress)")
-                        if oldTransientIndex > 0 {
-                            delegate?.pageTabBarController?(self, transit: oldTransientIndex, to: oldTransientIndex - 1, progress: progress)
-                        }
-                    }
-                    
-                } else if previousContentOffsetX < contentOffsetX {
-                    // moving right
-                    if startOffsetX < contentOffsetX {
-                        //print("moving from \(oldTransientIndex) to \(oldTransientIndex + 1) with progress \(progress)")
-                        if oldTransientIndex < viewControllers.count - 1 {
-                            delegate?.pageTabBarController?(self, transit: oldTransientIndex, to: oldTransientIndex + 1, progress: progress)
-                        }
-                    } else if startOffsetX > contentOffsetX {
-                        //print("moving back to \(oldTransientIndex) with progress \(1.0 - progress)")
-                        if oldTransientIndex > 0 {
-                            delegate?.pageTabBarController?(self, transit: oldTransientIndex, to: oldTransientIndex, progress: progress)
-                        }
-                    }
-                    
-                }
-            }
-            
-            
-        }
+        let diff = scrollView.contentOffset.x * pageTabBar.frame.width/scrollView.contentSize.width
+        let _ = pageTabBar.setIndicatorPosition(diff)
     }
     
     open func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
         if !decelerate && !scrollView.isDragging {
-            didDragAndEnd()
+            didDragAndEnd(scrollView)
         }
     }
     
     open func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
         if !scrollView.isDragging {
-            didDragAndEnd()
+            didDragAndEnd(scrollView)
         }
     }
     
     open func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
-        didChangeContentViewController(viewControllers[pageIndex], at: pageIndex)
+        guard let indexPath = pageTabBarCollectionView.indexPathForItem(at: scrollView.contentOffset) else { return }
+        if indexPath.item != pageIndex {
+            delegate?.pageTabBarController?(self, didChangeContentViewController: viewControllers[indexPath.item], atIndex: indexPath.item)
+        }
+        pageIndex = indexPath.item
+        didChangeContentViewController(viewControllers[indexPath.item], at: indexPath.item)
     }
     
-    private func didDragAndEnd() {
+    private func didDragAndEnd(_ scrollView: UIScrollView) {
         pageTabBar.isInteracting = false
-        pageTabBar.updateCurrentIndex()
-        didChangeContentViewController(viewControllers[pageIndex], at: pageIndex)
+        
+        guard let indexPath = pageTabBarCollectionView.indexPathForItem(at: scrollView.contentOffset) else { return }
+        if indexPath.item != pageIndex {
+            delegate?.pageTabBarController?(self, didChangeContentViewController: viewControllers[indexPath.item], atIndex: indexPath.item)
+        }
+        pageIndex = indexPath.item
+        didChangeContentViewController(viewControllers[indexPath.item], at: indexPath.item)
     }
     
     private func didChangeContentViewController(_ vc: UIViewController, at index: Int) {
@@ -656,7 +594,7 @@ extension PageTabBarController: UICollectionViewDelegate {
                 break
             }
         }
-        delegate?.pageTabBarController?(self, didChangeContentViewController: vc, atIndex: index)
+        
     }
 }
 
