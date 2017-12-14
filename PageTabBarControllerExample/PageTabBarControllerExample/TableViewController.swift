@@ -100,8 +100,9 @@ final class TableViewController: UIViewController, UITableViewDelegate, UITableV
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let presentedViewController = PresentedViewController(nibName: nil, bundle: nil)
-        present(presentedViewController, animated: true, completion: nil)
+        tableView.deselectRow(at: indexPath, animated: true)
+        // let presentedViewController = PresentedViewController(nibName: nil, bundle: nil)
+        // present(presentedViewController, animated: true, completion: nil)
     }
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {

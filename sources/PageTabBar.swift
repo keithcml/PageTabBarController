@@ -27,6 +27,7 @@ import Foundation
 import UIKit
 
 internal protocol PageTabBarDelegate: class {
+    func pageTabBarCurrentIndex(_ tabBar: PageTabBar) -> Int
     func pageTabBar(_ tabBar: PageTabBar, indexDidChanged index: Int)
 }
 
@@ -36,7 +37,6 @@ public enum PageTabBarPosition: Int {
     case topInsetAttached
     case bottom
 }
-
 
 internal enum PageTabBarItemArrangement {
     case fixedWidth(width: CGFloat)
@@ -54,7 +54,7 @@ open class PageTabBar: UIView {
     
     override open var bounds: CGRect {
         didSet {
-            scrollToItem(at: currentIndex, animated: false)
+            repositionAndResizeIndicatorView()
         }
     }
     
@@ -126,26 +126,27 @@ open class PageTabBar: UIView {
     
     internal var currentIndex: Int = 0
     
-    fileprivate var items = [PageTabBarItem]()
-    fileprivate var itemWidth: CGFloat {
+    private var items = [PageTabBarItem]()
+    private var itemWidth: CGFloat {
         if items.count == 0 {
             return 0
         }
         return bounds.width/CGFloat(items.count)
     }
 
-    fileprivate var indicatorLine: UIView = {
+    private var indicatorLine: UIView = {
         let line = UIView()
         line.backgroundColor = .blue
         return line
     }()
     
-    fileprivate var topLine: UIView = {
+    private var topLine: UIView = {
         let line = UIView()
         line.backgroundColor = .lightGray
         return line
     }()
-    fileprivate var bottomLine: UIView = {
+    
+    private var bottomLine: UIView = {
         let line = UIView()
         line.backgroundColor = .lightGray
         return line
@@ -166,7 +167,7 @@ open class PageTabBar: UIView {
         commonInit()
     }
     
-    fileprivate func commonInit() {
+    private func commonInit() {
         
         backgroundColor = barTintColor
         
@@ -178,7 +179,6 @@ open class PageTabBar: UIView {
         itemStackView.frame = bounds
         itemStackView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         addSubview(itemStackView)
-        
         
         topLine.frame = CGRect(x: 0, y: 0, width: bounds.width, height: 0.5)
         addSubview(topLine)
@@ -197,32 +197,28 @@ open class PageTabBar: UIView {
         bottomLine.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true
         
         addSubview(indicatorLine)
-        scrollToItem(at: currentIndex, animated: false)
     }
     
-    internal func setIndicatorPosition(_ position: CGFloat, animated: Bool = false) -> Int {
+    internal func setIndicatorPosition(_ position: CGFloat, animated: Bool = false) {
 
         if animated {
             UIView.animate(withDuration: 0.2, animations: {
-                self.indicatorLine.frame = CGRect(x: position, y: self.barHeight - self.indicatorLineHeight, width: self.itemWidth, height: self.indicatorLineHeight)
+                self.setIndicatorPosition(position)
             })
-        }
-        else {
-            indicatorLine.frame = CGRect(x: position, y: barHeight - indicatorLineHeight, width: itemWidth, height: indicatorLineHeight)
+            return
         }
         
+        indicatorLine.center.x = position + itemWidth/2
         
-        let location = position + itemWidth/2
-        let index = Int(ceil(location/itemWidth)) - 1
-        
+        let index = Int(indicatorLine.center.x/itemWidth)
         for (idx, button) in items.enumerated() {
             button.isSelected = idx == index ? true : false
         }
-        
-        return index
     }
     
-    internal func scrollToItem(at index: Int, animated: Bool) {
+    private func repositionAndResizeIndicatorView() {
+        guard let index = delegate?.pageTabBarCurrentIndex(self) else { return }
+        
         let origin = CGPoint(x: ceil(CGFloat(index) * itemWidth), y: barHeight - indicatorLineHeight)
         let size = CGSize(width: itemWidth, height: indicatorLineHeight)
         indicatorLine.frame = CGRect(origin: origin, size: size)
@@ -245,14 +241,12 @@ open class PageTabBar: UIView {
         items = newTabBarItems
         
         layoutIfNeeded()
-        // resize indicator
-        
-        
-        //delegate?.pageTabBar(self, indexDidChanged: index)
-        //currentIndex = targetIndex
-        //scrollToItem(at: targetIndex, animated: animated)
+        repositionAndResizeIndicatorView()
     }
     
+    /*  Public Methods
+     *
+     */
     open func setBarHeight(_ height: CGFloat, animated: Bool) {
         if animated {
             UIView.animate(withDuration: 0.3, animations: {

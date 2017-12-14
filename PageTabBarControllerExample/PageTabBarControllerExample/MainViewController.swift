@@ -131,14 +131,22 @@ extension MainViewController: UITableViewDelegate, UITableViewDataSource {
             parallaxVC.pageTabBarController.delegate = self
             
             parallaxVC.setParallexHeaderView(galleryView, height: 400)
-            //parallaxVC.setSelfSizingParallexHeaderView(galleryView)
             parallaxVC.delegate = self
             
+        
             let button = UIButton(type: .custom)
             button.setTitle("A Button", for: .normal)
             button.backgroundColor = .red
             button.addTarget(self, action: #selector(tap(_:)), for: .touchUpInside)
-            parallaxVC.setSupplementaryView(button, height: 40)
+            let contentView = UIView()
+            contentView.addSubview(button)
+            button.translatesAutoresizingMaskIntoConstraints = false
+            button.topAnchor.constraint(equalTo: contentView.topAnchor).isActive = true
+            button.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -16).isActive = true
+            button.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16).isActive = true
+            button.widthAnchor.constraint(equalToConstant: 100).isActive = true
+            
+            parallaxVC.setSupplementaryView(contentView, height: 40)
             
             navigationController?.pushViewController(parallaxVC, animated: true)
         }
@@ -146,43 +154,48 @@ extension MainViewController: UITableViewDelegate, UITableViewDataSource {
     
     @objc private func tap(_ sender: Any) {
         
-        parallaxVC.setParallexHeaderHeight(view.frame.width, animated: true)
+        // setPageVC02()
+        // parallaxVC.setParallexHeaderHeight(view.frame.width, animated: true)
         
-        /*
         UIView.animate(withDuration: 0.4, delay: 0.0, usingSpringWithDamping: 0.8, initialSpringVelocity: 10, options: [], animations: {
             self.parallaxVC.setParallexHeaderView(nil, height: 500)
         }) { (_) in
             
             
-            let tabColor = UIColor(red: 0/255.0, green: 215/255.0, blue: 215/255.0, alpha: 1)
-            let tabSelectedColor = UIColor(red: 35/255.0, green: 171/255.0, blue: 232/255.0, alpha: 1)
-            
-            let tab01 = PageTabBarItem(icon: UIImage(named: "img01"))
-            tab01.color = tabColor
-            tab01.selectedColor = tabSelectedColor
-            let tab02 = PageTabBarItem(icon: UIImage(named: "img01"))
-            tab02.color = tabColor
-            tab02.selectedColor = tabSelectedColor
-            
-            let vc01 = TableViewController(nibName: nil, bundle: nil)
-            let vc02 = TableViewController(nibName: nil, bundle: nil)
-            vc01.view.tag = 1
-            vc02.view.tag = 2
-            
-            self.parallaxVC.pageTabBarController.setPageTabBarController([vc01, vc02], items: [tab01, tab02], newPageIndex: 0, animated: false)
+            self.setPageVC02()
             
             let galleryView = GalleryView(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.width))
             galleryView.images = [GalleryImage.image(image: UIImage(named: "cover")!),
                                   GalleryImage.image(image: UIImage(named: "cover")!)]
             
-            UIView.animate(withDuration: 0.4, delay: 1.0, usingSpringWithDamping: 0.8, initialSpringVelocity: 10, options: [], animations: {
-                self.parallaxVC.setParallexHeaderView(galleryView, height: 300)
+            UIView.animate(withDuration: 0.4, delay: 2.0, usingSpringWithDamping: 0.8, initialSpringVelocity: 10, options: [], animations: {
+                self.parallaxVC.setParallexHeaderHeight(300, animated: false)
+                //self.parallaxVC.setParallexHeaderView(galleryView, height: 300)
             }) { (_) in
-                
+                self.parallaxVC.setParallexHeaderView(galleryView, height: 300)
             }
         }
-        */
         
+        
+    }
+    
+    private func setPageVC02() {
+        let tabColor = UIColor(red: 0/255.0, green: 215/255.0, blue: 215/255.0, alpha: 1)
+        let tabSelectedColor = UIColor(red: 35/255.0, green: 171/255.0, blue: 232/255.0, alpha: 1)
+        
+        let tab01 = PageTabBarItem(icon: UIImage(named: "img01"))
+        tab01.color = tabColor
+        tab01.selectedColor = tabSelectedColor
+        let tab02 = PageTabBarItem(icon: UIImage(named: "img01"))
+        tab02.color = tabColor
+        tab02.selectedColor = tabSelectedColor
+        
+        let vc01 = TableViewController(nibName: nil, bundle: nil)
+        let vc02 = TableViewController(nibName: nil, bundle: nil)
+        vc01.view.tag = 1
+        vc02.view.tag = 2
+        
+        self.parallaxVC.pageTabBarController.setPageTabBarController([vc01, vc02], items: [tab01, tab02], newPageIndex: 0, animated: true)
     }
 }
 

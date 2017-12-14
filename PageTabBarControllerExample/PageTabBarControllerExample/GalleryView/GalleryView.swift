@@ -73,6 +73,7 @@ final class GalleryView: UIView {
         addSubview(collectionView)
         
         pageNumberView.totalNumberOfPage = images.count
+        pageNumberView.isUserInteractionEnabled = false
         addSubview(pageNumberView)
         pageNumberView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([

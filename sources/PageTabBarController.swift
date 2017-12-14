@@ -144,9 +144,10 @@ open class PageTabBarController: UIViewController, UIScrollViewDelegate {
     open private(set) var bannerViewLayoutGuide = UILayoutGuide()
     
     // Constraints
-    fileprivate var tabBarTopConstraint: NSLayoutConstraint?
-    fileprivate var bannerHeightConstraint: NSLayoutConstraint?
+    private var tabBarTopConstraint: NSLayoutConstraint?
+    private var bannerHeightConstraint: NSLayoutConstraint?
     
+    // Child Scroll View
     open private(set) var currentScrollView: UIScrollView?
     
     public required init(viewControllers: [UIViewController],
@@ -189,8 +190,13 @@ open class PageTabBarController: UIViewController, UIScrollViewDelegate {
         pageTabBar.delegate = self
         view.addSubview(pageTabBar)
         pageTabBar.translatesAutoresizingMaskIntoConstraints = false
-        pageTabBar.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
-        pageTabBar.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
+        if #available(iOS 11.0, *) {
+            pageTabBar.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor).isActive = true
+            pageTabBar.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor).isActive = true
+        } else {
+            pageTabBar.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
+            pageTabBar.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
+        }
         
         view.addSubview(pageTabBarBannerView)
         pageTabBarBannerView.translatesAutoresizingMaskIntoConstraints = false
@@ -436,13 +442,13 @@ extension PageTabBarController {
     }
     
     open func setPageTabBarController(_ viewControllers: [UIViewController], items: [PageTabBarItem], newPageIndex: Int, animated: Bool) {
-        
-        pageTabBarItems = items
-        pageTabBar.replaceTabBarItems(items)
-        
+
         if view.window == nil {
             pageIndex = newPageIndex
         }
+        
+        pageTabBarItems = items
+        pageTabBar.replaceTabBarItems(items)
         
         self.viewControllers.forEach { vc in
             if vc.parent != nil {
@@ -478,6 +484,11 @@ extension PageTabBarController {
 }
 
 extension PageTabBarController: PageTabBarDelegate {
+    
+    func pageTabBarCurrentIndex(_ tabBar: PageTabBar) -> Int {
+        return pageIndex
+    }
+    
     // call back from item tapped
     func pageTabBar(_ tabBar: PageTabBar, indexDidChanged index: Int) {
         setPageIndex(index, animated: true)
@@ -556,9 +567,10 @@ extension PageTabBarController: UICollectionViewDelegate {
     }
     
     open func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        guard scrollView.contentSize.width > 0 else { return }
-        let diff = scrollView.contentOffset.x * pageTabBar.frame.width/scrollView.contentSize.width
-        let _ = pageTabBar.setIndicatorPosition(diff)
+        let contentSize = pageTabBarCollectionView.collectionViewLayout.collectionViewContentSize
+        guard contentSize.width > 0 else { return }
+        let diff = scrollView.contentOffset.x * pageTabBar.frame.width/contentSize.width
+        pageTabBar.setIndicatorPosition(diff)
     }
     
     open func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
