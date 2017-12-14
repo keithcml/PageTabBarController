@@ -12,7 +12,9 @@ import PageTabBarController
 
 class ScrollTabBarViewController: UIViewController {
     
-    private var parallaxController: ParallaxHeaderPageTabBarController
+    private lazy var parallaxController: ParallaxHeaderPageTabBarController = {
+        return initParallaxHeaderPageTabBarController()
+    }()
     
     private var pageTabBarTopConstraint: NSLayoutConstraint?
     
@@ -20,8 +22,7 @@ class ScrollTabBarViewController: UIViewController {
     private var currentScrollView: UIScrollView?
     private var contentOffsetObservation: NSKeyValueObservation?
     
-    override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
-        
+    private func initParallaxHeaderPageTabBarController() -> ParallaxHeaderPageTabBarController {
         // set styles
         let tabColor = UIColor(red: 215/255.0, green: 215/255.0, blue: 215/255.0, alpha: 1)
         let tabSelectedColor = UIColor(red: 35/255.0, green: 171/255.0, blue: 232/255.0, alpha: 1)
@@ -43,22 +44,15 @@ class ScrollTabBarViewController: UIViewController {
         vc02.view.tag = 2
         vc03.view.tag = 3
         
-        parallaxController = ParallaxHeaderPageTabBarController(viewControllers: [vc01, vc02, vc03], items: [tab01, tab02, tab03], parallaxHeaderHeight: 300)
+        let parallaxController = ParallaxHeaderPageTabBarController(viewControllers: [], items: [], parallaxHeaderHeight: 300)
         parallaxController.pageTabBarController.pageTabBar.barHeight = 60
         parallaxController.pageTabBarController.pageTabBar.indicatorLineColor = tabSelectedColor
         parallaxController.pageTabBarController.pageTabBar.indicatorLineHeight = 2
         parallaxController.pageTabBarController.pageTabBar.bottomLineHidden = true
         parallaxController.pageTabBarController.pageTabBar.topLineColor = tabSelectedColor
         parallaxController.pageTabBarController.pageTabBar.barTintColor = UIColor(white: 0.95, alpha: 1)
-        parallaxController.minimumRevealHeight = 0
-        super.init(nibName: nil, bundle: nil)
-        
-        
-        parallaxController.pageTabBarController.resetPageTabBarController([vc01, vc02, vc03], items: [tab01, tab02, tab03], newPageIndex: 1, animated: false)
-    }
-    
-    required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        parallaxController.pageTabBarController.setPageTabBarController([vc01, vc02, vc03], items: [tab01, tab02, tab03], newPageIndex: 1, animated: false)
+        return parallaxController
     }
     
     override func viewDidLoad() {

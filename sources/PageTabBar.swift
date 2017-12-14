@@ -222,11 +222,6 @@ open class PageTabBar: UIView {
         return index
     }
     
-//    internal func updateCurrentIndex() {
-//        let index = Int(indicatorLine.frame.midX/itemWidth)
-//        currentIndex = index
-//    }
-    
     internal func scrollToItem(at index: Int, animated: Bool) {
         let origin = CGPoint(x: ceil(CGFloat(index) * itemWidth), y: barHeight - indicatorLineHeight)
         let size = CGSize(width: itemWidth, height: indicatorLineHeight)
@@ -236,7 +231,7 @@ open class PageTabBar: UIView {
         }
     }
     
-    internal func replaceTabBarItems(_ newTabBarItems: [PageTabBarItem], targetIndex: Int = 0, animated: Bool = true) {
+    internal func replaceTabBarItems(_ newTabBarItems: [PageTabBarItem]) {
         
         itemStackView.arrangedSubviews.forEach {
             itemStackView.removeArrangedSubview($0)
@@ -248,9 +243,14 @@ open class PageTabBar: UIView {
         }
         
         items = newTabBarItems
+        
+        layoutIfNeeded()
+        // resize indicator
+        
+        
         //delegate?.pageTabBar(self, indexDidChanged: index)
         //currentIndex = targetIndex
-        scrollToItem(at: targetIndex, animated: animated)
+        //scrollToItem(at: targetIndex, animated: animated)
     }
     
     open func setBarHeight(_ height: CGFloat, animated: Bool) {

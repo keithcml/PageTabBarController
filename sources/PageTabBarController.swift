@@ -116,7 +116,7 @@ open class PageTabBarController: UIViewController, UIScrollViewDelegate {
         layout.sectionInset = .zero
         
         let collectionView = PageTabBarCollectionView(frame: UIScreen.main.bounds, collectionViewLayout: layout)
-        collectionView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "Cell")
+        collectionView.register(PageTabBarCollectionViewCell.self, forCellWithReuseIdentifier: "Cell")
         collectionView.isPagingEnabled = true
         collectionView.bounces = true
         collectionView.alwaysBounceHorizontal = true
@@ -225,7 +225,9 @@ open class PageTabBarController: UIViewController, UIScrollViewDelegate {
             break
         }
         
-        didChangeContentViewController(viewControllers[0], at: 0)
+        if viewControllers.count > 0 {
+            didChangeContentViewController(viewControllers[0], at: 0)
+        }
     }
     
     override open func viewWillAppear(_ animated: Bool) {
@@ -433,15 +435,18 @@ extension PageTabBarController {
         }
     }
     
-    open func resetPageTabBarController(_ viewControllers: [UIViewController], items: [PageTabBarItem], newPageIndex: Int, animated: Bool) {
+    open func setPageTabBarController(_ viewControllers: [UIViewController], items: [PageTabBarItem], newPageIndex: Int, animated: Bool) {
         
         pageTabBarItems = items
-        pageTabBar.replaceTabBarItems(items, animated: animated)
+        pageTabBar.replaceTabBarItems(items)
+        
+        if view.window == nil {
+            pageIndex = newPageIndex
+        }
         
         self.viewControllers.forEach { vc in
             if vc.parent != nil {
                 vc.willMove(toParentViewController: nil)
-                vc.view.removeFromSuperview()
                 vc.removeFromParentViewController()
             }
         }
@@ -451,11 +456,14 @@ extension PageTabBarController {
             addChildViewController(vc)
             vc.didMove(toParentViewController: self)
         }
-        
-        pageTabBarCollectionView.reloadData()
-        pageTabBarCollectionView.performBatchUpdates(nil) { (_) in
-            self.pageTabBarCollectionView.scrollToItem(at: IndexPath(item: newPageIndex, section: 0), at: .centeredHorizontally, animated: animated)
-            self.didChangeContentViewController(viewControllers[newPageIndex], at: newPageIndex)
+
+        // visual update if view on screen
+        if view.window != nil {
+            pageTabBarCollectionView.reloadData()
+            pageTabBarCollectionView.performBatchUpdates(nil) { (_) in
+                self.pageTabBarCollectionView.scrollToItem(at: IndexPath(item: newPageIndex, section: 0), at: .centeredHorizontally, animated: animated)
+                self.didChangeContentViewController(viewControllers[newPageIndex], at: newPageIndex)
+            }
         }
     }
     
@@ -486,7 +494,8 @@ extension PageTabBarController: UICollectionViewDataSource {
     }
     
     open func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "Cell", for: indexPath)
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "Cell", for: indexPath) as! PageTabBarCollectionViewCell
+        cell.viewController = viewControllers[indexPath.row]
         return cell
     }
 }
@@ -495,7 +504,7 @@ extension PageTabBarController: UICollectionViewDelegate {
     
     open func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
 
-        let vc = viewControllers[indexPath.row]
+        guard let cell = cell as? PageTabBarCollectionViewCell, let vc = cell.viewController else { return }
         
         if !shouldAutomaticallyForwardAppearanceMethods {
             vc.beginAppearanceTransition(true, animated: false)
@@ -521,7 +530,7 @@ extension PageTabBarController: UICollectionViewDelegate {
     
     open func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         
-        let vc = viewControllers[indexPath.row]
+        guard let cell = cell as? PageTabBarCollectionViewCell, let vc = cell.viewController else { return }
         
         for view in vc.view.subviews {
             if let scrollView =  view as? UIScrollView {
@@ -565,7 +574,8 @@ extension PageTabBarController: UICollectionViewDelegate {
     }
     
     open func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
-        guard let indexPath = pageTabBarCollectionView.indexPathForItem(at: scrollView.contentOffset) else { return }
+        let center = CGPoint(x: scrollView.contentOffset.x + (scrollView.frame.width / 2), y: (scrollView.frame.height / 2))
+        guard let indexPath = pageTabBarCollectionView.indexPathForItem(at: center) else { return }
         if indexPath.item != pageIndex {
             delegate?.pageTabBarController?(self, didChangeContentViewController: viewControllers[indexPath.item], atIndex: indexPath.item)
         }
@@ -576,7 +586,8 @@ extension PageTabBarController: UICollectionViewDelegate {
     private func didDragAndEnd(_ scrollView: UIScrollView) {
         pageTabBar.isInteracting = false
         
-        guard let indexPath = pageTabBarCollectionView.indexPathForItem(at: scrollView.contentOffset) else { return }
+        let center = CGPoint(x: scrollView.contentOffset.x + (scrollView.frame.width / 2), y: (scrollView.frame.height / 2))
+        guard let indexPath = pageTabBarCollectionView.indexPathForItem(at: center) else { return }
         if indexPath.item != pageIndex {
             delegate?.pageTabBarController?(self, didChangeContentViewController: viewControllers[indexPath.item], atIndex: indexPath.item)
         }

@@ -75,6 +75,13 @@ open class PageTabBarCollectionView: UICollectionView, UIGestureRecognizerDelega
     }
     
     open override func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        
+        if let panGestureRecognizer = gestureRecognizer as? UIPanGestureRecognizer {
+            let velocity = panGestureRecognizer.velocity(in: gestureRecognizer.view)
+            let translation = panGestureRecognizer.translation(in: gestureRecognizer.view)
+            return abs(velocity.x) > abs(velocity.y) && abs(translation.x) > abs(translation.y)
+        }
+        
         if let boolean = touchDelegate?.pageTabBarCollectionView?(self, gestureRecognizerShouldBegin: gestureRecognizer) {
             return boolean
         }

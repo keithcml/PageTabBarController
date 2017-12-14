@@ -182,7 +182,7 @@ class ViewController: UIViewController, CollapseTabBarViewControllerDelegate, Pa
         let vc03 = TableViewController(nibName: nil, bundle: nil)
         let vc04 = UIViewController(nibName: nil, bundle: nil)
         
-        collapseTabBarViewController?.pageTabBarController.resetPageTabBarController([vc01, vc02, vc03, vc04], items: [tab01, tab02, tab03, tab04], newPageIndex: 1, animated: true)
+        collapseTabBarViewController?.pageTabBarController.setPageTabBarController([vc01, vc02, vc03, vc04], items: [tab01, tab02, tab03, tab04], newPageIndex: 1, animated: true)
     }
 
     
