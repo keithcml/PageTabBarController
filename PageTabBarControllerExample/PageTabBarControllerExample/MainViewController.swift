@@ -130,7 +130,7 @@ extension MainViewController: UITableViewDelegate, UITableViewDataSource {
             parallaxVC.pageTabBarController.pageTabBar.topLineColor = tabSelectedColor
             parallaxVC.pageTabBarController.delegate = self
             
-            parallaxVC.setParallexHeaderView(galleryView, height: 200)
+            parallaxVC.setParallexHeaderView(galleryView, height: 400)
             //parallaxVC.setSelfSizingParallexHeaderView(galleryView)
             parallaxVC.delegate = self
             
@@ -138,7 +138,7 @@ extension MainViewController: UITableViewDelegate, UITableViewDataSource {
             button.setTitle("A Button", for: .normal)
             button.backgroundColor = .red
             button.addTarget(self, action: #selector(tap(_:)), for: .touchUpInside)
-            parallaxVC.setSupplementaryView(button)
+            parallaxVC.setSupplementaryView(button, height: 40)
             
             navigationController?.pushViewController(parallaxVC, animated: true)
         }

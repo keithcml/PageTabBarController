@@ -54,7 +54,6 @@ open class ParallaxHeaderPageTabBarController: UIViewController {
     
     private var minimumCollapseOffset: CGFloat {
         if #available(iOS 11.0, *) {
-            // print(max(minimumRevealHeight - parallaxHeaderHeight, -view.safeAreaInsets.top))
             return max(minimumRevealHeight, view.safeAreaInsets.top) - parallaxHeaderHeight
         } else {
             return minimumRevealHeight - parallaxHeaderHeight
@@ -142,9 +141,13 @@ open class ParallaxHeaderPageTabBarController: UIViewController {
     
     private func tabBarPositionYDidChange() {
         if let constant = parallaxHeaderViewTopConstraint?.constant {
-            let revealPercentage = 1 - abs(constant) / (minimumRevealHeight - minimumCollapseOffset)
-            let revealPercentageWithSafeAreaInset = 1 - abs(constant) / (parallaxHeaderHeight - minimumCollapseOffset)
-            delegate?.parallaxHeaderPageTabBarController?(self, revealPercentage: revealPercentage, revealPercentageIncludingTopSafeAreaInset: revealPercentageWithSafeAreaInset)
+            let revealPercentage = 1 - abs(constant) / abs(minimumCollapseOffset)
+            if #available(iOS 11.0, *) {
+                let revealPercentageWithSafeAreaInset = 1 - abs(constant) / (parallaxHeaderHeight - min(minimumRevealHeight, view.safeAreaInsets.top))
+                delegate?.parallaxHeaderPageTabBarController?(self, revealPercentage: revealPercentage, revealPercentageIncludingTopSafeAreaInset: revealPercentageWithSafeAreaInset)
+            } else {
+                delegate?.parallaxHeaderPageTabBarController?(self, revealPercentage: revealPercentage, revealPercentageIncludingTopSafeAreaInset: revealPercentage)
+            }
         }
     }
 }
@@ -219,8 +222,11 @@ extension ParallaxHeaderPageTabBarController {
                                      customView.heightAnchor.constraint(equalToConstant: height)])
     }
     
-    open func setSupplementaryView(_ view: UIView?) {
-        supplementaryContainerView.configureWithContentView(view)
+    open func setSupplementaryView(_ supplementaryView: UIView?, height: CGFloat) {
+        supplementaryContainerView.configureWithContentView(supplementaryView)
+        
+        supplementaryViewHeightConstraint?.constant = height
+        view.layoutIfNeeded()
     }
     
     /* @param height - new height
