@@ -79,12 +79,20 @@ open class PageTabBarCollectionView: UICollectionView, UIGestureRecognizerDelega
         if let panGestureRecognizer = gestureRecognizer as? UIPanGestureRecognizer {
             let velocity = panGestureRecognizer.velocity(in: gestureRecognizer.view)
             let translation = panGestureRecognizer.translation(in: gestureRecognizer.view)
-            return abs(velocity.x) > abs(velocity.y) && abs(translation.x) > abs(translation.y)
+            
+            let shouldBegin = abs(velocity.x) > abs(velocity.y) && abs(translation.x) > abs(translation.y)
+            
+            if shouldBegin {
+                return super.gestureRecognizerShouldBegin(gestureRecognizer)
+            }
+            
+            return false
         }
         
-        if let boolean = touchDelegate?.pageTabBarCollectionView?(self, gestureRecognizerShouldBegin: gestureRecognizer) {
-            return boolean
+        if let boolean = touchDelegate?.pageTabBarCollectionView?(self, gestureRecognizerShouldBegin: gestureRecognizer), !boolean {
+            return false
         }
+        
         return super.gestureRecognizerShouldBegin(gestureRecognizer)
     }
     

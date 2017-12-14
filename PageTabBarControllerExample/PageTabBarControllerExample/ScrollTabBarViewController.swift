@@ -110,16 +110,13 @@ class ScrollTabBarViewController: UIViewController {
 }
 
 extension ScrollTabBarViewController: PageTabBarControllerDelegate {
-    func pageTabBarController(_ controller: PageTabBarController, didSelectItem item: PageTabBarItem, atIndex index: Int, previousIndex: Int) {
-       
-    }
-    
+
     func pageTabBarController(_ controller: PageTabBarController, didChangeContentViewController vc: UIViewController, atIndex index: Int) {
 
     }
     
     func pageTabBarController(_ controller: PageTabBarController, transit fromIndex: Int, to toIndex: Int, progress: CGFloat) {
-        // print("from index: \(fromIndex), to index: \(toIndex), progress: \(progress)")
+        
     }
 }
 

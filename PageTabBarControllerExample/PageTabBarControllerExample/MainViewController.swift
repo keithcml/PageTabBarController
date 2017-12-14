@@ -154,9 +154,10 @@ extension MainViewController: UITableViewDelegate, UITableViewDataSource {
     
     @objc private func tap(_ sender: Any) {
         
+        parallaxVC.pageTabBarController.setPageIndex(1, animated: true)
         // setPageVC02()
         // parallaxVC.setParallexHeaderHeight(view.frame.width, animated: true)
-        
+        /*
         UIView.animate(withDuration: 0.4, delay: 0.0, usingSpringWithDamping: 0.8, initialSpringVelocity: 10, options: [], animations: {
             self.parallaxVC.setParallexHeaderView(nil, height: 500)
         }) { (_) in
@@ -174,7 +175,7 @@ extension MainViewController: UITableViewDelegate, UITableViewDataSource {
             }) { (_) in
                 self.parallaxVC.setParallexHeaderView(galleryView, height: 300)
             }
-        }
+        }*/
         
         
     }

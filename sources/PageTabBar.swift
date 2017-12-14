@@ -124,8 +124,6 @@ open class PageTabBar: UIView {
         }
     }
     
-    internal var currentIndex: Int = 0
-    
     private var items = [PageTabBarItem]()
     private var itemWidth: CGFloat {
         if items.count == 0 {

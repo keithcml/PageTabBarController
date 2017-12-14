@@ -186,7 +186,6 @@ open class PageTabBarController: UIViewController, UIScrollViewDelegate {
         pageTabBarCollectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
         pageTabBarCollectionView.topAnchor.constraint(equalTo: view.topAnchor).isActive = true
         
-        pageTabBar.currentIndex = pageIndex
         pageTabBar.delegate = self
         view.addSubview(pageTabBar)
         pageTabBar.translatesAutoresizingMaskIntoConstraints = false
