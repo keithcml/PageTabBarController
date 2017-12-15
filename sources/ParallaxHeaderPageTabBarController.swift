@@ -156,9 +156,9 @@ open class ParallaxHeaderPageTabBarController: UIViewController {
 
 extension ParallaxHeaderPageTabBarController {
     
-    open func scrollTabBar(to top: Bool, animated: Bool = false) {
+    open func scrollTabBarToPosition(atBottom bottom: Bool, animated: Bool = false) {
         
-        if top {
+        if bottom {
             if animated {
                 UIView.animate(withDuration: 0.3, animations: {
                     self.parallaxHeaderViewTopConstraint?.constant = 0

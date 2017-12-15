@@ -73,12 +73,14 @@ class ScrollTabBarViewController: UIViewController {
         } else {
             parallaxController.view.topAnchor.constraint(equalTo: view.topAnchor).isActive = true
         }
-        
         parallaxController.view.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
         parallaxController.view.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
         parallaxController.view.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
         
         parallaxController.didMove(toParentViewController: self)
+        
+        
+        parallaxController.pageTabBarController.delegate = self
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -89,6 +91,8 @@ class ScrollTabBarViewController: UIViewController {
         } else {
             // Fallback on earlier versions
         }
+        
+        navigationController?.setNavigationBarHidden(false, animated: true)
 //        if let vc = pageTabBarController.selectedViewController {
 //            for view in vc.view.subviews {
 //                if view.isKind(of: UIScrollView.self) {
@@ -112,12 +116,10 @@ class ScrollTabBarViewController: UIViewController {
 extension ScrollTabBarViewController: PageTabBarControllerDelegate {
 
     func pageTabBarController(_ controller: PageTabBarController, didChangeContentViewController vc: UIViewController, atIndex index: Int) {
-
+        print("didChangeContentViewController: \(vc)")
+        print("index: \(index)")
     }
-    
-    func pageTabBarController(_ controller: PageTabBarController, transit fromIndex: Int, to toIndex: Int, progress: CGFloat) {
-        
-    }
+  
 }
 
 
