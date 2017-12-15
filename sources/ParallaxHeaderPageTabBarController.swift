@@ -223,10 +223,8 @@ extension ParallaxHeaderPageTabBarController {
     }
     
     open func setSupplementaryView(_ supplementaryView: UIView?, height: CGFloat) {
+        supplementaryViewHeight = height
         supplementaryContainerView.configureWithContentView(supplementaryView)
-        
-        supplementaryViewHeightConstraint?.constant = height
-        view.layoutIfNeeded()
     }
     
     /* @param height - new height

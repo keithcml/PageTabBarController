@@ -145,7 +145,7 @@ open class PageTabBarController: UIViewController, UIScrollViewDelegate {
     
     // Constraints
     private var tabBarTopConstraint: NSLayoutConstraint?
-    private var bannerHeightConstraint: NSLayoutConstraint?
+    private var supplementaryViewHeightConstraint: NSLayoutConstraint?
     
     // Child Scroll View
     open private(set) var currentScrollView: UIScrollView?
@@ -202,8 +202,8 @@ open class PageTabBarController: UIViewController, UIScrollViewDelegate {
             pageTabBarSupplementaryView.translatesAutoresizingMaskIntoConstraints = false
             pageTabBarSupplementaryView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
             pageTabBarSupplementaryView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
-            bannerHeightConstraint = pageTabBarSupplementaryView.heightAnchor.constraint(equalToConstant: 0)
-            bannerHeightConstraint?.isActive = true
+            supplementaryViewHeightConstraint = pageTabBarSupplementaryView.heightAnchor.constraint(equalToConstant: 0)
+            supplementaryViewHeightConstraint?.isActive = true
             break
         default:
             break
@@ -305,7 +305,7 @@ open class PageTabBarController: UIViewController, UIScrollViewDelegate {
                 break
             }
             
-            if let bannerHeight = bannerHeightConstraint?.constant {
+            if let bannerHeight = supplementaryViewHeightConstraint?.constant {
                 newSafeArea.top += bannerHeight
             }
             for child in viewControllers {
@@ -318,7 +318,7 @@ open class PageTabBarController: UIViewController, UIScrollViewDelegate {
                     var inset = scrollView.contentInset
                     switch tabBarPosition {
                     case .topAttached, .topInsetAttached:
-                        inset.top = pageTabBar.frame.maxY + (bannerHeightConstraint?.constant ?? 0)
+                        inset.top = pageTabBar.frame.maxY + (supplementaryViewHeightConstraint?.constant ?? 0)
                         break
                     case .bottom:
                         inset.bottom = pageTabBar.frame.height
@@ -412,7 +412,7 @@ extension PageTabBarController {
         guard let customView = customView else {
             
             UIView.animate(withDuration: 0.3) {
-                self.bannerHeightConstraint?.constant = 0
+                self.supplementaryViewHeightConstraint?.constant = 0
                 self.view.layoutIfNeeded()
             }
             
@@ -429,13 +429,13 @@ extension PageTabBarController {
         customView.heightAnchor.constraint(equalToConstant: height).isActive = true
         
         if view.window == nil {
-            bannerHeightConstraint?.constant = height
+            supplementaryViewHeightConstraint?.constant = height
             adjustsContentInsets()
             return
         }
         
         UIView.animate(withDuration: 0.3) {
-            self.bannerHeightConstraint?.constant = height
+            self.supplementaryViewHeightConstraint?.constant = height
             self.adjustsContentInsets()
             self.view.layoutIfNeeded()
         }
