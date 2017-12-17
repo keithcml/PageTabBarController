@@ -130,7 +130,7 @@ extension MainViewController: UITableViewDelegate, UITableViewDataSource {
             parallaxVC.pageTabBarController.pageTabBar.topLineColor = tabSelectedColor
             parallaxVC.pageTabBarController.delegate = self
             
-            parallaxVC.setParallexHeaderView(galleryView, height: view.frame.width)
+            parallaxVC.setParallexHeaderView(galleryView, height: view.frame.width, sizeToFitHeader: true)
             parallaxVC.delegate = self
             
         
@@ -159,7 +159,8 @@ extension MainViewController: UITableViewDelegate, UITableViewDataSource {
         // parallaxVC.setParallexHeaderHeight(view.frame.width, animated: true)
         
         UIView.animate(withDuration: 0.4, delay: 0.0, usingSpringWithDamping: 0.8, initialSpringVelocity: 10, options: [], animations: {
-            self.parallaxVC.setParallexHeaderView(nil, height: 500)
+            self.parallaxVC.minimizesTabsContent(animated: false)
+            // self.parallaxVC.setParallexHeaderView(nil, height: 500, sizeToFitHeader:  true)
         }) { (_) in
             
             
@@ -169,11 +170,13 @@ extension MainViewController: UITableViewDelegate, UITableViewDataSource {
             galleryView.images = [GalleryImage.image(image: UIImage(named: "cover")!),
                                   GalleryImage.image(image: UIImage(named: "cover")!)]
             
+            self.parallaxVC.setParallexHeaderView(galleryView, height: 300)
+            
             UIView.animate(withDuration: 0.4, delay: 2.0, usingSpringWithDamping: 0.8, initialSpringVelocity: 10, options: [], animations: {
                 self.parallaxVC.setParallexHeaderHeight(300, animated: false)
                 //self.parallaxVC.setParallexHeaderView(galleryView, height: 300)
             }) { (_) in
-                self.parallaxVC.setParallexHeaderView(galleryView, height: 300)
+                // self.parallaxVC.setParallexHeaderView(galleryView, height: 300)
             }
         }
         
@@ -196,7 +199,7 @@ extension MainViewController: UITableViewDelegate, UITableViewDataSource {
         vc01.view.tag = 1
         vc02.view.tag = 2
         
-        self.parallaxVC.pageTabBarController.setPageTabBarController([vc01, vc02], items: [tab01, tab02], newPageIndex: 1, animated: true)
+        self.parallaxVC.pageTabBarController.setPageTabBarController([vc01, vc02], items: [tab01, tab02], newPageIndex: 1, animated: false)
     }
 }
 
@@ -218,27 +221,13 @@ extension MainViewController: PageTabBarControllerDelegate, ParallaxHeaderPageTa
     }
     
     func pageTabBarController(_ controller: PageTabBarController, didChangeContentViewController vc: UIViewController, atIndex index: Int) {
-        print("didChangeContentViewController: \(vc)")
-        print("index: \(index)")
-        
-        if index == 1 {
-            
-            if let _ = parallaxVC {
-                
-            }
-//
-            //parallaxVC.isStretchy = false
-            //parallaxVC.setParallexHeaderHeight(300, animated: true)
-        } else {
-            //parallaxVC.isStretchy = true
-        }
+        print("didChangeContentViewController: \(vc) at index: \(index)")
         
         if index == 2 {
-            //parallaxVC.setParallexHeaderHeight(view.frame.width, animated: true)
-            controller.setBadge(200, forItemAt: index)
+            controller.setBadge(20, forItemAt: index)
             
             if let _ = parallaxVC {
-                parallaxVC.scrollTabBarToPosition(atBottom: true, animated: true)
+                parallaxVC.scrollToTop(false, animated: true)
             }
         }
     }

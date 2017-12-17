@@ -156,9 +156,9 @@ open class ParallaxHeaderPageTabBarController: UIViewController {
 
 extension ParallaxHeaderPageTabBarController {
     
-    open func scrollTabBarToPosition(atBottom bottom: Bool, animated: Bool = false) {
-        
-        if bottom {
+    open func scrollToTop(_ toTop: Bool, animated: Bool = false) {
+
+        if toTop {
             if animated {
                 UIView.animate(withDuration: 0.3, animations: {
                     self.parallaxHeaderViewTopConstraint?.constant = 0
@@ -186,29 +186,17 @@ extension ParallaxHeaderPageTabBarController {
         }
     }
     
-    open func setSelfSizingParallexHeaderView(_ view: UIView?) {
-        
-        parallaxHeaderContainerView.subviews.forEach { $0.removeFromSuperview() }
-        
-        guard let customView = view else {
-            // setParallexHeaderHeight(height, animated: false)
-            return
-        }
-        
-        parallaxHeaderContainerView.addSubview(customView)
-        customView.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([customView.leadingAnchor.constraint(equalTo: parallaxHeaderContainerView.leadingAnchor),
-                                     customView.trailingAnchor.constraint(equalTo: parallaxHeaderContainerView.trailingAnchor),
-                                     customView.topAnchor.constraint(equalTo: parallaxHeaderContainerView.topAnchor),
-                                     customView.bottomAnchor.constraint(equalTo: parallaxHeaderContainerView.bottomAnchor)])
-        let size = parallaxHeaderContainerView.systemLayoutSizeFitting(UILayoutFittingCompressedSize)
-        setParallexHeaderHeight(size.height, animated: false)
+    open func setSupplementaryView(_ supplementaryView: UIView?, height: CGFloat) {
+        supplementaryViewHeight = height
+        supplementaryContainerView.configureWithContentView(supplementaryView)
     }
     
-    open func setParallexHeaderView(_ view: UIView?, height: CGFloat) {
+    open func setParallexHeaderView(_ view: UIView?, height: CGFloat, sizeToFitHeader: Bool = false) {
         
         defer {
-            setParallexHeaderHeight(height, animated: false)
+            if sizeToFitHeader {
+                setParallexHeaderHeight(height, animated: false)
+            }
         }
         parallaxHeaderContainerView.subviews.forEach { $0.removeFromSuperview() }
         
@@ -220,34 +208,48 @@ extension ParallaxHeaderPageTabBarController {
                                      customView.trailingAnchor.constraint(equalTo: parallaxHeaderContainerView.trailingAnchor),
                                      customView.topAnchor.constraint(equalTo: parallaxHeaderContainerView.topAnchor),
                                      customView.heightAnchor.constraint(equalToConstant: height)])
-    }
-    
-    open func setSupplementaryView(_ supplementaryView: UIView?, height: CGFloat) {
-        supplementaryViewHeight = height
-        supplementaryContainerView.configureWithContentView(supplementaryView)
+        self.view.setNeedsLayout()
+        self.view.layoutIfNeeded()
+        
+        //parallaxHeaderContainerView.setNeedsLayout()
+        //parallaxHeaderContainerView.layoutIfNeeded()
     }
     
     /* @param height - new height
      * @param animated - run default animation
      */
-    open func setParallexHeaderHeight(_ newHeight: CGFloat, animated: Bool) {
+    open func setParallexHeaderHeight(_ newHeight: CGFloat, animated: Bool, scrollToTop: Bool = true) {
         
         guard parallaxHeaderHeight != newHeight else { return }
         parallaxHeaderHeight = newHeight
         
         if animated {
             UIView.animate(withDuration: 0.3, animations: {
-                //self.parallaxHeaderViewTopConstraint?.constant = 0
+                if scrollToTop {
+                    self.parallaxHeaderViewTopConstraint?.constant = 0
+                }
                 self.parallaxHeaderViewHeightConstraint?.constant = newHeight
                 self.tabBarPositionYDidChange()
                 self.view.layoutIfNeeded()
             }, completion: nil)
         } else {
-            //parallaxHeaderViewTopConstraint?.constant = 0
+            if scrollToTop {
+                parallaxHeaderViewTopConstraint?.constant = 0
+            }
             parallaxHeaderViewHeightConstraint?.constant = newHeight
             tabBarPositionYDidChange()
             view.layoutIfNeeded()
         }
+    }
+    
+    open func minimizesTabsContent(animated: Bool, scrollToTop: Bool = true) {
+        var maximumHeight = CGFloat(0)
+        if #available(iOS 11.0, *) {
+            maximumHeight = view.frame.height - view.safeAreaInsets.top - view.safeAreaInsets.bottom - pageTabBarController.pageTabBar.frame.height
+        } else {
+            
+        }
+        setParallexHeaderHeight(maximumHeight, animated: animated, scrollToTop: scrollToTop)
     }
     
     open func childScrollViewDidScroll(_ scrollView: UIScrollView) {
