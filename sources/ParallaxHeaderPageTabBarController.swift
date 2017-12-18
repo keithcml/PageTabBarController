@@ -26,6 +26,13 @@ open class ParallaxHeaderPageTabBarController: UIViewController {
         view.clipsToBounds = true
         return view
     }()
+    open let headerTransitionView: UIView = {
+        let transitionView = UIView()
+        transitionView.isUserInteractionEnabled = false
+        transitionView.translatesAutoresizingMaskIntoConstraints = false
+        transitionView.clipsToBounds = true
+        return transitionView
+    }()
     let supplementaryContainerView: SupplementaryView = {
         let view = SupplementaryView()
         view.backgroundColor = .clear
@@ -95,7 +102,8 @@ open class ParallaxHeaderPageTabBarController: UIViewController {
         view.addSubview(pageTabBarController.view)
         view.addSubview(parallaxHeaderContainerView)
         view.addSubview(supplementaryContainerView)
-
+        view.addSubview(headerTransitionView)
+        
         parallaxHeaderContainerView.translatesAutoresizingMaskIntoConstraints = false
         pageTabBarController.view.translatesAutoresizingMaskIntoConstraints = false
         supplementaryContainerView.translatesAutoresizingMaskIntoConstraints = false
@@ -127,6 +135,11 @@ open class ParallaxHeaderPageTabBarController: UIViewController {
                                      pageTabBarController.view.trailingAnchor.constraint(equalTo: trailingAnchor),
                                      pageTabBarController.view.bottomAnchor.constraint(equalTo: view.bottomAnchor),
                                      pageTabBarController.view.topAnchor.constraint(equalTo: parallaxHeaderContainerView.bottomAnchor)])
+        
+        NSLayoutConstraint.activate([headerTransitionView.topAnchor.constraint(equalTo: parallaxHeaderContainerView.topAnchor),
+                                     headerTransitionView.leftAnchor.constraint(equalTo: parallaxHeaderContainerView.leftAnchor),
+                                     headerTransitionView.rightAnchor.constraint(equalTo: parallaxHeaderContainerView.rightAnchor),
+                                     headerTransitionView.bottomAnchor.constraint(equalTo: parallaxHeaderContainerView.bottomAnchor)])
         
         pageTabBarController.didMove(toParentViewController: self)
     }
