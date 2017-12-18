@@ -202,7 +202,7 @@ extension ParallaxHeaderPageTabBarController {
         
         guard let customView = view else { return }
         
-        parallaxHeaderContainerView.addSubview(customView)
+        parallaxHeaderContainerView.insertSubview(customView, at: 0)
         customView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([customView.leadingAnchor.constraint(equalTo: parallaxHeaderContainerView.leadingAnchor),
                                      customView.trailingAnchor.constraint(equalTo: parallaxHeaderContainerView.trailingAnchor),
@@ -210,9 +210,6 @@ extension ParallaxHeaderPageTabBarController {
                                      customView.heightAnchor.constraint(equalToConstant: height)])
         self.view.setNeedsLayout()
         self.view.layoutIfNeeded()
-        
-        //parallaxHeaderContainerView.setNeedsLayout()
-        //parallaxHeaderContainerView.layoutIfNeeded()
     }
     
     /* @param height - new height
