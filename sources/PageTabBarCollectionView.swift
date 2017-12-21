@@ -80,7 +80,7 @@ open class PageTabBarCollectionView: UICollectionView, UIGestureRecognizerDelega
             let velocity = panGestureRecognizer.velocity(in: gestureRecognizer.view)
             let translation = panGestureRecognizer.translation(in: gestureRecognizer.view)
             
-            let shouldBegin = abs(velocity.x) > abs(velocity.y) && abs(translation.x) > abs(translation.y)
+            let shouldBegin = abs(velocity.x) >= abs(velocity.y) && abs(translation.x) >= abs(translation.y)
             
             if !shouldBegin {
                 return false
