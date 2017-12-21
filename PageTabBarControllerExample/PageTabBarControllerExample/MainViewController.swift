@@ -154,10 +154,12 @@ extension MainViewController: UITableViewDelegate, UITableViewDataSource {
     
     @objc private func tap(_ sender: Any) {
         
+        parallaxVC.scrollToTop(true, animated: true)
+        
         // parallaxVC.pageTabBarController.setPageIndex(1, animated: true)
         // setPageVC02()
         // parallaxVC.setParallexHeaderHeight(view.frame.width, animated: true)
-        
+        /*
         UIView.animate(withDuration: 0.4, delay: 0.0, usingSpringWithDamping: 0.8, initialSpringVelocity: 10, options: [], animations: {
             self.parallaxVC.minimizesTabsContent(animated: false)
             // self.parallaxVC.setParallexHeaderView(nil, height: 500, sizeToFitHeader:  true)
@@ -178,7 +180,7 @@ extension MainViewController: UITableViewDelegate, UITableViewDataSource {
             }) { (_) in
                 // self.parallaxVC.setParallexHeaderView(galleryView, height: 300)
             }
-        }
+        }*/
         
         
     }
@@ -227,7 +229,7 @@ extension MainViewController: PageTabBarControllerDelegate, ParallaxHeaderPageTa
             controller.setBadge(20, forItemAt: index)
             
             if let _ = parallaxVC {
-                parallaxVC.scrollToTop(false, animated: true)
+                parallaxVC.scrollToTop(true, animated: true)
             }
         }
     }
