@@ -50,13 +50,30 @@ open class ParallaxHeaderPageTabBarController: UIViewController {
         }
     }
     open var parallaxOffset = CGFloat(1)
-    open var minimumRevealHeight = CGFloat(0)
+    open var minimumRevealHeight = CGFloat(0) {
+        didSet {
+            
+        }
+    }
     open var parallaxHeaderHeight = CGFloat(200)
     open var supplementaryViewHeight = CGFloat(60) {
         didSet {
             supplementaryViewHeightConstraint?.constant = supplementaryViewHeight
             view.setNeedsLayout()
         }
+    }
+    
+    open var minimumSafeAreaInsets: UIEdgeInsets {
+        var safeAreaInsets = UIEdgeInsets.zero
+        if #available(iOS 11.0, *) {
+            safeAreaInsets.top = max(minimumRevealHeight, view.safeAreaInsets.top) + pageTabBarController.pageTabBar.frame.height
+        } else {
+            safeAreaInsets.top = minimumRevealHeight + pageTabBarController.pageTabBar.frame.height
+        }
+        safeAreaInsets.left = 0
+        safeAreaInsets.bottom = 0
+        safeAreaInsets.right = 0
+        return safeAreaInsets
     }
     
     private var minimumCollapseOffset: CGFloat {
@@ -187,12 +204,12 @@ extension ParallaxHeaderPageTabBarController {
         else {
             if animated {
                 UIView.animate(withDuration: 0.3, animations: {
-                    self.parallaxHeaderViewTopConstraint?.constant = self.minimumRevealHeight - self.parallaxHeaderHeight
+                    self.parallaxHeaderViewTopConstraint?.constant = self.minimumCollapseOffset // self.minimumRevealHeight - self.parallaxHeaderHeight
                     self.tabBarPositionYDidChange()
                     self.view.layoutIfNeeded()
                 }, completion: nil)
             } else {
-                parallaxHeaderViewTopConstraint?.constant = self.minimumRevealHeight - self.parallaxHeaderHeight
+                parallaxHeaderViewTopConstraint?.constant = self.minimumCollapseOffset // self.minimumRevealHeight - self.parallaxHeaderHeight
                 tabBarPositionYDidChange()
                 view.layoutIfNeeded()
             }

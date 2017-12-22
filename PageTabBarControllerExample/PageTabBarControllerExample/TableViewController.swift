@@ -62,12 +62,23 @@ final class TableViewController: UIViewController, UITableViewDelegate, UITableV
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        
         //print("viewWillAppear \(view.tag)")
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         //print("viewDidAppear \(view.tag)")
+        if #available(iOS 11.0, *) {
+            print(view.safeAreaInsets)
+            print(parallaxHeaderPageTabBarController?.view.safeAreaInsets)
+            
+            let height = parallaxHeaderPageTabBarController!.view.safeAreaInsets.top + view.safeAreaInsets.bottom
+            tableView.contentSize = CGSize(width: tableView.contentSize.width, height: <#T##CGFloat#>)
+        } else {
+            // Fallback on earlier versions
+        }
+        print(parallaxHeaderPageTabBarController?.minimumSafeAreaInsets)
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -85,7 +96,7 @@ final class TableViewController: UIViewController, UITableViewDelegate, UITableV
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 10
+        return 1
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {

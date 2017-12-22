@@ -43,6 +43,8 @@ internal enum PageTabBarItemArrangement {
     case compact
 }
 
+public typealias LineWidthUnit = Int
+
 @objcMembers
 open class PageTabBar: UIView {
     
@@ -91,30 +93,44 @@ open class PageTabBar: UIView {
         }
     }
     
-    open var indicatorLineColor = UIColor.blue  {
+    open var indicatorLineColor = UIColor.blue {
         didSet {
             indicatorLine.backgroundColor = indicatorLineColor
             setNeedsDisplay()
         }
     }
     
-    open var indicatorLineHeight: CGFloat = 1.0  {
+    open var indicatorLineHeight: CGFloat = 1.0 {
         didSet {
             indicatorLine.frame = CGRect(x: indicatorLine.frame.minX, y: barHeight - indicatorLineHeight, width: itemWidth, height: indicatorLineHeight)
         }
     }
     
-    open var topLineColor = UIColor.lightGray  {
+    open var topLineColor = UIColor.lightGray {
         didSet {
             topLine.backgroundColor = topLineColor
             setNeedsDisplay()
         }
     }
     
-    open var bottomLineColor = UIColor.lightGray  {
+    open var bottomLineColor = UIColor.lightGray {
         didSet {
             bottomLine.backgroundColor = bottomLineColor
             setNeedsDisplay()
+        }
+    }
+    
+    open var topLineWidth: LineWidthUnit = 1 {
+        didSet {
+            let lineWidth = CGFloat(topLineWidth) / UIScreen.main.scale
+            topLine.frame = CGRect(x: 0, y: 0, width: bounds.width, height: lineWidth)
+        }
+    }
+    
+    open var bottomLineWidth: LineWidthUnit = 1 {
+        didSet {
+            let lineWidth = CGFloat(bottomLineWidth) / UIScreen.main.scale
+            bottomLine.frame = CGRect(x: 0, y: bounds.height - lineWidth, width: bounds.width, height: lineWidth)
         }
     }
     
@@ -178,23 +194,31 @@ open class PageTabBar: UIView {
         itemStackView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         addSubview(itemStackView)
         
-        topLine.frame = CGRect(x: 0, y: 0, width: bounds.width, height: 0.5)
+        var lineWidth = CGFloat(topLineWidth) / UIScreen.main.scale
+        topLine.frame = CGRect(x: 0, y: 0, width: bounds.width, height: lineWidth)
         addSubview(topLine)
         topLine.translatesAutoresizingMaskIntoConstraints = false
         topLine.topAnchor.constraint(equalTo: topAnchor).isActive = true
         topLine.leadingAnchor.constraint(equalTo: leadingAnchor).isActive = true
         topLine.trailingAnchor.constraint(equalTo: trailingAnchor).isActive = true
-        topLine.heightAnchor.constraint(equalToConstant: 0.5).isActive = true
         
-        bottomLine.frame = CGRect(x: 0, y: bounds.height - 0.5, width: bounds.width, height: 0.5)
+        lineWidth = CGFloat(bottomLineWidth) / UIScreen.main.scale
+        bottomLine.frame = CGRect(x: 0, y: bounds.height - lineWidth, width: bounds.width, height: lineWidth)
         addSubview(bottomLine)
         bottomLine.translatesAutoresizingMaskIntoConstraints = false
-        bottomLine.heightAnchor.constraint(equalToConstant: 0.5).isActive = true
         bottomLine.leadingAnchor.constraint(equalTo: leadingAnchor).isActive = true
         bottomLine.trailingAnchor.constraint(equalTo: trailingAnchor).isActive = true
         bottomLine.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true
         
         addSubview(indicatorLine)
+    }
+    
+    override open func layoutSubviews() {
+        super.layoutSubviews()
+        var lineWidth = CGFloat(topLineWidth) / UIScreen.main.scale
+        topLine.frame = CGRect(x: 0, y: 0, width: bounds.width, height: lineWidth)
+        lineWidth = CGFloat(bottomLineWidth) / UIScreen.main.scale
+        bottomLine.frame = CGRect(x: 0, y: bounds.height - lineWidth, width: bounds.width, height: lineWidth)
     }
     
     internal func setIndicatorPosition(_ position: CGFloat, animated: Bool = false) {

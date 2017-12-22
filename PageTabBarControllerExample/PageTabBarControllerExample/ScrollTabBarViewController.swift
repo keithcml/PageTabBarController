@@ -48,9 +48,13 @@ class ScrollTabBarViewController: UIViewController {
         parallaxController.pageTabBarController.pageTabBar.barHeight = 60
         parallaxController.pageTabBarController.pageTabBar.indicatorLineColor = tabSelectedColor
         parallaxController.pageTabBarController.pageTabBar.indicatorLineHeight = 2
-        parallaxController.pageTabBarController.pageTabBar.bottomLineHidden = true
-        parallaxController.pageTabBarController.pageTabBar.topLineColor = tabSelectedColor
-        parallaxController.pageTabBarController.pageTabBar.barTintColor = UIColor(white: 0.95, alpha: 1)
+        parallaxController.pageTabBarController.pageTabBar.bottomLineHidden = false
+        parallaxController.pageTabBarController.pageTabBar.topLineColor = UIColor(white: 0.95, alpha: 1)
+        parallaxController.pageTabBarController.pageTabBar.bottomLineColor = UIColor(white: 0.95, alpha: 1)
+        parallaxController.pageTabBarController.pageTabBar.barTintColor = .white
+        parallaxController.pageTabBarController.pageTabBar.topLineWidth = 1
+        parallaxController.pageTabBarController.pageTabBar.bottomLineWidth = 1
+        
         parallaxController.pageTabBarController.setPageTabBarController([vc01, vc02, vc03], items: [tab01, tab02, tab03], newPageIndex: 1, animated: false)
         return parallaxController
     }
@@ -104,6 +108,14 @@ class ScrollTabBarViewController: UIViewController {
 //            }
 //        }
 //        addContentOffsetObserve()
+        
+       // print(parallaxController.minimumSafeAreaInsets)
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+    //    print(parallaxController.minimumSafeAreaInsets)
     }
     
     override func viewWillDisappear(_ animated: Bool) {

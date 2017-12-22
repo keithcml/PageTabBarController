@@ -129,7 +129,9 @@ extension MainViewController: UITableViewDelegate, UITableViewDataSource {
             parallaxVC.pageTabBarController.pageTabBar.bottomLineHidden = true
             parallaxVC.pageTabBarController.pageTabBar.topLineColor = tabSelectedColor
             parallaxVC.pageTabBarController.delegate = self
-            
+            parallaxVC.pageTabBarController.pageTabBar.topLineWidth = 1
+            parallaxVC.pageTabBarController.pageTabBar.bottomLineWidth = 1
+            parallaxVC.minimumRevealHeight = 100
             parallaxVC.setParallexHeaderView(galleryView, height: view.frame.width, sizeToFitHeader: true)
             parallaxVC.delegate = self
             
