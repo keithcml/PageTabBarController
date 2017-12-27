@@ -70,15 +70,14 @@ final class TableViewController: UIViewController, UITableViewDelegate, UITableV
         super.viewDidAppear(animated)
         //print("viewDidAppear \(view.tag)")
         if #available(iOS 11.0, *) {
-            print(view.safeAreaInsets)
-            print(parallaxHeaderPageTabBarController?.view.safeAreaInsets)
+            let height = parallaxHeaderPageTabBarController!.view.safeAreaLayoutGuide.layoutFrame.height - parallaxHeaderPageTabBarController!.minimumSafeAreaInsets.top
             
-            let height = parallaxHeaderPageTabBarController!.view.safeAreaInsets.top + view.safeAreaInsets.bottom
-            tableView.contentSize = CGSize(width: tableView.contentSize.width, height: <#T##CGFloat#>)
+            print(height)
+            
+            tableView.contentSize = CGSize(width: tableView.contentSize.width, height: height)
         } else {
             // Fallback on earlier versions
         }
-        print(parallaxHeaderPageTabBarController?.minimumSafeAreaInsets)
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -89,6 +88,11 @@ final class TableViewController: UIViewController, UITableViewDelegate, UITableV
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
         //print("viewDidDisappear \(view.tag)")
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        
     }
     
     func numberOfSections(in tableView: UITableView) -> Int {
@@ -112,6 +116,7 @@ final class TableViewController: UIViewController, UITableViewDelegate, UITableV
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
+        tableView.reloadData()
         // let presentedViewController = PresentedViewController(nibName: nil, bundle: nil)
         // present(presentedViewController, animated: true, completion: nil)
     }
