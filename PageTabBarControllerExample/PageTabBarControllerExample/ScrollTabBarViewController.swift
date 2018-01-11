@@ -23,19 +23,15 @@ class ScrollTabBarViewController: UIViewController {
     private var contentOffsetObservation: NSKeyValueObservation?
     
     private func initParallaxHeaderPageTabBarController() -> ParallaxHeaderPageTabBarController {
-        // set styles
-        let tabColor = UIColor(red: 215/255.0, green: 215/255.0, blue: 215/255.0, alpha: 1)
-        let tabSelectedColor = UIColor(red: 35/255.0, green: 171/255.0, blue: 232/255.0, alpha: 1)
         
-        let tab01 = PageTabBarItem(icon: UIImage(named: "img01"))
-        tab01.color = tabColor
-        tab01.selectedColor = tabSelectedColor
-        let tab02 = PageTabBarItem(icon: UIImage(named: "img01"))
-        tab02.color = tabColor
-        tab02.selectedColor = tabSelectedColor
-        let tab03 = PageTabBarItem(icon: UIImage(named: "img01"))
-        tab03.color = tabColor
-        tab03.selectedColor = tabSelectedColor
+        // set default appearance settings
+        var appearance = PageTabBarItem.defaultAppearanceSettings
+        appearance.contentHeight = 30
+        PageTabBarItem.defaultAppearanceSettings = appearance
+
+        let tab01 = PageTabBarItem(unselectedImage: UIImage(named: "img01"), selectedImage: UIImage(named: "img01"))
+        let tab02 = PageTabBarItem(unselectedImage: UIImage(named: "img01"), selectedImage: UIImage(named: "img01"))
+        let tab03 = PageTabBarItem(unselectedImage: UIImage(named: "img01"), selectedImage: UIImage(named: "img01"))
         
         let vc01 = TableViewController(nibName: nil, bundle: nil)
         let vc02 = TableViewController(nibName: nil, bundle: nil)
@@ -44,17 +40,22 @@ class ScrollTabBarViewController: UIViewController {
         vc02.view.tag = 2
         vc03.view.tag = 3
         
+        // set default appearance settings
+        var barAppearance = PageTabBar.defaultBarAppearanceSettings
+        barAppearance.topLineColor = UIColor(white: 0.95, alpha: 1)
+        barAppearance.bottomLineColor = UIColor(white: 0.95, alpha: 1)
+        barAppearance.barTintColor = .white
+        barAppearance.topLineHidden = true
+        PageTabBar.defaultBarAppearanceSettings = barAppearance
+        
+        var lineAppearance = PageTabBar.defaultIndicatorLineAppearanceSettings
+        lineAppearance.lineHeight = 2
+        lineAppearance.lineColor = view.tintColor
+        PageTabBar.defaultIndicatorLineAppearanceSettings = lineAppearance
+        
         let parallaxController = ParallaxHeaderPageTabBarController(viewControllers: [], items: [], parallaxHeaderHeight: 300)
         parallaxController.pageTabBarController.pageTabBar.barHeight = 60
-        parallaxController.pageTabBarController.pageTabBar.indicatorLineColor = tabSelectedColor
-        parallaxController.pageTabBarController.pageTabBar.indicatorLineHeight = 2
-        parallaxController.pageTabBarController.pageTabBar.bottomLineHidden = false
-        parallaxController.pageTabBarController.pageTabBar.topLineColor = UIColor(white: 0.95, alpha: 1)
-        parallaxController.pageTabBarController.pageTabBar.bottomLineColor = UIColor(white: 0.95, alpha: 1)
-        parallaxController.pageTabBarController.pageTabBar.barTintColor = .white
-        parallaxController.pageTabBarController.pageTabBar.topLineWidth = 1
-        parallaxController.pageTabBarController.pageTabBar.bottomLineWidth = 1
-        
+
         parallaxController.pageTabBarController.setPageTabBarController([vc01, vc02, vc03], items: [tab01, tab02, tab03], newPageIndex: 1, animated: false)
         return parallaxController
     }

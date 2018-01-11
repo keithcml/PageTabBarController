@@ -70,11 +70,15 @@ final class TableViewController: UIViewController, UITableViewDelegate, UITableV
         super.viewDidAppear(animated)
         //print("viewDidAppear \(view.tag)")
         if #available(iOS 11.0, *) {
-            let height = parallaxHeaderPageTabBarController!.view.safeAreaLayoutGuide.layoutFrame.height - parallaxHeaderPageTabBarController!.minimumSafeAreaInsets.top
             
-            print(height)
+            if let vc = parallaxHeaderPageTabBarController {
+                let height = vc.view.safeAreaLayoutGuide.layoutFrame.height - vc.minimumSafeAreaInsets.top
+                
+                print(height)
+                
+                tableView.contentSize = CGSize(width: tableView.contentSize.width, height: height)
+            }
             
-            tableView.contentSize = CGSize(width: tableView.contentSize.width, height: height)
         } else {
             // Fallback on earlier versions
         }

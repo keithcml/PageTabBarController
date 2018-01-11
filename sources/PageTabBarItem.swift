@@ -26,7 +26,7 @@
 import Foundation
 import UIKit
 
-protocol PageTabBarItemDelegate: class {
+protocol PageTabBarItemDelegate: NSObjectProtocol {
     func pageTabBarItemDidTap(_ item: PageTabBarItem)
 }
 
@@ -37,52 +37,102 @@ internal enum PageTabBarItemType {
 
 private class PageTabBarButton: UIButton {
     
-    fileprivate var color = UIColor.lightGray {
-        didSet {
-            setTitleColor(color, for: .normal)
-            setTitleColor(color.withAlphaComponent(0.5), for: .highlighted)
+    fileprivate var pageTabBarItemType = PageTabBarItemType.text
+    
+    override var intrinsicContentSize: CGSize {
+        
+        // use natural size
+        if super.intrinsicContentSize.equalTo(.zero) {
+            return super.intrinsicContentSize
+        }
+        
+        switch pageTabBarItemType {
+        case .text:
+            return CGSize(width: super.intrinsicContentSize.width, height: designatedContentSize.height)
+        case .icon:
+            return designatedContentSize
         }
     }
     
-    fileprivate var selectedColor = UIColor.blue {
+    fileprivate var designatedContentSize: CGSize = .zero {
         didSet {
-            setTitleColor(selectedColor, for: .selected)
+            invalidateIntrinsicContentSize()
         }
     }
+    
+    fileprivate var color: UIColor? = UIColor.lightGray
+    fileprivate var selectedColor: UIColor? = UIColor.blue
     
     override var isHighlighted: Bool {
         didSet {
-            if isHighlighted {
-                tintColor = isSelected ? selectedColor.withAlphaComponent(0.5) : color.withAlphaComponent(0.5)
-            }
-            else {
-                tintColor = isSelected ? selectedColor : color
+            switch pageTabBarItemType {
+            case .text:
+                alpha = isHighlighted ? 0.5 : 1.0
+                break
+            case .icon:
+                if isHighlighted {
+                    tintColor = isSelected ? selectedColor?.withAlphaComponent(0.5) : color?.withAlphaComponent(0.5)
+                }
+                else {
+                    tintColor = isSelected ? selectedColor : color
+                }
+                break
             }
         }
     }
     
     override var isSelected: Bool {
         didSet {
-            tintColor = isSelected ? selectedColor : color
+            switch pageTabBarItemType {
+            case .text:
+                break
+            case .icon:
+                tintColor = isSelected ? selectedColor : color
+                break
+            }
         }
     }
 }
 
-@objc open class PageTabBarItem: UIView {
+@objcMembers
+open class PageTabBarItem: UIView {
     
-    @objc open var font = UIFont.systemFont(ofSize: 12, weight: UIFont.Weight.medium) {
-        didSet {
-            tabBarButton.titleLabel?.font = font
-        }
+    public struct AppearanceSettings {
+        public var font: UIFont
+        public var unselectedColor: UIColor?
+        public var selectedColor: UIColor?
+        public var contentHeight: CGFloat
+        public var offset: CGSize
+        
+        public static let automaticDimemsion = CGFloat(0)
     }
-    @objc open var color = UIColor.lightGray {
+    
+    open static var defaultAppearanceSettings = AppearanceSettings(font: UIFont.systemFont(ofSize: 12, weight: UIFont.Weight.medium),
+                                                                   unselectedColor: UIColor.lightGray,
+                                                                   selectedColor: UIApplication.shared.delegate?.window??.tintColor,
+                                                                   contentHeight: AppearanceSettings.automaticDimemsion,
+                                                                   offset: .zero)
+    
+    open var appearance: AppearanceSettings = PageTabBarItem.defaultAppearanceSettings {
         didSet {
-            tabBarButton.color = color
-        }
-    }
-    @objc open var selectedColor = UIColor.blue {
-        didSet {
-            tabBarButton.selectedColor = selectedColor
+            tabBarButton.titleLabel?.font = appearance.font
+            tabBarButton.color = appearance.unselectedColor
+            tabBarButton.selectedColor = appearance.selectedColor
+            tabBarButton.setTitleColor(appearance.unselectedColor, for: .normal)
+            tabBarButton.setTitleColor(appearance.selectedColor, for: .selected)
+            
+            switch type {
+            case .text:
+                tabBarButton.designatedContentSize = CGSize(width: AppearanceSettings.automaticDimemsion, height: appearance.contentHeight)
+                break
+            case .icon:
+                tabBarButton.designatedContentSize = CGSize(width: appearance.contentHeight, height: appearance.contentHeight)
+                break
+            }
+            
+            tabBarButtonHorizontalOffsetConstraint?.constant = appearance.offset.width
+            tabBarButtonVerticalOffsetConstraint?.constant = appearance.offset.height
+            layoutIfNeeded()
         }
     }
     
@@ -90,6 +140,10 @@ private class PageTabBarButton: UIButton {
         didSet {
             tabBarButton.isSelected = isSelected
         }
+    }
+    
+    internal var tabBarButtonContentWidth: CGFloat {
+        return tabBarButton.bounds.width
     }
     
     internal var badgeCount = 0 {
@@ -103,72 +157,91 @@ private class PageTabBarButton: UIButton {
     private let tabBarButton: PageTabBarButton = {
         let button = PageTabBarButton(type: .custom)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 12)
-        button.contentEdgeInsets = UIEdgeInsets(top: 8, left: 8, bottom: 8, right: 8)
+        button.contentEdgeInsets = .zero
+        button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
     
-    @objc open let badgeView: Badge = {
+    open let badgeView: Badge = {
         let badgeView = Badge(type: .number)
+        badgeView.translatesAutoresizingMaskIntoConstraints = false
         return badgeView
     }()
     
     private var type = PageTabBarItemType.text
     
-    @objc public convenience init(title: String?) {
+    // MARK: Layout Constraints
+    private var tabBarButtonVerticalOffsetConstraint: NSLayoutConstraint?
+    private var tabBarButtonHorizontalOffsetConstraint: NSLayoutConstraint?
+    
+    public convenience init(title: String?) {
     
         self.init(frame: CGRect(x: 0, y: 0, width: 30, height: 30))
     
         type = .text
 
+        tabBarButton.pageTabBarItemType = .text
         tabBarButton.setTitle(title, for: .normal)
-        tabBarButton.titleLabel?.font = UIFont.systemFont(ofSize: 12, weight: UIFont.Weight.medium)
+        tabBarButton.titleLabel?.font = appearance.font
+        tabBarButton.setTitleColor(appearance.unselectedColor, for: .normal)
+        tabBarButton.setTitleColor(appearance.selectedColor, for: .selected)
+        
+        tabBarButton.designatedContentSize = CGSize(width: AppearanceSettings.automaticDimemsion, height: appearance.contentHeight)
+        
         commonInit()
     }
     
-    @objc public convenience init(icon: UIImage?) {
+    public convenience init(unselectedImage: UIImage?, selectedImage: UIImage?) {
         self.init(frame: CGRect(x: 0, y: 0, width: 30, height: 30))
         
         type = .icon
         
-        let img = icon?.withRenderingMode(.alwaysTemplate)
+        tabBarButton.pageTabBarItemType = .icon
         tabBarButton.setTitle("", for: .normal)
-        tabBarButton.setImage(img, for: .normal)
+        tabBarButton.setImage(unselectedImage?.withRenderingMode(.alwaysTemplate), for: .normal)
+        tabBarButton.setImage(selectedImage?.withRenderingMode(.alwaysTemplate), for: .selected)
         tabBarButton.imageView?.contentMode = .scaleAspectFit
+        tabBarButton.designatedContentSize = CGSize(width: appearance.contentHeight, height: appearance.contentHeight)
+        tabBarButton.tintColor = appearance.unselectedColor
+        
         commonInit()
     }
     
     private func commonInit() {
         backgroundColor = .clear
         
-        tabBarButton.setTitleColor(color, for: .normal)
-        tabBarButton.setTitleColor(selectedColor, for: .highlighted)
-        tabBarButton.tintColor = color
+        tabBarButton.color = appearance.unselectedColor
+        tabBarButton.selectedColor = appearance.selectedColor
         
         tabBarButton.addTarget(self, action: #selector(press(_:)), for: .touchUpInside)
         
         addSubview(tabBarButton)
-        tabBarButton.translatesAutoresizingMaskIntoConstraints = false
-        tabBarButton.topAnchor.constraint(equalTo: topAnchor).isActive = true
-        tabBarButton.leadingAnchor.constraint(equalTo: leadingAnchor).isActive = true
-        tabBarButton.trailingAnchor.constraint(equalTo: trailingAnchor).isActive = true
-        tabBarButton.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true
+        
+        tabBarButtonHorizontalOffsetConstraint = tabBarButton.centerXAnchor.constraint(equalTo: centerXAnchor, constant: appearance.offset.width)
+        tabBarButtonHorizontalOffsetConstraint?.isActive = true
+        tabBarButtonVerticalOffsetConstraint = tabBarButton.centerYAnchor.constraint(equalTo: centerYAnchor, constant: appearance.offset.height)
+        tabBarButtonVerticalOffsetConstraint?.isActive = true
         
         addSubview(badgeView)
-        badgeView.translatesAutoresizingMaskIntoConstraints = false
+        
         if case .icon = type {
             badgeView.topAnchor.constraint(equalTo: topAnchor, constant: 4).isActive = true
             badgeView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -4).isActive = true
         } else {
-            badgeView.centerYAnchor.constraint(equalTo: centerYAnchor).isActive = true
-            if let label = tabBarButton.titleLabel {
-                badgeView.leadingAnchor.constraint(equalTo: label.trailingAnchor, constant: 6).isActive = true
-            }
-            
+            badgeView.centerYAnchor.constraint(equalTo: tabBarButton.centerYAnchor).isActive = true
+            badgeView.leadingAnchor.constraint(equalTo: tabBarButton.trailingAnchor, constant: 6).isActive = true
         }
         
     }
     
     @objc private func press(_ sender: UIButton) {
         delegate?.pageTabBarItemDidTap(self)
+    }
+    
+    override open func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
+        if let hitTestView = super.hitTest(point, with: event), hitTestView == self {
+            return tabBarButton
+        }
+        return super.hitTest(point, with: event)
     }
 }

@@ -38,6 +38,16 @@ public enum PageTabBarPosition: Int {
     case bottom
 }
 
+public enum PageTabBarIndicatorPosition {
+    case top(offset: CGFloat)
+    case bottom(offset: CGFloat)
+}
+
+public enum PageTabBarIndicatorLineWidth {
+    case fill
+    case contentWidth
+}
+
 internal enum PageTabBarItemArrangement {
     case fixedWidth(width: CGFloat)
     case compact
@@ -47,6 +57,84 @@ public typealias LineWidthUnit = Int
 
 @objcMembers
 open class PageTabBar: UIView {
+    
+    public struct BarAppearanceSettings {
+        public var barTintColor: UIColor?
+        public var topLineHidden: Bool
+        public var bottomLineHidden: Bool
+        public var topLineColor: UIColor?
+        public var bottomLineColor: UIColor?
+        public var topLineWidth: LineWidthUnit
+        public var bottomLineWidth: LineWidthUnit
+    }
+    
+    public struct IndicatorLineAppearanceSettings {
+        public var isHidden: Bool
+        public var lineHeight: CGFloat
+        public var lineWidth: PageTabBarIndicatorLineWidth
+        public var lineColor: UIColor?
+        public var position: PageTabBarIndicatorPosition
+    }
+    
+    open static var defaultBarAppearanceSettings = BarAppearanceSettings(barTintColor: .white,
+                                                                         topLineHidden: false,
+                                                                         bottomLineHidden: false,
+                                                                         topLineColor: .lightGray,
+                                                                         bottomLineColor: .lightGray,
+                                                                         topLineWidth: 1,
+                                                                         bottomLineWidth: 1)
+    
+    open static var defaultIndicatorLineAppearanceSettings = IndicatorLineAppearanceSettings(isHidden: false,
+                                                                                             lineHeight: 1,
+                                                                                             lineWidth: .fill,
+                                                                                             lineColor: UIApplication.shared.delegate?.window??.tintColor,
+                                                                                             position: PageTabBarIndicatorPosition.bottom(offset: 0))
+    
+    open var appearance: BarAppearanceSettings = PageTabBar.defaultBarAppearanceSettings {
+        didSet {
+
+            backgroundColor = appearance.barTintColor
+            
+            topLine.isHidden = appearance.topLineHidden
+            bottomLine.isHidden = appearance.bottomLineHidden
+            
+            topLine.backgroundColor = appearance.topLineColor
+            bottomLine.backgroundColor = appearance.bottomLineColor
+            
+            let topLineWidth = CGFloat(appearance.topLineWidth) / UIScreen.main.scale
+            topLine.frame = CGRect(x: 0, y: 0, width: bounds.width, height: topLineWidth)
+            
+            let bottomLineWidth = CGFloat(appearance.bottomLineWidth) / UIScreen.main.scale
+            bottomLine.frame = CGRect(x: 0, y: 0, width: bounds.width, height: bottomLineWidth)
+            
+            setNeedsDisplay()
+        }
+    }
+    
+    open var indicatorLineAppearance: IndicatorLineAppearanceSettings = PageTabBar.defaultIndicatorLineAppearanceSettings {
+        didSet {
+            indicatorLine.isHidden = indicatorLineAppearance.isHidden
+            indicatorLine.backgroundColor = indicatorLineAppearance.lineColor
+            indicatorLine.frame = CGRect(x: indicatorLine.frame.minX, y: indicatorLineOriginY, width: indicatorLineWidth(at: 0), height: indicatorLineHeight)
+        }
+    }
+    
+    // Private Getter
+    
+    private var indicatorLineHeight: CGFloat {
+        return indicatorLineAppearance.lineHeight
+    }
+    
+    private var indicatorLineOriginY: CGFloat {
+        switch indicatorLineAppearance.position {
+        case let .top(offset):
+            return offset
+        case let .bottom(offset):
+            return barHeight - indicatorLineHeight - offset
+        }
+    }
+    
+    // Delegates
     
     internal weak var delegate: PageTabBarDelegate?
     
@@ -60,80 +148,14 @@ open class PageTabBar: UIView {
         }
     }
     
-    open var barHeight: CGFloat = 44.0 {
+    open var barHeight = CGFloat(44) {
         didSet {
             guard oldValue != barHeight else { return }
-            indicatorLine.frame.origin = CGPoint(x: indicatorLine.frame.minX, y: barHeight - indicatorLineHeight)
+            indicatorLine.frame.origin = CGPoint(x: indicatorLine.frame.minX, y: indicatorLineOriginY)
             bounds = CGRect(x: bounds.origin.x, y: bounds.origin.y, width: bounds.width, height: barHeight)
         }
     }
-    
-    open var barTintColor: UIColor = .white {
-        didSet {
-            backgroundColor = barTintColor
-            setNeedsDisplay()
-        }
-    }
-    
-    open var indicatorLineHidden = false {
-        didSet {
-            indicatorLine.isHidden = indicatorLineHidden
-        }
-    }
-    
-    open var topLineHidden = false {
-        didSet {
-            topLine.isHidden = topLineHidden
-        }
-    }
-    
-    open var bottomLineHidden = false {
-        didSet {
-            bottomLine.isHidden = bottomLineHidden
-        }
-    }
-    
-    open var indicatorLineColor = UIColor.blue {
-        didSet {
-            indicatorLine.backgroundColor = indicatorLineColor
-            setNeedsDisplay()
-        }
-    }
-    
-    open var indicatorLineHeight: CGFloat = 1.0 {
-        didSet {
-            indicatorLine.frame = CGRect(x: indicatorLine.frame.minX, y: barHeight - indicatorLineHeight, width: itemWidth, height: indicatorLineHeight)
-        }
-    }
-    
-    open var topLineColor = UIColor.lightGray {
-        didSet {
-            topLine.backgroundColor = topLineColor
-            setNeedsDisplay()
-        }
-    }
-    
-    open var bottomLineColor = UIColor.lightGray {
-        didSet {
-            bottomLine.backgroundColor = bottomLineColor
-            setNeedsDisplay()
-        }
-    }
-    
-    open var topLineWidth: LineWidthUnit = 1 {
-        didSet {
-            let lineWidth = CGFloat(topLineWidth) / UIScreen.main.scale
-            topLine.frame = CGRect(x: 0, y: 0, width: bounds.width, height: lineWidth)
-        }
-    }
-    
-    open var bottomLineWidth: LineWidthUnit = 1 {
-        didSet {
-            let lineWidth = CGFloat(bottomLineWidth) / UIScreen.main.scale
-            bottomLine.frame = CGRect(x: 0, y: bounds.height - lineWidth, width: bounds.width, height: lineWidth)
-        }
-    }
-    
+
     internal var isInteracting = false {
         didSet {
             isUserInteractionEnabled = !isInteracting
@@ -183,7 +205,7 @@ open class PageTabBar: UIView {
     
     private func commonInit() {
         
-        backgroundColor = barTintColor
+        backgroundColor = appearance.barTintColor
         
         items.forEach {
             itemStackView.addArrangedSubview($0)
@@ -194,7 +216,7 @@ open class PageTabBar: UIView {
         itemStackView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         addSubview(itemStackView)
         
-        var lineWidth = CGFloat(topLineWidth) / UIScreen.main.scale
+        var lineWidth = CGFloat(appearance.topLineWidth) / UIScreen.main.scale
         topLine.frame = CGRect(x: 0, y: 0, width: bounds.width, height: lineWidth)
         addSubview(topLine)
         topLine.translatesAutoresizingMaskIntoConstraints = false
@@ -202,7 +224,7 @@ open class PageTabBar: UIView {
         topLine.leadingAnchor.constraint(equalTo: leadingAnchor).isActive = true
         topLine.trailingAnchor.constraint(equalTo: trailingAnchor).isActive = true
         
-        lineWidth = CGFloat(bottomLineWidth) / UIScreen.main.scale
+        lineWidth = CGFloat(appearance.bottomLineWidth) / UIScreen.main.scale
         bottomLine.frame = CGRect(x: 0, y: bounds.height - lineWidth, width: bounds.width, height: lineWidth)
         addSubview(bottomLine)
         bottomLine.translatesAutoresizingMaskIntoConstraints = false
@@ -215,9 +237,9 @@ open class PageTabBar: UIView {
     
     override open func layoutSubviews() {
         super.layoutSubviews()
-        var lineWidth = CGFloat(topLineWidth) / UIScreen.main.scale
+        var lineWidth = CGFloat(appearance.topLineWidth) / UIScreen.main.scale
         topLine.frame = CGRect(x: 0, y: 0, width: bounds.width, height: lineWidth)
-        lineWidth = CGFloat(bottomLineWidth) / UIScreen.main.scale
+        lineWidth = CGFloat(appearance.bottomLineWidth) / UIScreen.main.scale
         bottomLine.frame = CGRect(x: 0, y: bounds.height - lineWidth, width: bounds.width, height: lineWidth)
     }
     
@@ -233,6 +255,18 @@ open class PageTabBar: UIView {
         indicatorLine.center.x = position + itemWidth/2
         
         let index = Int(indicatorLine.center.x/itemWidth)
+        
+        let oldWidth = indicatorLine.bounds.width
+        let newWidth = indicatorLineWidth(at: index)
+        
+        if oldWidth != newWidth {
+            UIView.animate(withDuration: 0.2, delay: 0, options: [.beginFromCurrentState], animations: {
+                self.indicatorLine.bounds = CGRect(x: 0, y: 0, width: newWidth, height: self.indicatorLineHeight)
+            }, completion: nil)
+        } else {
+            indicatorLine.bounds = CGRect(x: 0, y: 0, width: newWidth, height: self.indicatorLineHeight)
+        }
+        
         for (idx, button) in items.enumerated() {
             button.isSelected = idx == index ? true : false
         }
@@ -241,9 +275,12 @@ open class PageTabBar: UIView {
     private func repositionAndResizeIndicatorView() {
         guard let index = delegate?.pageTabBarCurrentIndex(self) else { return }
         
-        let origin = CGPoint(x: ceil(CGFloat(index) * itemWidth), y: barHeight - indicatorLineHeight)
-        let size = CGSize(width: itemWidth, height: indicatorLineHeight)
-        indicatorLine.frame = CGRect(origin: origin, size: size)
+        layoutIfNeeded()
+        
+        let centerX = itemWidth / 2 + ceil(CGFloat(index) * itemWidth)
+        indicatorLine.center = CGPoint(x: centerX, y: indicatorLineOriginY + indicatorLineHeight / 2)
+        indicatorLine.bounds = CGRect(x: 0, y: 0, width: indicatorLineWidth(at: index), height: indicatorLineHeight)
+
         for (idx, button) in items.enumerated() {
             button.isSelected = idx == index ? true : false
         }
@@ -262,7 +299,6 @@ open class PageTabBar: UIView {
         
         items = newTabBarItems
         
-        layoutIfNeeded()
         repositionAndResizeIndicatorView()
     }
     
@@ -276,6 +312,18 @@ open class PageTabBar: UIView {
             })
         } else {
             barHeight = height
+        }
+    }
+    
+    /**
+     *  Line Width Calculation
+     */
+    private func indicatorLineWidth(at index: Int) -> CGFloat {
+        switch indicatorLineAppearance.lineWidth {
+        case .fill:
+            return itemWidth
+        case .contentWidth:
+            return items[index].tabBarButtonContentWidth
         }
     }
 }

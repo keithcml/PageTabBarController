@@ -43,18 +43,14 @@ extension MainViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if indexPath.row == 0 {
             
-            let tabColor = UIColor(red: 215/255.0, green: 215/255.0, blue: 215/255.0, alpha: 1)
-            let tabSelectedColor = UIColor(red: 35/255.0, green: 171/255.0, blue: 232/255.0, alpha: 1)
+            // set default appearance settings
+            var appearance = PageTabBarItem.defaultAppearanceSettings
+            appearance.contentHeight = 20
+            PageTabBarItem.defaultAppearanceSettings = appearance
             
-            let tab01 = PageTabBarItem(icon: UIImage(named: "img01"))
-            tab01.color = tabColor
-            tab01.selectedColor = tabSelectedColor
-            let tab02 = PageTabBarItem(icon: UIImage(named: "img01"))
-            tab02.color = tabColor
-            tab02.selectedColor = tabSelectedColor
-            let tab03 = PageTabBarItem(icon: UIImage(named: "img01"))
-            tab03.color = tabColor
-            tab03.selectedColor = tabSelectedColor
+            let tab01 = PageTabBarItem(unselectedImage: UIImage(named: "img01"), selectedImage: UIImage(named: "img01"))
+            let tab02 = PageTabBarItem(unselectedImage: UIImage(named: "img01"), selectedImage: UIImage(named: "img01"))
+            let tab03 = PageTabBarItem(unselectedImage: UIImage(named: "img01"), selectedImage: UIImage(named: "img01"))
             
             let vc01 = TableViewController(nibName: nil, bundle: nil)
             let vc02 = TableViewController(nibName: nil, bundle: nil)
@@ -63,13 +59,20 @@ extension MainViewController: UITableViewDelegate, UITableViewDataSource {
             vc02.view.tag = 2
             vc03.view.tag = 3
             
+            var barAppearance = PageTabBar.defaultBarAppearanceSettings
+            barAppearance.topLineColor = view.tintColor
+            barAppearance.bottomLineColor = UIColor(white: 0.95, alpha: 1)
+            barAppearance.barTintColor = .white
+            barAppearance.bottomLineHidden = true
+            PageTabBar.defaultBarAppearanceSettings = barAppearance
+            
+            var lineAppearance = PageTabBar.defaultIndicatorLineAppearanceSettings
+            lineAppearance.lineHeight = 2
+            lineAppearance.lineColor = view.tintColor
+            PageTabBar.defaultIndicatorLineAppearanceSettings = lineAppearance
+            
             let vc = PlainPageTabBarController(viewControllers: [vc01, vc02, vc03], items: [tab01, tab02, tab03], tabBarPosition: .topAttached)
             vc.pageTabBar.barHeight = 60
-            vc.pageTabBar.indicatorLineColor = tabSelectedColor
-            vc.pageTabBar.indicatorLineHeight = 2
-            vc.pageTabBar.bottomLineHidden = true
-            vc.pageTabBar.topLineColor = tabSelectedColor
-            vc.pageTabBar.barTintColor = UIColor(white: 0.95, alpha: 1)
             vc.delegate = self
             
             let tempView = UIView(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
@@ -95,18 +98,17 @@ extension MainViewController: UITableViewDelegate, UITableViewDataSource {
             navigationController?.pushViewController(vc, animated: true)
         } else {
             
-            let tabColor = UIColor(red: 215/255.0, green: 215/255.0, blue: 215/255.0, alpha: 1)
-            let tabSelectedColor = UIColor(red: 35/255.0, green: 171/255.0, blue: 232/255.0, alpha: 1)
+            // set default appearance settings
+            var appearance = PageTabBarItem.defaultAppearanceSettings
+            appearance.font = UIFont.boldSystemFont(ofSize: 16)
+            appearance.selectedColor = view.tintColor
+            appearance.contentHeight = PageTabBarItem.AppearanceSettings.automaticDimemsion
+            appearance.offset = CGSize(width: 0, height: -5)
+            PageTabBarItem.defaultAppearanceSettings = appearance
             
-            let tab01 = PageTabBarItem(icon: UIImage(named: "img01"))
-            tab01.color = tabColor
-            tab01.selectedColor = tabSelectedColor
-            let tab02 = PageTabBarItem(icon: UIImage(named: "img01"))
-            tab02.color = tabColor
-            tab02.selectedColor = tabSelectedColor
-            let tab03 = PageTabBarItem(icon: UIImage(named: "img01"))
-            tab03.color = tabColor
-            tab03.selectedColor = tabSelectedColor
+            let tab01 = PageTabBarItem(title: "London")
+            let tab02 = PageTabBarItem(title: "Paris")
+            let tab03 = PageTabBarItem(title: "Singapore")
             
             let vc01 = TableViewController(nibName: nil, bundle: nil)
             let vc02 = TableViewController(nibName: nil, bundle: nil)
@@ -121,16 +123,24 @@ extension MainViewController: UITableViewDelegate, UITableViewDataSource {
                                   GalleryImage.image(image: UIImage(named: "cover")!),
                                   GalleryImage.image(image: UIImage(named: "cover")!)]
             
+            var barAppearance = PageTabBar.defaultBarAppearanceSettings
+            barAppearance.topLineColor = view.tintColor
+            barAppearance.bottomLineColor = UIColor(white: 0.95, alpha: 1)
+            barAppearance.barTintColor = .white
+            barAppearance.bottomLineHidden = true
+            PageTabBar.defaultBarAppearanceSettings = barAppearance
+            
+            var lineAppearance = PageTabBar.defaultIndicatorLineAppearanceSettings
+            lineAppearance.lineHeight = 3
+            lineAppearance.lineWidth = .contentWidth
+            lineAppearance.lineColor = view.tintColor
+            lineAppearance.position = .bottom(offset: 15)
+            PageTabBar.defaultIndicatorLineAppearanceSettings = lineAppearance
+            
             parallaxVC = ParallaxHeaderPageTabBarController(viewControllers: [vc01, vc02, vc03], items: [tab01, tab02, tab03], parallaxHeaderHeight: view.frame.width)
             parallaxVC.pageTabBarController.pageTabBar.barHeight = 60
             parallaxVC.pageTabBarController.transitionAnimation = .scroll
-            parallaxVC.pageTabBarController.pageTabBar.indicatorLineColor = tabSelectedColor
-            parallaxVC.pageTabBarController.pageTabBar.indicatorLineHeight = 2
-            parallaxVC.pageTabBarController.pageTabBar.bottomLineHidden = true
-            parallaxVC.pageTabBarController.pageTabBar.topLineColor = tabSelectedColor
             parallaxVC.pageTabBarController.delegate = self
-            parallaxVC.pageTabBarController.pageTabBar.topLineWidth = 1
-            parallaxVC.pageTabBarController.pageTabBar.bottomLineWidth = 1
             parallaxVC.minimumRevealHeight = 100
             parallaxVC.setParallexHeaderView(galleryView, height: view.frame.width, sizeToFitHeader: true)
             parallaxVC.delegate = self
@@ -188,15 +198,8 @@ extension MainViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     private func setPageVC02() {
-        let tabColor = UIColor(red: 0/255.0, green: 215/255.0, blue: 215/255.0, alpha: 1)
-        let tabSelectedColor = UIColor(red: 35/255.0, green: 171/255.0, blue: 232/255.0, alpha: 1)
-        
-        let tab01 = PageTabBarItem(icon: UIImage(named: "img01"))
-        tab01.color = tabColor
-        tab01.selectedColor = tabSelectedColor
-        let tab02 = PageTabBarItem(icon: UIImage(named: "img01"))
-        tab02.color = tabColor
-        tab02.selectedColor = tabSelectedColor
+        let tab01 = PageTabBarItem(unselectedImage: UIImage(named: "img01"), selectedImage: UIImage(named: "img01"))
+        let tab02 = PageTabBarItem(unselectedImage: UIImage(named: "img01"), selectedImage: UIImage(named: "img01"))
         
         let vc01 = TableViewController(nibName: nil, bundle: nil)
         let vc02 = TableViewController(nibName: nil, bundle: nil)
