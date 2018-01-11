@@ -45,7 +45,7 @@ extension MainViewController: UITableViewDelegate, UITableViewDataSource {
             
             // set default appearance settings
             var appearance = PageTabBarItem.defaultAppearanceSettings
-            appearance.contentHeight = 20
+            //appearance.contentHeight = 20
             PageTabBarItem.defaultAppearanceSettings = appearance
             
             let tab01 = PageTabBarItem(unselectedImage: UIImage(named: "img01"), selectedImage: UIImage(named: "img01"))

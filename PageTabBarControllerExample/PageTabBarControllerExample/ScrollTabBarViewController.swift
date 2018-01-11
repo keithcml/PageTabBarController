@@ -26,7 +26,7 @@ class ScrollTabBarViewController: UIViewController {
         
         // set default appearance settings
         var appearance = PageTabBarItem.defaultAppearanceSettings
-        appearance.contentHeight = 30
+        //appearance.contentHeight = 30
         PageTabBarItem.defaultAppearanceSettings = appearance
 
         let tab01 = PageTabBarItem(unselectedImage: UIImage(named: "img01"), selectedImage: UIImage(named: "img01"))

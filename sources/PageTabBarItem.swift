@@ -42,7 +42,7 @@ private class PageTabBarButton: UIButton {
     override var intrinsicContentSize: CGSize {
         
         // use natural size
-        if super.intrinsicContentSize.equalTo(.zero) {
+        if designatedContentSize.equalTo(.zero) {
             return super.intrinsicContentSize
         }
         
