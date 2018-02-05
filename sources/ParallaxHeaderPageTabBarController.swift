@@ -236,7 +236,7 @@ extension ParallaxHeaderPageTabBarController {
         customView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([customView.leadingAnchor.constraint(equalTo: parallaxHeaderContainerView.leadingAnchor),
                                      customView.trailingAnchor.constraint(equalTo: parallaxHeaderContainerView.trailingAnchor),
-                                     customView.topAnchor.constraint(equalTo: parallaxHeaderContainerView.topAnchor),
+                                     customView.bottomAnchor.constraint(equalTo: parallaxHeaderContainerView.bottomAnchor),
                                      customView.heightAnchor.constraint(equalToConstant: height)])
         self.view.setNeedsLayout()
         self.view.layoutIfNeeded()
