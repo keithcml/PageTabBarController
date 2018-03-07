@@ -15,7 +15,7 @@ final class PageTabBarBackdropView: UIView {
     
     var isTranslucent: Bool = true {
         didSet {
-            backgroundColor = barTintColor.withAlphaComponent(translucentFactor)
+            backgroundColor = isTranslucent ? barTintColor.withAlphaComponent(translucentFactor) : barTintColor
         }
     }
     

@@ -60,8 +60,8 @@ extension MainViewController: UITableViewDelegate, UITableViewDataSource {
             vc03.view.tag = 3
             
             var barAppearance = PageTabBar.defaultBarAppearanceSettings
-            barAppearance.isTranslucent = true
-            barAppearance.topLineColor = view.tintColor
+            //barAppearance.isTranslucent = true
+            //barAppearance.topLineColor = view.tintColor
             barAppearance.bottomLineColor = UIColor(white: 0.95, alpha: 1)
             barAppearance.barTintColor = .white
             barAppearance.bottomLineHidden = true
