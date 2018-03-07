@@ -59,6 +59,7 @@ public typealias LineWidthUnit = Int
 open class PageTabBar: UIView {
     
     public struct BarAppearanceSettings {
+        public var isTranslucent: Bool
         public var barTintColor: UIColor?
         public var topLineHidden: Bool
         public var bottomLineHidden: Bool
@@ -76,7 +77,8 @@ open class PageTabBar: UIView {
         public var position: PageTabBarIndicatorPosition
     }
     
-    open static var defaultBarAppearanceSettings = BarAppearanceSettings(barTintColor: .white,
+    open static var defaultBarAppearanceSettings = BarAppearanceSettings(isTranslucent: false,
+                                                                         barTintColor: .white,
                                                                          topLineHidden: false,
                                                                          bottomLineHidden: false,
                                                                          topLineColor: .lightGray,
@@ -93,7 +95,8 @@ open class PageTabBar: UIView {
     open var appearance: BarAppearanceSettings = PageTabBar.defaultBarAppearanceSettings {
         didSet {
 
-            backgroundColor = appearance.barTintColor
+            backdropView.barTintColor = appearance.barTintColor ?? .white
+            backdropView.isTranslucent = appearance.isTranslucent
             
             topLine.isHidden = appearance.topLineHidden
             bottomLine.isHidden = appearance.bottomLineHidden
@@ -163,6 +166,7 @@ open class PageTabBar: UIView {
     }
     
     private var items = [PageTabBarItem]()
+    
     private var itemWidth: CGFloat {
         if items.count == 0 {
             return 0
@@ -197,6 +201,13 @@ open class PageTabBar: UIView {
         return stackView
     }()
     
+    private let backdropView: PageTabBarBackdropView = {
+        let backdropView = PageTabBarBackdropView(frame: CGRect(x: 0, y: 0, width: 375, height: 44))
+        backdropView.barTintColor = UIColor.white
+        backdropView.translatesAutoresizingMaskIntoConstraints = false
+        return backdropView
+    }()
+    
     convenience init(tabBarItems: [PageTabBarItem]) {
         self.init(frame: CGRect(x: 0, y: 0, width: 100, height: 44))
         items = tabBarItems
@@ -205,7 +216,12 @@ open class PageTabBar: UIView {
     
     private func commonInit() {
         
-        backgroundColor = appearance.barTintColor
+        addSubview(backdropView)
+        backdropView.barTintColor = appearance.barTintColor ?? .white
+        NSLayoutConstraint.activate([backdropView.topAnchor.constraint(equalTo: topAnchor),
+                                     backdropView.leftAnchor.constraint(equalTo: leftAnchor),
+                                     backdropView.bottomAnchor.constraint(equalTo: bottomAnchor),
+                                     backdropView.rightAnchor.constraint(equalTo: rightAnchor)])
         
         items.forEach {
             itemStackView.addArrangedSubview($0)

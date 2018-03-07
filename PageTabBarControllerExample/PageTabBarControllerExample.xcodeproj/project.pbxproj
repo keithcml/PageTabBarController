@@ -28,6 +28,7 @@
 		9BAB9A881FDE766C00F5DD89 /* PlainPageTabBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BAB9A871FDE766C00F5DD89 /* PlainPageTabBarController.swift */; };
 		9BAB9A8A1FDF80E600F5DD89 /* PageTabBarCollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BAB9A891FDF80E600F5DD89 /* PageTabBarCollectionView.swift */; };
 		9BAB9A8C1FE2684A00F5DD89 /* PageTabBarCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BAB9A8B1FE2684A00F5DD89 /* PageTabBarCollectionViewCell.swift */; };
+		9BB93157204FAB36008E695C /* PageTabBarBackdropView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BB93156204FAB36008E695C /* PageTabBarBackdropView.swift */; };
 		9BE2D5661F9A005300AB0F35 /* GalleryCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BE2D5641F9A005300AB0F35 /* GalleryCell.swift */; };
 		9BE2D5671F9A005300AB0F35 /* GalleryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BE2D5651F9A005300AB0F35 /* GalleryView.swift */; };
 /* End PBXBuildFile section */
@@ -81,6 +82,7 @@
 		9BAB9A871FDE766C00F5DD89 /* PlainPageTabBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlainPageTabBarController.swift; sourceTree = "<group>"; };
 		9BAB9A891FDF80E600F5DD89 /* PageTabBarCollectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PageTabBarCollectionView.swift; sourceTree = "<group>"; };
 		9BAB9A8B1FE2684A00F5DD89 /* PageTabBarCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PageTabBarCollectionViewCell.swift; sourceTree = "<group>"; };
+		9BB93156204FAB36008E695C /* PageTabBarBackdropView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PageTabBarBackdropView.swift; sourceTree = "<group>"; };
 		9BE2D5641F9A005300AB0F35 /* GalleryCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GalleryCell.swift; sourceTree = "<group>"; };
 		9BE2D5651F9A005300AB0F35 /* GalleryView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GalleryView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -148,6 +150,7 @@
 				9A3FD9271F5DBD6300C24A1B /* Badge.swift */,
 				9B168F641F97525F009281A9 /* PageTabBarSupplementaryView.swift */,
 				9B6D04201F5D69A900B018E9 /* PageTabBar.swift */,
+				9BB93156204FAB36008E695C /* PageTabBarBackdropView.swift */,
 				9B6D04221F5D69A900B018E9 /* PageTabBarItem.swift */,
 				9BAB9A891FDF80E600F5DD89 /* PageTabBarCollectionView.swift */,
 				9B6D04211F5D69A900B018E9 /* PageTabBarController.swift */,
@@ -315,6 +318,7 @@
 				9B6D043A1F5D69DB00B018E9 /* PageTabBar.swift in Sources */,
 				9A0B69881FDED89300FD29EC /* ParallaxHeaderPageTabBarController.swift in Sources */,
 				9A3FD9281F5DBD6300C24A1B /* Badge.swift in Sources */,
+				9BB93157204FAB36008E695C /* PageTabBarBackdropView.swift in Sources */,
 				9A0B698A1FDEF64400FD29EC /* SupplementaryView.swift in Sources */,
 				9B168F661F975390009281A9 /* PageTabBarSupplementaryView.swift in Sources */,
 				9B6D043B1F5D69DB00B018E9 /* PageTabBarController.swift in Sources */,
