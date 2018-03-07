@@ -219,8 +219,10 @@ open class PageTabBar: UIView {
     
     private func commonInit() {
         
-        addSubview(backdropView)
+        backdropView.isTranslucent = false
         backdropView.barTintColor = appearance.barTintColor ?? .white
+        addSubview(backdropView)
+        
         NSLayoutConstraint.activate([backdropView.topAnchor.constraint(equalTo: topAnchor),
                                      backdropView.leftAnchor.constraint(equalTo: leftAnchor),
                                      backdropView.bottomAnchor.constraint(equalTo: bottomAnchor),
