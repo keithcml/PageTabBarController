@@ -60,6 +60,7 @@ open class PageTabBar: UIView {
     
     public struct BarAppearanceSettings {
         public var isTranslucent: Bool
+        public var translucentFactor: CGFloat
         public var barTintColor: UIColor?
         public var topLineHidden: Bool
         public var bottomLineHidden: Bool
@@ -78,6 +79,7 @@ open class PageTabBar: UIView {
     }
     
     open static var defaultBarAppearanceSettings = BarAppearanceSettings(isTranslucent: false,
+                                                                         translucentFactor: 0.6,
                                                                          barTintColor: .white,
                                                                          topLineHidden: false,
                                                                          bottomLineHidden: false,
@@ -95,6 +97,7 @@ open class PageTabBar: UIView {
     open var appearance: BarAppearanceSettings = PageTabBar.defaultBarAppearanceSettings {
         didSet {
 
+            backdropView.translucentFactor = appearance.translucentFactor
             backdropView.barTintColor = appearance.barTintColor ?? .white
             backdropView.isTranslucent = appearance.isTranslucent
             
