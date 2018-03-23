@@ -169,6 +169,12 @@ open class ParallaxHeaderPageTabBarController: UIViewController {
         super.viewWillDisappear(animated)
     }
     
+    override open func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        
+        
+    }
+    
     private func tabBarPositionYDidChange() {
         if let constant = parallaxHeaderViewTopConstraint?.constant {
             let revealPercentage = 1 - abs(constant) / abs(minimumCollapseOffset)
@@ -231,7 +237,7 @@ extension ParallaxHeaderPageTabBarController {
         parallaxHeaderContainerView.subviews.forEach { $0.removeFromSuperview() }
         
         guard let customView = view else { return }
-        
+  
         parallaxHeaderContainerView.insertSubview(customView, at: 0)
         customView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([customView.leadingAnchor.constraint(equalTo: parallaxHeaderContainerView.leadingAnchor),
