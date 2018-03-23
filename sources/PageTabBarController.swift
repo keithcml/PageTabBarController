@@ -443,10 +443,6 @@ extension PageTabBarController {
     
     open func setPageTabBarController(_ viewControllers: [UIViewController], items: [PageTabBarItem], newPageIndex: Int, animated: Bool) {
 
-        if view.window == nil {
-            pageIndex = newPageIndex
-        }
-        
         pageTabBarItems = items
         pageTabBar.replaceTabBarItems(items)
         
@@ -464,13 +460,18 @@ extension PageTabBarController {
         }
 
         // visual update if view on screen
-        if view.window != nil {
+        if !viewDidLayoutSubviewsForTheFirstTime {
             pageTabBarCollectionView.reloadData()
-            pageTabBarCollectionView.performBatchUpdates(nil) { (_) in
-                self.pageTabBarCollectionView.scrollToItem(at: IndexPath(item: newPageIndex, section: 0), at: .centeredHorizontally, animated: animated)
-                self.didChangeContentViewController(viewControllers[newPageIndex], at: newPageIndex)
-            }
+            setPageIndex(newPageIndex, animated: animated)
         }
+        
+//        if view.window != nil {
+//            pageTabBarCollectionView.reloadData()
+//            pageTabBarCollectionView.performBatchUpdates(nil) { (_) in
+//                self.pageTabBarCollectionView.scrollToItem(at: IndexPath(item: newPageIndex, section: 0), at: .centeredHorizontally, animated: animated)
+//                self.didChangeContentViewController(viewControllers[newPageIndex], at: newPageIndex)
+//            }
+//        }
     }
     
     open func setTabBarTopPosition(_ position: PageTabBarPosition) {
