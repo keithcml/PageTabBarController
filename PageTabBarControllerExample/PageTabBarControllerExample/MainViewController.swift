@@ -160,7 +160,7 @@ extension MainViewController: UITableViewDelegate, UITableViewDataSource {
             button.widthAnchor.constraint(equalToConstant: 100).isActive = true
             
             parallaxVC.setSupplementaryView(contentView, height: 40)
-            
+            setPageVC02()
             navigationController?.pushViewController(parallaxVC, animated: true)
         }
     }
@@ -201,13 +201,24 @@ extension MainViewController: UITableViewDelegate, UITableViewDataSource {
     private func setPageVC02() {
         let tab01 = PageTabBarItem(unselectedImage: UIImage(named: "img01"), selectedImage: UIImage(named: "img01"))
         let tab02 = PageTabBarItem(unselectedImage: UIImage(named: "img01"), selectedImage: UIImage(named: "img01"))
+        let tab03 = PageTabBarItem(unselectedImage: UIImage(named: "img01"), selectedImage: UIImage(named: "img01"))
+        let tab04 = PageTabBarItem(unselectedImage: UIImage(named: "img01"), selectedImage: UIImage(named: "img01"))
+        let tab05 = PageTabBarItem(unselectedImage: UIImage(named: "img01"), selectedImage: UIImage(named: "img01"))
         
         let vc01 = TableViewController(nibName: nil, bundle: nil)
         let vc02 = TableViewController(nibName: nil, bundle: nil)
+        let vc03 = TableViewController(nibName: nil, bundle: nil)
+        let vc04 = TableViewController(nibName: nil, bundle: nil)
+        let vc05 = TableViewController(nibName: nil, bundle: nil)
         vc01.view.tag = 1
         vc02.view.tag = 2
+        vc03.view.tag = 3
+        vc04.view.tag = 3
+        vc05.view.tag = 3
         
-        self.parallaxVC.pageTabBarController.setPageTabBarController([vc01, vc02], items: [tab01, tab02], newPageIndex: 1, animated: false)
+        self.parallaxVC.pageTabBarController.setPageTabBarController([vc01, vc02, vc03, vc04, vc05],
+                                                                     items: [tab01, tab02, tab03, tab04, tab05],
+                                                                     newPageIndex: 4, animated: false)
     }
 }
 

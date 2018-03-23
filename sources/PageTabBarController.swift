@@ -462,7 +462,10 @@ extension PageTabBarController {
         // visual update if view on screen
         if !viewDidLayoutSubviewsForTheFirstTime {
             pageTabBarCollectionView.reloadData()
-            setPageIndex(newPageIndex, animated: animated)
+            
+            pageTabBarCollectionView.performBatchUpdates(nil) { [weak self] (_) in
+                self?.setPageIndex(newPageIndex, animated: animated)
+            }
         }
         
 //        if view.window != nil {
