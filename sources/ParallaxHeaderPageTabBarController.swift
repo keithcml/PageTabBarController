@@ -128,7 +128,6 @@ open class ParallaxHeaderPageTabBarController: UIViewController {
         self.parallaxHeaderHeight = parallaxHeaderHeight
         revealingGapHeight = parallaxHeaderHeight
         pageTabBarController.parallaxDelegate = self
-        
     }
     
     required public init?(coder aDecoder: NSCoder) {
@@ -305,6 +304,17 @@ extension ParallaxHeaderPageTabBarController {
             return
         }
         
+        completion?(true)
+    }
+
+    open func finalizeTransition() {
+        
+        headerTransitionView.isHidden = true
+        isTransitioning = false
+    }
+    
+    open func turnOnTabBarTransitionMode(spacing: TransitionSpacing, duration: TimeInterval, animated: Bool, completion: ((Bool) -> ())? = nil) {
+        
         let prepareCompletion: () -> () = {
             self.headerTransitionView.isHidden = false
         }
@@ -326,27 +336,20 @@ extension ParallaxHeaderPageTabBarController {
         
         if animated {
             UIView.animate(withDuration: duration, animations: {
-                self.pageTabBarController.view.transform = CGAffineTransform(translationX: 0, y: spacingHeight - self.revealingGapHeight)
+                self.pageTabBarController.view.transform = CGAffineTransform(translationX: 0, y: spacingHeight)
             }) { finished in
                 prepareCompletion()
                 completion?(finished)
             }
         } else {
-            pageTabBarController.view.transform = CGAffineTransform(translationX: 0, y: spacingHeight - revealingGapHeight)
+            pageTabBarController.view.transform = CGAffineTransform(translationX: 0, y: spacingHeight)
             prepareCompletion()
             completion?(true)
         }
-
     }
     
-    open func finalizeTransition(headerHeight: CGFloat, duration: TimeInterval, animated: Bool, completion: ((Bool) -> ())? = nil) {
-        
+    open func turnOffTabBarTransitionMode(headerHeight: CGFloat, duration: TimeInterval, animated: Bool, completion: ((Bool) -> ())? = nil) {
         parallaxHeaderHeight = headerHeight
-        
-        let finalizeCompletion: () -> () = {
-            self.headerTransitionView.isHidden = true
-            self.isTransitioning = false
-        }
         
         if animated {
             UIView.animate(withDuration: duration, animations: {
@@ -354,19 +357,14 @@ extension ParallaxHeaderPageTabBarController {
                 self.setViewsToPosition(.refresh)
                 self.tabBarPositionYDidChange()
             }) { finished in
-                if finished {
-                    finalizeCompletion()
-                }
                 completion?(finished)
             }
         } else {
             pageTabBarController.view.transform = .identity
             setViewsToPosition(.refresh)
             tabBarPositionYDidChange()
-            finalizeCompletion()
             completion?(true)
         }
-        
     }
     
     // MARK: - Scroll View Monitoring
