@@ -39,6 +39,12 @@ open class ParallaxHeaderPageTabBarController: UIViewController {
         return transitionView
     }()
     
+    open var isTransitioning = false {
+        didSet {
+            headerTransitionView.isHidden = !isTransitioning
+        }
+    }
+    
     internal let supplementaryContainerView = SupplementaryView()
     
     open var isStretchy = true {
@@ -143,6 +149,8 @@ open class ParallaxHeaderPageTabBarController: UIViewController {
         parallaxHeaderContainerView.frame = CGRect(x: 0, y: parallaxHeaderViewMinY, width: view.frame.width, height: parallaxHeaderHeight)
         pageTabBarController.view.frame = CGRect(x: 0, y: pageTabBarViewMinY, width: view.frame.width, height: pageTabBarViewHeight)
         supplementaryContainerView.frame = CGRect(x: 0, y: supplementaryViewMinY, width: view.frame.width, height: supplementaryViewHeight)
+        headerTransitionView.frame = parallaxHeaderContainerView.frame
+        headerTransitionView.isHidden = true
         
         pageTabBarController.didMove(toParentViewController: self)
     }
@@ -182,6 +190,9 @@ extension ParallaxHeaderPageTabBarController {
             revealingGapHeight = minimumCollapseOffset
             break
         case .refresh:
+            if resetContentOffset {
+                revealingGapHeight = parallaxHeaderHeight
+            }
             break
         }
         
@@ -196,6 +207,8 @@ extension ParallaxHeaderPageTabBarController {
                                                    y: parallaxHeaderViewMinY,
                                                    width: view.frame.width,
                                                    height: parallaxHeaderHeight)
+        
+        headerTransitionView.frame = parallaxHeaderContainerView.frame
     }
     
     private func setPageTabBarViewPosition() {
@@ -326,6 +339,8 @@ extension ParallaxHeaderPageTabBarController {
             parallaxHeaderContainerView.transform = CGAffineTransform(scaleX: scale, y: scale)
             
             parallaxHeaderContainerView.center = CGPoint(x: parallaxHeaderContainerView.frame.midX, y: revealingGapHeight + gap - parallaxHeaderContainerView.frame.height / 2)
+            
+            headerTransitionView.frame = parallaxHeaderContainerView.frame
             
             setPageTabBarViewPosition()
             
