@@ -324,9 +324,17 @@ extension ParallaxHeaderPageTabBarController {
             break
         }
         
-        transformTabBar(value: spacingHeight - revealingGapHeight, duration: duration, animated: true) { finished in
+        if animated {
+            UIView.animate(withDuration: duration, animations: {
+                self.pageTabBarController.view.transform = CGAffineTransform(translationX: 0, y: spacingHeight - self.revealingGapHeight)
+            }) { finished in
+                prepareCompletion()
+                completion?(finished)
+            }
+        } else {
+            pageTabBarController.view.transform = CGAffineTransform(translationX: 0, y: spacingHeight - revealingGapHeight)
             prepareCompletion()
-            completion?(finished)
+            completion?(true)
         }
 
     }
@@ -342,7 +350,7 @@ extension ParallaxHeaderPageTabBarController {
         
         if animated {
             UIView.animate(withDuration: duration, animations: {
-                self.pageTabBarController.pageTabBar.transform = .identity
+                self.pageTabBarController.view.transform = .identity
                 self.setViewsToPosition(.refresh)
                 self.tabBarPositionYDidChange()
             }) { finished in
@@ -352,24 +360,11 @@ extension ParallaxHeaderPageTabBarController {
                 completion?(finished)
             }
         } else {
-            pageTabBarController.pageTabBar.transform = .identity
+            pageTabBarController.view.transform = .identity
             setViewsToPosition(.refresh)
             tabBarPositionYDidChange()
             finalizeCompletion()
             completion?(true)
-        }
-        
-    }
-    
-    private func transformTabBar(value: CGFloat, duration: TimeInterval, animated: Bool, completion: @escaping (Bool) -> ()) {
-        
-        if animated {
-            UIView.animate(withDuration: duration, animations: {
-                self.pageTabBarController.pageTabBar.transform = CGAffineTransform(translationX: 0, y: value)
-            }, completion: completion)
-        } else {
-            pageTabBarController.pageTabBar.transform = CGAffineTransform(translationX: 0, y: value)
-            completion(true)
         }
         
     }
