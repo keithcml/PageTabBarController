@@ -293,13 +293,13 @@ extension ParallaxHeaderPageTabBarController {
     
     // MARK: - Header Transitioning
     
-    open func prepareTransition(_ completion: ((Bool) -> ())? = nil) {
+    open func prepareTransition(animated: Bool, completion: ((Bool) -> ())? = nil) {
         
         isTransitioning = true
         
         if revealingGapHeight != parallaxHeaderHeight {
-            scrollToTop(true) { _ in
-                self.prepareTransition(completion)
+            scrollToTop(animated) { _ in
+                self.prepareTransition(animated: animated, completion: completion)
             }
             
             return
@@ -310,12 +310,11 @@ extension ParallaxHeaderPageTabBarController {
     }
 
     open func finalizeTransition() {
-        
         headerTransitionView.isHidden = true
         isTransitioning = false
     }
     
-    open func turnOnTabBarTransitionMode(spacing: TransitionSpacing, duration: TimeInterval, animated: Bool, completion: ((Bool) -> ())? = nil) {
+    open func startTransition(spacing: TransitionSpacing, duration: TimeInterval, animated: Bool, completion: ((Bool) -> ())? = nil) {
         
         var spacingHeight = CGFloat(0)
         
@@ -328,6 +327,12 @@ extension ParallaxHeaderPageTabBarController {
             }
             break
         case let .customHeight(height):
+            
+            guard height != parallaxHeaderHeight else {
+                completion?(true)
+                return
+            }
+            
             spacingHeight = height
             break
         }
@@ -344,7 +349,7 @@ extension ParallaxHeaderPageTabBarController {
         }
     }
     
-    open func turnOffTabBarTransitionMode(headerHeight: CGFloat, duration: TimeInterval, animated: Bool, completion: ((Bool) -> ())? = nil) {
+    open func endTransition(headerHeight: CGFloat, duration: TimeInterval, animated: Bool, completion: ((Bool) -> ())? = nil) {
         parallaxHeaderHeight = headerHeight
         
         if animated {
