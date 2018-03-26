@@ -314,9 +314,9 @@ extension ParallaxHeaderPageTabBarController {
         switch spacing {
         case .maximumSpace:
             if #available(iOS 11.0, *) {
-                spacingHeight = view.frame.height - view.safeAreaInsets.top - view.safeAreaInsets.bottom - pageTabBarController.pageTabBar.frame.height
+                spacingHeight = view.frame.height - parallaxHeaderHeight - view.safeAreaInsets.bottom - pageTabBarController.pageTabBar.frame.height
             } else {
-                spacingHeight = view.frame.height - topLayoutGuide.length - bottomLayoutGuide.length - pageTabBarController.pageTabBar.frame.height
+                spacingHeight = view.frame.height - parallaxHeaderHeight - bottomLayoutGuide.length - pageTabBarController.pageTabBar.frame.height
             }
             break
         case let .customHeight(height):
