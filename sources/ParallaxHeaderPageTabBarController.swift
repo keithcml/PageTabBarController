@@ -24,7 +24,16 @@ open class ParallaxHeaderPageTabBarController: UIViewController {
         case bottom
         case refresh
     }
-        
+    
+    // MARK: - Transition Spacing
+    
+    public enum TransitionSpacing {
+        case maximumSpace
+        case customHeight(height: CGFloat)
+    }
+    
+    // MARK: - Properties
+    
     open weak var delegate: ParallaxHeaderPageTabBarControllerDelegate?
     
     open let pageTabBarController: PageTabBarController
@@ -38,12 +47,6 @@ open class ParallaxHeaderPageTabBarController: UIViewController {
         transitionView.clipsToBounds = true
         return transitionView
     }()
-    
-    open var isTransitioning = false {
-        didSet {
-            headerTransitionView.isHidden = !isTransitioning
-        }
-    }
     
     internal let supplementaryContainerView = SupplementaryView()
     
@@ -89,6 +92,8 @@ open class ParallaxHeaderPageTabBarController: UIViewController {
     private weak var currentChildScrollViewWeakReference: UIScrollView?
     private var previousChildScrollViewOffset: CGPoint = .zero
     private var isLatestScrollingUp = false
+    
+    private var isTransitioning = false
     
     // Positions
     private var revealingGapHeight = CGFloat(0)
@@ -225,16 +230,17 @@ extension ParallaxHeaderPageTabBarController {
                                                   height: supplementaryViewHeight)
     }
     
-    open func scrollToTop(_ toTop: Bool, animated: Bool = false) {
+    open func scrollToTop(_ toTop: Bool, animated: Bool = false, completion: ((Bool) -> ())? = nil) {
 
         if animated {
             UIView.animate(withDuration: 0.3, animations: {
                 self.setViewsToPosition(toTop ? .top : .bottom)
                 self.tabBarPositionYDidChange()
-            }, completion: nil)
+            }, completion: completion)
         } else {
             setViewsToPosition(toTop ? .top : .bottom)
             tabBarPositionYDidChange()
+            completion?(true)
         }
     }
     
@@ -259,7 +265,7 @@ extension ParallaxHeaderPageTabBarController {
         customView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([customView.leadingAnchor.constraint(equalTo: parallaxHeaderContainerView.leadingAnchor),
                                      customView.trailingAnchor.constraint(equalTo: parallaxHeaderContainerView.trailingAnchor),
-                                     customView.bottomAnchor.constraint(equalTo: parallaxHeaderContainerView.bottomAnchor),
+                                     customView.topAnchor.constraint(equalTo: parallaxHeaderContainerView.topAnchor),
                                      customView.heightAnchor.constraint(equalToConstant: height)])
         parallaxHeaderContainerView.setNeedsLayout()
         parallaxHeaderContainerView.layoutIfNeeded()
@@ -268,7 +274,7 @@ extension ParallaxHeaderPageTabBarController {
     /* @param height - new height
      * @param animated - run default animation
      */
-    open func setParallexHeaderHeight(_ newHeight: CGFloat, animated: Bool, scrollToTop: Bool = true) {
+    open func setParallexHeaderHeight(_ newHeight: CGFloat, animated: Bool, scrollToTop: Bool = true, completion: ((Bool) -> ())? = nil) {
         
         guard parallaxHeaderHeight != newHeight else { return }
         parallaxHeaderHeight = newHeight
@@ -277,25 +283,103 @@ extension ParallaxHeaderPageTabBarController {
             UIView.animate(withDuration: 0.3, animations: {
                 self.setViewsToPosition(.refresh, resetContentOffset: scrollToTop)
                 self.tabBarPositionYDidChange()
-            }, completion: nil)
+            }, completion: completion)
         } else {
             setViewsToPosition(.refresh, resetContentOffset: scrollToTop)
             tabBarPositionYDidChange()
+            completion?(true)
         }
     }
     
-    open func minimizesTabsContent(animated: Bool, scrollToTop: Bool = true) {
-        var maximumHeight = CGFloat(0)
-        if #available(iOS 11.0, *) {
-            maximumHeight = view.frame.height - view.safeAreaInsets.top - view.safeAreaInsets.bottom - pageTabBarController.pageTabBar.frame.height
-        } else {
+    // MARK: - Header Transitioning
+    
+    open func prepareTransition(spacing: TransitionSpacing, duration: TimeInterval, animated: Bool, completion: ((Bool) -> ())? = nil) {
+        
+        isTransitioning = true
+        
+        if revealingGapHeight != parallaxHeaderHeight {
+            scrollToTop(true) { _ in
+                self.prepareTransition(spacing: spacing, duration: duration, animated: animated, completion: completion)
+            }
             
+            return
         }
-        setParallexHeaderHeight(maximumHeight, animated: animated, scrollToTop: scrollToTop)
+        
+        let prepareCompletion: () -> () = {
+            self.headerTransitionView.isHidden = false
+        }
+        
+        var spacingHeight = CGFloat(0)
+        
+        switch spacing {
+        case .maximumSpace:
+            if #available(iOS 11.0, *) {
+                spacingHeight = view.frame.height - view.safeAreaInsets.top - view.safeAreaInsets.bottom - pageTabBarController.pageTabBar.frame.height
+            } else {
+                spacingHeight = view.frame.height - topLayoutGuide.length - bottomLayoutGuide.length - pageTabBarController.pageTabBar.frame.height
+            }
+            break
+        case let .customHeight(height):
+            spacingHeight = height
+            break
+        }
+        
+        transformTabBar(value: spacingHeight - revealingGapHeight, duration: duration, animated: true) { finished in
+            prepareCompletion()
+            completion?(finished)
+        }
+
     }
+    
+    open func finalizeTransition(headerHeight: CGFloat, duration: TimeInterval, animated: Bool, completion: ((Bool) -> ())? = nil) {
+        
+        parallaxHeaderHeight = headerHeight
+        
+        let finalizeCompletion: () -> () = {
+            self.headerTransitionView.isHidden = true
+            self.isTransitioning = false
+        }
+        
+        if animated {
+            UIView.animate(withDuration: duration, animations: {
+                self.pageTabBarController.pageTabBar.transform = .identity
+                self.setViewsToPosition(.refresh)
+                self.tabBarPositionYDidChange()
+            }) { finished in
+                if finished {
+                    finalizeCompletion()
+                }
+                completion?(finished)
+            }
+        } else {
+            pageTabBarController.pageTabBar.transform = .identity
+            setViewsToPosition(.refresh)
+            tabBarPositionYDidChange()
+            finalizeCompletion()
+            completion?(true)
+        }
+        
+    }
+    
+    private func transformTabBar(value: CGFloat, duration: TimeInterval, animated: Bool, completion: @escaping (Bool) -> ()) {
+        
+        if animated {
+            UIView.animate(withDuration: duration, animations: {
+                self.pageTabBarController.pageTabBar.transform = CGAffineTransform(translationX: 0, y: value)
+            }, completion: completion)
+        } else {
+            pageTabBarController.pageTabBar.transform = CGAffineTransform(translationX: 0, y: value)
+            completion(true)
+        }
+        
+    }
+    
+    // MARK: - Scroll View Monitoring
     
     open func childScrollViewDidScroll(_ scrollView: UIScrollView) {
 
+        guard !isTransitioning else { return }
+        
         guard let currentScrollView = currentChildScrollViewWeakReference, currentScrollView == scrollView else { return }
         
         var contentInset = scrollView.contentInset
