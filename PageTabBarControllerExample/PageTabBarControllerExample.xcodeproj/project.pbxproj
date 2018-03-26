@@ -13,6 +13,7 @@
 		9A3FD9281F5DBD6300C24A1B /* Badge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A3FD9271F5DBD6300C24A1B /* Badge.swift */; };
 		9A4609FC1F62F1C600694602 /* PresentedViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A4609FB1F62F1C600694602 /* PresentedViewController.swift */; };
 		9B168F661F975390009281A9 /* PageTabBarSupplementaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B168F641F97525F009281A9 /* PageTabBarSupplementaryView.swift */; };
+		9B5F54BC2064D3B60026FC6A /* ParallaxHeaderContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B5F54BB2064D3B60026FC6A /* ParallaxHeaderContainerView.swift */; };
 		9B6D040D1F5D696D00B018E9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B6D040C1F5D696D00B018E9 /* AppDelegate.swift */; };
 		9B6D04121F5D696D00B018E9 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9B6D04101F5D696D00B018E9 /* Main.storyboard */; };
 		9B6D04141F5D696D00B018E9 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9B6D04131F5D696D00B018E9 /* Assets.xcassets */; };
@@ -64,6 +65,7 @@
 		9A3FD9271F5DBD6300C24A1B /* Badge.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Badge.swift; sourceTree = "<group>"; };
 		9A4609FB1F62F1C600694602 /* PresentedViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PresentedViewController.swift; sourceTree = "<group>"; };
 		9B168F641F97525F009281A9 /* PageTabBarSupplementaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PageTabBarSupplementaryView.swift; sourceTree = "<group>"; };
+		9B5F54BB2064D3B60026FC6A /* ParallaxHeaderContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParallaxHeaderContainerView.swift; sourceTree = "<group>"; };
 		9B6D04091F5D696D00B018E9 /* PageTabBarControllerExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PageTabBarControllerExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9B6D040C1F5D696D00B018E9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		9B6D04111F5D696D00B018E9 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -156,6 +158,7 @@
 				9B6D04211F5D69A900B018E9 /* PageTabBarController.swift */,
 				9BAB9A8B1FE2684A00F5DD89 /* PageTabBarCollectionViewCell.swift */,
 				9A0B69871FDED89300FD29EC /* ParallaxHeaderPageTabBarController.swift */,
+				9B5F54BB2064D3B60026FC6A /* ParallaxHeaderContainerView.swift */,
 				9A0B69891FDEF64400FD29EC /* SupplementaryView.swift */,
 			);
 			name = sources;
@@ -319,6 +322,7 @@
 				9A0B69881FDED89300FD29EC /* ParallaxHeaderPageTabBarController.swift in Sources */,
 				9A3FD9281F5DBD6300C24A1B /* Badge.swift in Sources */,
 				9BB93157204FAB36008E695C /* PageTabBarBackdropView.swift in Sources */,
+				9B5F54BC2064D3B60026FC6A /* ParallaxHeaderContainerView.swift in Sources */,
 				9A0B698A1FDEF64400FD29EC /* SupplementaryView.swift in Sources */,
 				9B168F661F975390009281A9 /* PageTabBarSupplementaryView.swift in Sources */,
 				9B6D043B1F5D69DB00B018E9 /* PageTabBarController.swift in Sources */,

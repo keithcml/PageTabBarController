@@ -118,11 +118,12 @@ extension MainViewController: UITableViewDelegate, UITableViewDataSource {
             vc02.view.tag = 2
             vc03.view.tag = 3
             
-            
-            let galleryView = GalleryView(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.width))
-            galleryView.images = [GalleryImage.image(image: UIImage(named: "cover")!),
-                                  GalleryImage.image(image: UIImage(named: "cover")!),
-                                  GalleryImage.image(image: UIImage(named: "cover")!)]
+            let headerView = UIView(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.width))
+            headerView.backgroundColor = .lightGray
+//            let galleryView = GalleryView(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.width))
+//            galleryView.images = [GalleryImage.image(image: UIImage(named: "cover")!),
+//                                  GalleryImage.image(image: UIImage(named: "cover")!),
+//                                  GalleryImage.image(image: UIImage(named: "cover")!)]
             
             var barAppearance = PageTabBar.defaultBarAppearanceSettings
             barAppearance.topLineColor = view.tintColor
@@ -140,10 +141,11 @@ extension MainViewController: UITableViewDelegate, UITableViewDataSource {
             
             parallaxVC = ParallaxHeaderPageTabBarController(viewControllers: [vc01, vc02, vc03], items: [tab01, tab02, tab03], parallaxHeaderHeight: view.frame.width)
             parallaxVC.pageTabBarController.pageTabBar.barHeight = 60
+            // parallaxVC.isStretchy = false
             parallaxVC.pageTabBarController.transitionAnimation = .scroll
             parallaxVC.pageTabBarController.delegate = self
-            parallaxVC.minimumRevealHeight = 100
-            parallaxVC.setParallexHeaderView(galleryView, height: view.frame.width, sizeToFitHeader: true)
+            parallaxVC.minimumRevealHeight = 0
+            parallaxVC.setParallexHeaderView(headerView, height: view.frame.width, sizeToFitHeader: true)
             parallaxVC.delegate = self
             
         
@@ -230,6 +232,11 @@ extension MainViewController: PageTabBarControllerDelegate, ParallaxHeaderPageTa
     
     func pageTabBarController(_ controller: PageTabBarController, didChangeContentViewController vc: UIViewController, atIndex index: Int) {
         print("didChangeContentViewController: \(vc) at index: \(index)")
+        
+        
+        if index == 1 {
+            parallaxVC.scrollToTop(false, animated: true)
+        }
         
         if index == 2 {
             controller.setBadge(20, forItemAt: index)

@@ -29,6 +29,7 @@ final class GalleryCell: UICollectionViewCell {
     }
     
     private func commonInit() {
+        contentView.backgroundColor = .red
         imageView.frame = contentView.bounds
         contentView.addSubview(imageView)
     }
