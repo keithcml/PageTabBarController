@@ -169,10 +169,11 @@ open class ParallaxHeaderPageTabBarController: UIViewController {
     
     private func tabBarPositionYDidChange() {
         
-        let revealPercentage = 1 - abs(parallaxHeaderViewMinY) / abs(minimumCollapseOffset)
+        let revealPercentage = 1 - abs(parallaxHeaderViewMinY) / (parallaxHeaderHeight - minimumRevealHeight)
         
         if #available(iOS 11.0, *) {
             let revealPercentageWithSafeAreaInset = 1 - abs(parallaxHeaderViewMinY) / (parallaxHeaderHeight - min(minimumRevealHeight, view.safeAreaInsets.top))
+            
             delegate?.parallaxHeaderPageTabBarController?(self, revealPercentage: revealPercentage, revealPercentageIncludingTopSafeAreaInset: revealPercentageWithSafeAreaInset)
         } else {
             delegate?.parallaxHeaderPageTabBarController?(self, revealPercentage: revealPercentage, revealPercentageIncludingTopSafeAreaInset: revealPercentage)
@@ -292,13 +293,13 @@ extension ParallaxHeaderPageTabBarController {
     
     // MARK: - Header Transitioning
     
-    open func prepareTransition(spacing: TransitionSpacing, duration: TimeInterval, animated: Bool, completion: ((Bool) -> ())? = nil) {
+    open func prepareTransition(_ completion: ((Bool) -> ())? = nil) {
         
         isTransitioning = true
         
         if revealingGapHeight != parallaxHeaderHeight {
             scrollToTop(true) { _ in
-                self.prepareTransition(spacing: spacing, duration: duration, animated: animated, completion: completion)
+                self.prepareTransition(completion)
             }
             
             return

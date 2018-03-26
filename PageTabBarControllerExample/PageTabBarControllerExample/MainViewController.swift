@@ -144,7 +144,7 @@ extension MainViewController: UITableViewDelegate, UITableViewDataSource {
             // parallaxVC.isStretchy = false
             parallaxVC.pageTabBarController.transitionAnimation = .scroll
             parallaxVC.pageTabBarController.delegate = self
-            parallaxVC.minimumRevealHeight = 0
+            parallaxVC.minimumRevealHeight = 40
             parallaxVC.setParallexHeaderView(headerView, height: view.frame.width, sizeToFitHeader: true)
             parallaxVC.delegate = self
             
