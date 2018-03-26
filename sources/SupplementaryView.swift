@@ -15,6 +15,8 @@ class SupplementaryView: UICollectionReusableView {
     
     override init(frame: CGRect) {
         super.init(frame: frame)
+        backgroundColor = .clear
+        clipsToBounds = true
     }
     
     required init?(coder aDecoder: NSCoder) {
