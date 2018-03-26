@@ -305,6 +305,7 @@ extension ParallaxHeaderPageTabBarController {
             return
         }
         
+        headerTransitionView.isHidden = false
         completion?(true)
     }
 
@@ -315,10 +316,6 @@ extension ParallaxHeaderPageTabBarController {
     }
     
     open func turnOnTabBarTransitionMode(spacing: TransitionSpacing, duration: TimeInterval, animated: Bool, completion: ((Bool) -> ())? = nil) {
-        
-        let prepareCompletion: () -> () = {
-            self.headerTransitionView.isHidden = false
-        }
         
         var spacingHeight = CGFloat(0)
         
@@ -339,12 +336,10 @@ extension ParallaxHeaderPageTabBarController {
             UIView.animate(withDuration: duration, animations: {
                 self.pageTabBarController.view.transform = CGAffineTransform(translationX: 0, y: spacingHeight)
             }) { finished in
-                prepareCompletion()
                 completion?(finished)
             }
         } else {
             pageTabBarController.view.transform = CGAffineTransform(translationX: 0, y: spacingHeight)
-            prepareCompletion()
             completion?(true)
         }
     }
