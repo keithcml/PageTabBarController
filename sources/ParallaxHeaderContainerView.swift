@@ -32,7 +32,8 @@ final internal class ParallaxHeaderContainerView: UIView {
 
             return
         }
-                
+        
+        contentView = view
         contentView?.frame = bounds
         
         if let view = view {
