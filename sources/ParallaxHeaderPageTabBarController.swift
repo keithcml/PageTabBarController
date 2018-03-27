@@ -372,7 +372,7 @@ extension ParallaxHeaderPageTabBarController {
     
     open func childScrollViewDidScroll(_ scrollView: UIScrollView) {
 
-        guard !isTransitioning else { return }
+        // guard !isTransitioning else { return }
         
         guard let currentScrollView = currentChildScrollViewWeakReference, currentScrollView == scrollView else { return }
         

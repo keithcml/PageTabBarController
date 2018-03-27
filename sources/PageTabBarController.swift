@@ -467,14 +467,6 @@ extension PageTabBarController {
                 self?.setPageIndex(newPageIndex, animated: animated)
             }
         }
-        
-//        if view.window != nil {
-//            pageTabBarCollectionView.reloadData()
-//            pageTabBarCollectionView.performBatchUpdates(nil) { (_) in
-//                self.pageTabBarCollectionView.scrollToItem(at: IndexPath(item: newPageIndex, section: 0), at: .centeredHorizontally, animated: animated)
-//                self.didChangeContentViewController(viewControllers[newPageIndex], at: newPageIndex)
-//            }
-//        }
     }
     
     open func setTabBarTopPosition(_ position: PageTabBarPosition) {
