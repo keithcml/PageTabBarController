@@ -458,6 +458,10 @@ extension PageTabBarController {
             addChildViewController(vc)
             vc.didMove(toParentViewController: self)
         }
+        
+        if viewControllers.count > newPageIndex {
+            didChangeContentViewController(viewControllers[newPageIndex], at: newPageIndex)
+        }
 
         // visual update if view on screen
         if !viewDidLayoutSubviewsForTheFirstTime {
@@ -466,6 +470,8 @@ extension PageTabBarController {
             pageTabBarCollectionView.performBatchUpdates(nil) { [weak self] (_) in
                 self?.setPageIndex(newPageIndex, animated: animated)
             }
+        } else {
+            pageIndex = newPageIndex
         }
     }
     

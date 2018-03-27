@@ -27,6 +27,13 @@ open class ParallaxHeaderPageTabBarController: UIViewController {
     
     // MARK: - Transition Spacing
     
+    public enum TransitionContextPosition {
+        case automatic
+        case custom(position: CGRect)
+    }
+    
+    // MARK: - Transition Spacing
+    
     public enum TransitionSpacing {
         case maximumSpace
         case customHeight(height: CGFloat)
@@ -153,7 +160,7 @@ open class ParallaxHeaderPageTabBarController: UIViewController {
         parallaxHeaderContainerView.frame = CGRect(x: 0, y: parallaxHeaderViewMinY, width: view.frame.width, height: parallaxHeaderHeight)
         pageTabBarController.view.frame = CGRect(x: 0, y: pageTabBarViewMinY, width: view.frame.width, height: pageTabBarViewHeight)
         supplementaryContainerView.frame = CGRect(x: 0, y: supplementaryViewMinY, width: view.frame.width, height: supplementaryViewHeight)
-        headerTransitionView.frame = parallaxHeaderContainerView.frame
+
         headerTransitionView.isHidden = true
         
         pageTabBarController.didMove(toParentViewController: self)
@@ -212,8 +219,6 @@ extension ParallaxHeaderPageTabBarController {
                                                    y: parallaxHeaderViewMinY,
                                                    width: view.frame.width,
                                                    height: parallaxHeaderHeight)
-        
-        headerTransitionView.frame = parallaxHeaderContainerView.frame
     }
     
     private func setPageTabBarViewPosition() {
@@ -249,47 +254,30 @@ extension ParallaxHeaderPageTabBarController {
         supplementaryContainerView.configureWithContentView(supplementaryView)
     }
     
-    open func setParallexHeaderView(_ view: UIView?, height: CGFloat, sizeToFitHeader: Bool = false) {
+    open func setParallexHeaderView(_ view: UIView?, height: CGFloat) {
         
-        defer {
-            if sizeToFitHeader {
-                setParallexHeaderHeight(height, animated: false)
-            }
-        }
+        parallaxHeaderContainerView.removeContentView()
         
-        parallaxHeaderContainerView.subviews.forEach { $0.removeFromSuperview() }
+        setParallexHeaderHeight(height, animated: false)
         
-        guard let customView = view else { return }
-  
-        parallaxHeaderContainerView.insertSubview(customView, at: 0)
-        customView.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([customView.leadingAnchor.constraint(equalTo: parallaxHeaderContainerView.leadingAnchor),
-                                     customView.trailingAnchor.constraint(equalTo: parallaxHeaderContainerView.trailingAnchor),
-                                     customView.topAnchor.constraint(equalTo: parallaxHeaderContainerView.topAnchor),
-                                     customView.heightAnchor.constraint(equalToConstant: height)])
-        parallaxHeaderContainerView.setNeedsLayout()
-        parallaxHeaderContainerView.layoutIfNeeded()
+        parallaxHeaderContainerView.setContentView(view)
     }
     
     /* @param height - new height
      * @param animated - run default animation
      */
-    open func setParallexHeaderHeight(_ newHeight: CGFloat, animated: Bool, scrollToTop: Bool = true, completion: ((Bool) -> ())? = nil) {
+    open func setParallexHeaderHeight(_ newHeight: CGFloat, animated: Bool, completion: ((Bool) -> ())? = nil) {
         
         guard parallaxHeaderHeight != newHeight else { return }
         parallaxHeaderHeight = newHeight
         
-        if revealingGapHeight > parallaxHeaderHeight {
-            revealingGapHeight = parallaxHeaderHeight
-        }
-        
         if animated {
             UIView.animate(withDuration: 0.3, animations: {
-                self.setViewsToPosition(.refresh, resetContentOffset: scrollToTop)
+                self.setViewsToPosition(.refresh, resetContentOffset: true)
                 self.tabBarPositionYDidChange()
             }, completion: completion)
         } else {
-            setViewsToPosition(.refresh, resetContentOffset: scrollToTop)
+            setViewsToPosition(.refresh, resetContentOffset: true)
             tabBarPositionYDidChange()
             completion?(true)
         }
@@ -297,16 +285,25 @@ extension ParallaxHeaderPageTabBarController {
     
     // MARK: - Header Transitioning
     
-    open func prepareTransition(animated: Bool, completion: ((Bool) -> ())? = nil) {
+    open func prepareTransition(transitionContextPosition position: TransitionContextPosition, animated: Bool, completion: ((Bool) -> ())? = nil) {
         
         isTransitioning = true
         
         if revealingGapHeight != parallaxHeaderHeight {
             scrollToTop(animated) { _ in
-                self.prepareTransition(animated: animated, completion: completion)
+                self.prepareTransition(transitionContextPosition: position, animated: animated, completion: completion)
             }
             
             return
+        }
+        
+        switch position {
+        case .automatic:
+            headerTransitionView.frame = parallaxHeaderContainerView.frame
+            break
+        case let .custom(position):
+            headerTransitionView.frame = position
+            break
         }
         
         headerTransitionView.isHidden = false
@@ -425,8 +422,6 @@ extension ParallaxHeaderPageTabBarController {
             parallaxHeaderContainerView.transform = CGAffineTransform(scaleX: scale, y: scale)
             
             parallaxHeaderContainerView.center = CGPoint(x: parallaxHeaderContainerView.frame.midX, y: revealingGapHeight + gap - parallaxHeaderContainerView.frame.height / 2)
-            
-            headerTransitionView.frame = parallaxHeaderContainerView.frame
             
             setPageTabBarViewPosition()
             

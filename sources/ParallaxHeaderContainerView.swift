@@ -10,6 +10,8 @@ import UIKit
 
 final internal class ParallaxHeaderContainerView: UIView {
     
+    private var contentView: UIView?
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         backgroundColor = .clear
@@ -20,4 +22,32 @@ final internal class ParallaxHeaderContainerView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
+    func setContentView(_ view: UIView?) {
+        
+        if let currentContentView = contentView, currentContentView == view {
+            
+            if currentContentView == view {
+                currentContentView.frame = bounds
+            }
+
+            return
+        }
+                
+        contentView?.frame = bounds
+        
+        if let view = view {
+            addSubview(view)
+        }
+        
+    }
+    
+    func removeContentView() {
+        contentView?.removeFromSuperview()
+        contentView = nil
+    }
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        contentView?.frame = bounds
+    }
 }
