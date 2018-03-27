@@ -51,6 +51,9 @@ final class TableViewController: UIViewController, UITableViewDelegate, UITableV
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        title = "Table"
+        
         automaticallyAdjustsScrollViewInsets = false
         tableView = UITableView(frame: view.frame, style: .plain)
         tableView.autoresizingMask = [.flexibleHeight, .flexibleWidth]
