@@ -279,6 +279,10 @@ extension ParallaxHeaderPageTabBarController {
         guard parallaxHeaderHeight != newHeight else { return }
         parallaxHeaderHeight = newHeight
         
+        if revealingGapHeight > parallaxHeaderHeight {
+            revealingGapHeight = parallaxHeaderHeight
+        }
+        
         if animated {
             UIView.animate(withDuration: 0.3, animations: {
                 self.setViewsToPosition(.refresh, resetContentOffset: scrollToTop)
@@ -352,6 +356,10 @@ extension ParallaxHeaderPageTabBarController {
     open func endTransition(headerHeight: CGFloat, duration: TimeInterval, animated: Bool, completion: ((Bool) -> ())? = nil) {
         parallaxHeaderHeight = headerHeight
         
+        if revealingGapHeight > parallaxHeaderHeight {
+            revealingGapHeight = parallaxHeaderHeight
+        }
+        
         if animated {
             UIView.animate(withDuration: duration, animations: {
                 self.pageTabBarController.view.transform = .identity
@@ -372,7 +380,7 @@ extension ParallaxHeaderPageTabBarController {
     
     open func childScrollViewDidScroll(_ scrollView: UIScrollView) {
 
-        // guard !isTransitioning else { return }
+        guard !isTransitioning else { return }
         
         guard let currentScrollView = currentChildScrollViewWeakReference, currentScrollView == scrollView else { return }
         
