@@ -1,0 +1,5 @@
+# Avoid conflicts in pbxproj files
+.pbxproj merge=union
+
+# Always diff strings files as text
+*.strings text diff
