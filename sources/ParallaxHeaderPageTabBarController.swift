@@ -43,11 +43,11 @@ open class ParallaxHeaderPageTabBarController: UIViewController {
     
     open weak var delegate: ParallaxHeaderPageTabBarControllerDelegate?
     
-    open let pageTabBarController: PageTabBarController
+    public let pageTabBarController: PageTabBarController
     
     internal let parallaxHeaderContainerView = ParallaxHeaderContainerView()
     
-    open let headerTransitionView: UIView = {
+    public let headerTransitionView: UIView = {
         let transitionView = UIView()
         transitionView.isUserInteractionEnabled = false
         transitionView.translatesAutoresizingMaskIntoConstraints = false
@@ -146,7 +146,7 @@ open class ParallaxHeaderPageTabBarController: UIViewController {
         
         view.backgroundColor = .white
         
-        addChildViewController(pageTabBarController)
+        addChild(pageTabBarController)
         
         view.addSubview(pageTabBarController.view)
         view.addSubview(parallaxHeaderContainerView)
@@ -163,7 +163,7 @@ open class ParallaxHeaderPageTabBarController: UIViewController {
 
         headerTransitionView.isHidden = true
         
-        pageTabBarController.didMove(toParentViewController: self)
+        pageTabBarController.didMove(toParent: self)
     }
     
     override open func viewWillAppear(_ animated: Bool) {

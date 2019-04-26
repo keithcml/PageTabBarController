@@ -32,7 +32,7 @@ final class GalleryView: UIView {
         }
     }
     
-    internal(set) var collectionView: GalleryCollectionView
+    var collectionView: GalleryCollectionView
     
     fileprivate let pageNumberView = PageNumberView(frame: CGRect(x: 0, y: 0, width: 36, height: 18))
     
@@ -99,7 +99,7 @@ extension GalleryView: UICollectionViewDataSource, UICollectionViewDelegate, UIC
     
     func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         guard let cell = cell as? GalleryCell else { return }
-        if case let .url(imgURL) = images[indexPath.row] {
+        if case .url(_) = images[indexPath.row] {
             // cell.imageView.sd_setImage(with: imgURL, placeholderImage: nil)
         }
         else if case let .image(img) = images[indexPath.row] {

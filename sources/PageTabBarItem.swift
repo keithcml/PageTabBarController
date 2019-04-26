@@ -107,7 +107,7 @@ open class PageTabBarItem: UIView {
         public static let automaticDimemsion = CGFloat(0)
     }
     
-    open static var defaultAppearanceSettings = AppearanceSettings(font: UIFont.systemFont(ofSize: 12, weight: UIFont.Weight.medium),
+    public static var defaultAppearanceSettings = AppearanceSettings(font: UIFont.systemFont(ofSize: 12, weight: UIFont.Weight.medium),
                                                                    unselectedColor: UIColor.lightGray,
                                                                    selectedColor: UIApplication.shared.delegate?.window??.tintColor,
                                                                    contentHeight: AppearanceSettings.automaticDimemsion,
@@ -162,7 +162,7 @@ open class PageTabBarItem: UIView {
         return button
     }()
     
-    open let badgeView: Badge = {
+    public let badgeView: Badge = {
         let badgeView = Badge(type: .number)
         badgeView.translatesAutoresizingMaskIntoConstraints = false
         return badgeView

@@ -25,7 +25,7 @@ class ScrollTabBarViewController: UIViewController {
     private func initParallaxHeaderPageTabBarController() -> ParallaxHeaderPageTabBarController {
         
         // set default appearance settings
-        var appearance = PageTabBarItem.defaultAppearanceSettings
+        let appearance = PageTabBarItem.defaultAppearanceSettings
         //appearance.contentHeight = 30
         PageTabBarItem.defaultAppearanceSettings = appearance
 
@@ -63,7 +63,7 @@ class ScrollTabBarViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        addChildViewController(parallaxController)
+        addChild(parallaxController)
         
         parallaxController.view.frame = CGRect(x: 0, y: 0, width: view.frame.width, height: view.frame.height)
         view.addSubview(parallaxController.view)
@@ -82,7 +82,7 @@ class ScrollTabBarViewController: UIViewController {
         parallaxController.view.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
         parallaxController.view.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
         
-        parallaxController.didMove(toParentViewController: self)
+        parallaxController.didMove(toParent: self)
         
         
         parallaxController.pageTabBarController.delegate = self

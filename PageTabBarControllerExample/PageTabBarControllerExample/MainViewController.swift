@@ -47,7 +47,7 @@ extension MainViewController: UITableViewDelegate, UITableViewDataSource {
         if indexPath.row == 0 {
             
             // set default appearance settings
-            var appearance = PageTabBarItem.defaultAppearanceSettings
+            let appearance = PageTabBarItem.defaultAppearanceSettings
             //appearance.contentHeight = 20
             PageTabBarItem.defaultAppearanceSettings = appearance
             

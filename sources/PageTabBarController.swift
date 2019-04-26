@@ -45,11 +45,11 @@ protocol PageTabBarControllerParallaxDelegate: NSObjectProtocol {
 @objcMembers
 open class PageTabBarController: UIViewController, UIScrollViewDelegate {
         
-    override open var childViewControllerForStatusBarHidden: UIViewController? {
+    override open var childForStatusBarHidden: UIViewController? {
         return selectedViewController
     }
     
-    override open var childViewControllerForStatusBarStyle: UIViewController? {
+    override open var childForStatusBarStyle: UIViewController? {
         return selectedViewController
     }
     
@@ -108,7 +108,7 @@ open class PageTabBarController: UIViewController, UIScrollViewDelegate {
     
     open private(set) lazy var pageTabBarSupplementaryView = PageTabBarSupplementaryView(frame: CGRect.zero)
     
-    open let pageTabBarCollectionView: PageTabBarCollectionView = {
+    public let pageTabBarCollectionView: PageTabBarCollectionView = {
         let layout = PageTabBarCollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
         layout.minimumInteritemSpacing = 0
@@ -131,7 +131,7 @@ open class PageTabBarController: UIViewController, UIScrollViewDelegate {
         return collectionView
     }()
     
-    internal(set) var viewControllers = [UIViewController]()
+    var viewControllers = [UIViewController]()
     private(set) var tabBarPosition: PageTabBarPosition = .topAttached
     
     var pageTabBarItems: [PageTabBarItem] = []
@@ -162,12 +162,9 @@ open class PageTabBarController: UIViewController, UIScrollViewDelegate {
         self.tabBarPosition = tabBarPosition
         pageTabBarItems = items
         
-        automaticallyAdjustsScrollViewInsets = false
-        viewControllers.forEach { $0.automaticallyAdjustsScrollViewInsets = false }
-        
         for vc in viewControllers {
-            addChildViewController(vc)
-            vc.didMove(toParentViewController: self)
+            addChild(vc)
+            vc.didMove(toParent: self)
         }
     }
     
@@ -419,7 +416,7 @@ extension PageTabBarController {
             return
         }
         
-        let height = ceil(customView.systemLayoutSizeFitting(UILayoutFittingCompressedSize).height)
+        let height = ceil(customView.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).height)
         
         pageTabBarSupplementaryView.addSubview(customView)
         customView.translatesAutoresizingMaskIntoConstraints = false
@@ -448,15 +445,15 @@ extension PageTabBarController {
         
         self.viewControllers.forEach { vc in
             if vc.parent != nil {
-                vc.willMove(toParentViewController: nil)
-                vc.removeFromParentViewController()
+                vc.willMove(toParent: nil)
+                vc.removeFromParent()
             }
         }
         self.viewControllers = viewControllers
         
         for vc in viewControllers {
-            addChildViewController(vc)
-            vc.didMove(toParentViewController: self)
+            addChild(vc)
+            vc.didMove(toParent: self)
         }
         
         if viewControllers.count > newPageIndex {
@@ -640,13 +637,8 @@ extension PageTabBarController: UICollectionViewDelegateFlowLayout {
 extension PageTabBarController {
 
     func transformTabBarWithScrollViewBounces(_ scrollView: UIScrollView) {
-        
-        var contentInset = scrollView.contentInset
-        var minimumThreshold = self.topLayoutGuide.length
-        if #available(iOS 11.0, *) {
-            minimumThreshold = 0
-            contentInset = scrollView.adjustedContentInset
-        }
+        let minimumThreshold: CGFloat = 0
+        let contentInset = scrollView.adjustedContentInset
         
         let offset = min(0, scrollView.contentOffset.y + contentInset.top)
         
