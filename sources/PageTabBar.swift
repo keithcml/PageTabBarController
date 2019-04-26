@@ -78,7 +78,7 @@ open class PageTabBar: UIView {
         public var position: PageTabBarIndicatorPosition
     }
     
-    open static var defaultBarAppearanceSettings = BarAppearanceSettings(isTranslucent: false,
+    public static var defaultBarAppearanceSettings = BarAppearanceSettings(isTranslucent: false,
                                                                          translucentFactor: 0.6,
                                                                          barTintColor: .white,
                                                                          topLineHidden: false,
@@ -88,7 +88,7 @@ open class PageTabBar: UIView {
                                                                          topLineWidth: 1,
                                                                          bottomLineWidth: 1)
     
-    open static var defaultIndicatorLineAppearanceSettings = IndicatorLineAppearanceSettings(isHidden: false,
+    public static var defaultIndicatorLineAppearanceSettings = IndicatorLineAppearanceSettings(isHidden: false,
                                                                                              lineHeight: 1,
                                                                                              lineWidth: .fill,
                                                                                              lineColor: UIApplication.shared.delegate?.window??.tintColor,
@@ -351,7 +351,7 @@ open class PageTabBar: UIView {
 
 extension PageTabBar: PageTabBarItemDelegate {
     func pageTabBarItemDidTap(_ item: PageTabBarItem) {
-        if let index = items.index(of: item) {
+        if let index = items.firstIndex(of: item) {
             delegate?.pageTabBar(self, indexDidChanged: index)
         }
     }

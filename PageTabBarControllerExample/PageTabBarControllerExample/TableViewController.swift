@@ -43,7 +43,7 @@ final class TableViewController: UIViewController, UITableViewDelegate, UITableV
         return .default
     }
     
-    override open var preferredStatusBarUpdateAnimation: UIStatusBarAnimation {
+    override public var preferredStatusBarUpdateAnimation: UIStatusBarAnimation {
         return .slide
     }
     
@@ -54,7 +54,6 @@ final class TableViewController: UIViewController, UITableViewDelegate, UITableV
         
         title = "Table"
         
-        automaticallyAdjustsScrollViewInsets = false
         tableView = UITableView(frame: view.frame, style: .plain)
         tableView.autoresizingMask = [.flexibleHeight, .flexibleWidth]
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "Cell")

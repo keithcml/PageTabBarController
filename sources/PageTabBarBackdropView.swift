@@ -19,7 +19,7 @@ final class PageTabBarBackdropView: UIView {
         }
     }
     
-    var barBlurStyle: UIBlurEffectStyle = .light {
+    var barBlurStyle: UIBlurEffect.Style = .light {
         didSet {
             backDropBlurView.effect = UIBlurEffect(style: barBlurStyle)
         }
@@ -32,7 +32,7 @@ final class PageTabBarBackdropView: UIView {
     }
     
     private let backDropBlurView: UIVisualEffectView = {
-        let backDropBlurView = UIVisualEffectView(effect: UIBlurEffect(style: UIBlurEffectStyle.light))
+        let backDropBlurView = UIVisualEffectView(effect: UIBlurEffect(style: UIBlurEffect.Style.light))
         backDropBlurView.translatesAutoresizingMaskIntoConstraints = false
         return backDropBlurView
     }()
