@@ -1,0 +1,44 @@
+{
+  "title": [
+    {
+      "pattern": "^(build|ci|docs|feat|fix|perf|refactor|style|test|config):\\s",
+      "message": "Your title needs to be prefixed with a topic"
+    }
+  ],
+  "body": [
+    {
+      "pattern": ".{1,}",
+      "message": "You need literally anything in your description"
+    }
+  ],
+  "head.ref": [
+    {
+      "pattern": "^(build|ci|docs|feat|fix|perf|refactor|style|test|config)/",
+      "message": "Your branch name is invalid"
+    }
+  ],
+  "assignee.login": [
+    {
+      "pattern": ".+",
+      "message": "You need to assign someone"
+    }
+  ],
+  "requested_teams.0.id": [
+    {
+      "pattern": "2691982",
+      "message": "The product team needs to be added as a reviewer"
+    }
+  ],
+  "additions": [
+    {
+      "pattern": "0|^[1-9]$|^[1-9]\\d$",
+      "message": "Your PR is too big (over 99 additions)"
+    }
+  ],
+  "labels.0.name": [
+    {
+      "pattern": "bug|enhancement|question|feature",
+      "message": "Please add a label"
+    }
+  ]
+}
