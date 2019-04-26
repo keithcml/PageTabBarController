@@ -23,12 +23,6 @@
       "message": "You need to assign someone"
     }
   ],
-  "requested_teams.0.id": [
-    {
-      "pattern": "2691982",
-      "message": "The product team needs to be added as a reviewer"
-    }
-  ],
   "additions": [
     {
       "pattern": "0|^[1-9]$|^[1-9]\\d$",
