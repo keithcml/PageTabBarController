@@ -13,7 +13,7 @@
   ],
   "head.ref": [
     {
-      "pattern": "^((feature|fix|hotfix)/[A-Z]{3,6}-\\d{1,6}|(spec|doc|inf|refactor|release|deploy)/",
+      "pattern": "^((feature|fix|hotfix)/[A-Z]{3,6}-\\d{1,6}|(spec|doc|inf|refactor|release|deploy)/)",
       "message": "Your branch name is invalid"
     }
   ],
