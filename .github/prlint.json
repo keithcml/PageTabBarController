@@ -1,7 +1,7 @@
 {
   "title": [
     {
-      "pattern": "^(build|ci|docs|feat|fix|perf|refactor|style|test|config):\\s",
+      "pattern": "(^(spec|doc|inf|refactor|release|deploy)/)|(^(feature|fix|hotfix)/[A-Z]{3,6}-\\d{1,6})",
       "message": "Your title needs to be prefixed with a topic"
     }
   ],
@@ -13,14 +13,8 @@
   ],
   "head.ref": [
     {
-      "pattern": "^(build|ci|docs|feat|fix|perf|refactor|style|test|config)/",
+      "pattern": "(^(spec|doc|inf|refactor|release|deploy)/)|(^(feature|fix|hotfix)/[A-Z]{3,6}-\\d{1,6})",
       "message": "Your branch name is invalid"
-    }
-  ],
-  "assignee.login": [
-    {
-      "pattern": ".+",
-      "message": "You need to assign someone"
     }
   ],
   "additions": [
