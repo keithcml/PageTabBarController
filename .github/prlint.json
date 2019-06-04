@@ -1,7 +1,7 @@
 {
   "title": [
     {
-      "pattern": "^(spec|doc|inf|refactor|release|deploy)/",
+      "pattern": "(^(spec|doc|inf|refactor|release|deploy)/)|(^(feature|fix|hotfix)/[A-Z]{3,6}-\\d{1,6})",
       "message": "Your title needs to be prefixed with a topic"
     }
   ],
